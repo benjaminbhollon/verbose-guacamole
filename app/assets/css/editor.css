@@ -1,0 +1,31 @@
+body {
+  text-align: left;
+}
+
+#editor {
+  height: 100vh;
+  display: inline-block;
+
+  --top: 0;
+  --left: 0;
+  --right: 0;
+  --bottom: 0;
+}
+
+#editor .CodeMirror {
+  --top: 50px;
+  --bottom: 30px;
+  background: #fff;
+  position: fixed;
+  top: var(--top);
+  left: var(--left);
+  right: var(--right);
+  bottom: var(--bottom);
+}
+
+#editor .editor-statusbar {
+  position: fixed;
+  bottom: var(--bottom);
+  left: var(--left);
+  right: var(--right);
+}
