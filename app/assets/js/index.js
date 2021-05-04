@@ -7,7 +7,7 @@ function newProject() {
       "properties": [ 'openDirectory' ]
     }).then(result => {
     if (result.canceled !== true) {
-      location.href = "./editor.html?f=" + encodeURIComponent(result.filePaths[0]) + '&new=true';
+      location.href = `./editor.html?f=${encodeURIComponent(result.filePaths[0])}&new=true`;
     }
   });
 }
@@ -22,7 +22,7 @@ function openProject() {
     ]
   }).then(result => {
     if (result.canceled !== true) {
-      location.href = "./editor.html?f=" + encodeURIComponent(result.filePaths[0]);
+      location.href = `./editor.html?f=${encodeURIComponent(result.filePaths[0])}`;
     }
   });
 }
