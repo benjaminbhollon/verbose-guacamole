@@ -1,7 +1,7 @@
 "use strict";
 
 //Import modules
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow } = require('electron');
 
 function createWindow () {
   const win = new BrowserWindow({

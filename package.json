@@ -18,5 +18,9 @@
   "homepage": "https://github.com/benjaminbhollon/verbose-guacamole#readme",
   "devDependencies": {
     "electron": "^11.2.0"
+  },
+  "dependencies": {
+    "simple-git": "^2.38.0",
+    "vocado": "^0.5.2"
   }
 }
