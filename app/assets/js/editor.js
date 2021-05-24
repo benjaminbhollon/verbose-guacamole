@@ -104,7 +104,7 @@ function populateFiletree() {
           <summary
             onclick='focusItem(this, event)'
             ondblclick='this.parentNode.toggleAttribute("open")'
-            oncontextmenu="document.getElementById('deleteButton').style.display = 'block';focusItem(this, event);"
+            oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';focusItem(this, event);"
           >${item.name}</summary>
         </details>`;
         setTimeout(
@@ -116,7 +116,7 @@ function populateFiletree() {
         <span
           onclick='focusItem(this, event)'
           ondblclick='openItem(this)'
-          oncontextmenu="document.getElementById('deleteButton').style.display = 'block';focusItem(this, event);"
+          oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';focusItem(this, event);"
           id=${JSON.stringify(idFromPath(item.path))}
         >
           ${item.name}
@@ -321,6 +321,6 @@ function showContextMenu(event) {
 window.addEventListener("click", e => {
   if (contextMenu.classList.contains('visible')) {
     contextMenu.classList.toggle('visible');
-    document.getElementById('deleteButton').style.display = 'none';
+    document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'none';
   };
 });

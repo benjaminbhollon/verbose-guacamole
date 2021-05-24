@@ -20,9 +20,10 @@
 
     </section>
     <div id="contextMenu">
+      <span onclick="deleteItem()" id="deleteButton">Delete</span>
+      <span onclick="startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
       <span onclick="createItem('file')">Create File</span>
       <span onclick="createItem('folder')">Create Folder</span>
-      <span onclick="deleteItem()" id="deleteButton">Delete</span>
     </div>
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script src="./assets/js/editor.js"></script>

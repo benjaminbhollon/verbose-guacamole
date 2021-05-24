@@ -51,6 +51,6 @@ header {
   display: block;
 }
 
-#contextMenu #deleteButton {
+#contextMenu #deleteButton, #contextMenu #renameButton {
   display: none;
 }
