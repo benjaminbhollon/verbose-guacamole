@@ -102,7 +102,8 @@ function populateFiletree() {
           id=${JSON.stringify(idFromPath(item.path))}
         >
           <summary
-            onclick='focusItem(this)'
+            onclick='focusItem(this, event)'
+            ondblclick='this.parentNode.toggleAttribute("open")'
           >${item.name}</summary>
         </details>`;
         setTimeout(
@@ -112,7 +113,7 @@ function populateFiletree() {
       } else {
         html += `
         <span
-          onclick='focusItem(this)'
+          onclick='focusItem(this, event)'
           ondblclick='openItem(this)'
           id=${JSON.stringify(idFromPath(item.path))}
         >
@@ -135,7 +136,10 @@ function flatten(arr) {
 }
 
 // Filetree items
-function focusItem(e) {
+function focusItem(e, event) {
+  event.preventDefault();
+  if (e.contentEditable === 'true') return;
+  if (e.classList.contains('active')) return startRename(e);
   if (document.querySelector('#fileTree .active'))
     document.querySelector('#fileTree .active').classList.toggle('active');
   e.classList.toggle('active');
@@ -185,6 +189,37 @@ function createItem(type) {
 
   document.getElementById('fileTree__list').innerHTML = '';
   populateFiletree();
+}
+function startRename(e) {
+  e.contentEditable = true;
+  e.focus();
+  document.execCommand('selectAll', false, null);
+  e.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      e.blur();
+    }
+    if (event.key === 'Escape') {
+      const file = flatten(project.index).find(i => idFromPath(i.path) === e.id);
+      e.innerText = file.name;
+      e.blur();
+    }
+  });
+  e.addEventListener('blur', renameItem.bind(this, e));
+}
+function renameItem(e) {
+  e.removeAttribute('contenteditable');
+
+  const file = flatten(project.index).find(i => idFromPath(i.path) === e.id);
+
+  if (e.innerText.length <= 0 || e.innerText === file.name) {
+    e.innerText = file.name;
+    return;
+  }
+
+  file.name = e.innerText;
+
+  saveFile(projectPath, JSON.stringify(project));
 }
 
 (async () => {

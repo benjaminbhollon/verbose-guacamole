@@ -1,3 +1,7 @@
+body, body * {
+  box-sizing: border-box;
+}
+
 body {
   text-align: left;
   display: grid;
@@ -20,6 +24,13 @@ body {
   white-space: nowrap;
   cursor: default;
   user-select: none;
+}
+
+#fileTree span[contenteditable], #fileTree details summary[contenteditable] {
+  text-overflow: inherit;
+  background-color: #fff;
+  color: #000;
+  outline: 3px solid orange;
 }
 
 #fileTree details span, #fileTree details details {
