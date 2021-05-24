@@ -21,5 +21,15 @@
   },
   "dependencies": {
     "simple-git": "^2.38.0"
+  },
+  "build": {
+    "fileAssociations": [
+      {
+        "ext": "vgp",
+        "name": "Verbose Guacamole Project",
+        "role": "Editor",
+        "perMachine": true
+      }
+    ]
   }
 }
