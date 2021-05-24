@@ -78,7 +78,7 @@ function openFile(p, n) {
     flag:'r'
   });
   editor.value(value);
-  currentFile = project.index.flat(Infinity).find(i => i.path === p);
+  currentFile = flatten(project.index).find(i => i.path === p);
   clearing = false;
 }
 function saveFile(p, v) {
@@ -99,12 +99,16 @@ function populateFiletree() {
       if (typeof item.children !== 'undefined') {
         html += `
         <details
-          onclick='focusItem(this)'
           id=${JSON.stringify(idFromPath(item.path))}
         >
-          <summary>${item.name}</summary>
+          <summary
+            onclick='focusItem(this)'
+          >${item.name}</summary>
         </details>`;
-        populateFiletree(item.children, idFromPath(item.path));
+        setTimeout(
+          () => {drawLayer(item.children, idFromPath(item.path))},
+          0
+        );
       } else {
         html += `
         <span
@@ -121,6 +125,14 @@ function populateFiletree() {
   }
   drawLayer(project.index, 'fileTree__list');
 }
+function flatten(arr) {
+  let newArr = arr;
+  newArr = arr.map(i => {
+    if (i.children) return [i, flatten(i.children)];
+    else return i;
+  }).flat(Infinity);
+  return newArr;
+}
 
 // Filetree items
 function focusItem(e) {
@@ -129,10 +141,10 @@ function focusItem(e) {
   e.classList.toggle('active');
 }
 function openItem(e) {
-  const file = project.index.flat(Infinity).find(i => idFromPath(i.path) === e.id);
+  const file = flatten(project.index).find(i => idFromPath(i.path) === e.id);
   openFile(file.path, file.name);
 }
-function createFile(type) {
+function createItem(type) {
   let folder = document.querySelector('#fileTree .active');
   let parent = null;
   if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
@@ -142,25 +154,31 @@ function createFile(type) {
   }
 
   if (parent === null) {
-    var parentFile = project.index.flat(Infinity).find(i => idFromPath(i.path) === folder.id);
-
-    let parent = parentFile.children;
+    var parentFile = flatten(project.index).find(i => idFromPath(i.path) === folder.id);
+    parent = parentFile.children;
   }
 
   const filePath = './content/' + fileName();
 
-  fs.writeFileSync(
-    path.resolve(path.dirname(projectPath), filePath),
-    '',
-    {
-      encoding: 'utf8',
-      flag: 'w'
-    }
-  );
+  if (type === 'file') {
+    fs.writeFileSync(
+      path.resolve(path.dirname(projectPath), filePath),
+      '',
+      {
+        encoding: 'utf8',
+        flag: 'w'
+      }
+    );
 
-  if (type === 'file') parent.push({
-    name: 'New File',
-    path: filePath
+    parent.push({
+      name: 'New File',
+      path: filePath
+    });
+  }
+  else if (type === 'folder') parent.push({
+    name: 'New Folder',
+    path: filePath,
+    children: []
   });
 
   saveFile(projectPath, JSON.stringify(project));
@@ -171,10 +189,10 @@ function createFile(type) {
 
 (async () => {
   if (params.new) {
-    console.log('New project alert! Let me get that set up for you...');
-    console.log('Initializing git repository...');
+    console.info('New project alert! Let me get that set up for you...');
+    console.info('Initializing git repository...');
     await git.init();
-    console.log('Creating project file...');
+    console.info('Creating project file...');
     projectPath = path.resolve(projectPath, 'project.vgp');
     await fs.writeFile(
       projectPath,
@@ -186,11 +204,11 @@ function createFile(type) {
       (err) => {
         if (err) throw new Error(err);
         else {
-          console.log('File written successfully!');
+          console.info('File written successfully!');
         }
       }
     );
-    console.log('Creating initial file...');
+    console.info('Creating initial file...');
     try {
       fs.mkdirSync(path.resolve(path.dirname(projectPath), './content'));
     } catch(err) {
@@ -206,18 +224,18 @@ function createFile(type) {
       (err) => {
         if (err) throw new Error(err);
         else {
-          console.log('File written successfully!');
+          console.info('File written successfully!');
         }
       }
     );
-    console.log('Done! Changing URL to avoid refresh-slipups.');
+    console.info('Done! Changing URL to avoid refresh-slipups.');
     history.replaceState(null, null, './editor.html?f=' + projectPath);
   } else {
     project = JSON.parse(fs.readFileSync(projectPath, {
       encoding:'utf8',
       flag:'r'
     }));
-    currentFile = project.index.flat(Infinity)[0];
+    currentFile = flatten(project.index)[0];
   }
 })().finally(() => {
   openFile(currentFile.path, currentFile.name);
