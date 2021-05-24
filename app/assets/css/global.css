@@ -14,10 +14,39 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: hsl(118, 72%, 90%)
+  background-color: hsl(118, 72%, 90%);
+  overflow: hidden;
 }
 
 header {
   background-color: hsl(118, 72%, 79%);
   padding: 1em;
+}
+
+#contextMenu {
+  border: 1px solid #aaa;
+  width: 200px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #fff;
+  display: none;
+}
+
+#contextMenu span {
+  display: block;
+  cursor: default;
+  padding: 0.5em;
+}
+
+#contextMenu span:hover {
+  display: block;
+  cursor: default;
+  background-color: #ccc;
+  padding: 0.5em;
+}
+
+#contextMenu.visible {
+  display: block;
 }

@@ -12,8 +12,6 @@
       <div id="fileTree__list">
 
       </div>
-      <button onclick="createItem('file')">Create File</button>
-      <button onclick="createItem('folder')">Create Folder</button>
     </section>
     <section id="editor">
       <textarea id="editorTextarea"></textarea>
@@ -21,6 +19,10 @@
     <section id="git">
 
     </section>
+    <div id="contextMenu">
+      <span onclick="createItem('file')">Create File</span>
+      <span onclick="createItem('folder')">Create Folder</span>
+    </div>
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script src="./assets/js/editor.js"></script>
   </body>

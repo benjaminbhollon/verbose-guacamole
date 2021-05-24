@@ -104,6 +104,9 @@ function populateFiletree() {
           <summary
             onclick='focusItem(this, event)'
             ondblclick='this.parentNode.toggleAttribute("open")'
+            oncontextmenu='event.preventDefault();
+              focusItem(this, event);
+              showContextMenu(event)'
           >${item.name}</summary>
         </details>`;
         setTimeout(
@@ -115,6 +118,9 @@ function populateFiletree() {
         <span
           onclick='focusItem(this, event)'
           ondblclick='openItem(this)'
+          oncontextmenu='event.preventDefault();
+            focusItem(this, event);
+            showContextMenu(event)'
           id=${JSON.stringify(idFromPath(item.path))}
         >
           ${item.name}
@@ -139,7 +145,7 @@ function flatten(arr) {
 function focusItem(e, event) {
   event.preventDefault();
   if (e.contentEditable === 'true') return;
-  if (e.classList.contains('active')) return startRename(e);
+  if (e.classList.contains('active') && event.type !== 'contextmenu') return startRename(e);
   if (document.querySelector('#fileTree .active'))
     document.querySelector('#fileTree .active').classList.toggle('active');
   e.classList.toggle('active');
@@ -225,6 +231,12 @@ function renameItem(e) {
 
   saveFile(projectPath, JSON.stringify(project));
 }
+function showContextMenu(event) {
+  contextMenu.style.top = event.clientY + 'px';
+  contextMenu.style.left = event.clientX + 'px';
+
+  if (!contextMenu.classList.contains('visible')) contextMenu.classList.toggle('visible');
+}
 
 (async () => {
   if (params.new) {
@@ -279,4 +291,8 @@ function renameItem(e) {
 })().finally(() => {
   openFile(currentFile.path, currentFile.name);
   populateFiletree();
+});
+
+window.addEventListener("click", e => {
+  if (contextMenu.classList.contains('visible')) contextMenu.classList.toggle('visible');
 });
