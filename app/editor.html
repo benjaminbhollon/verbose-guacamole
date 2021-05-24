@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./assets/css/editor.css">
   </head>
   <body>
-    <section id="fileTree">
+    <section id="fileTree" oncontextmenu="showContextMenu(event)">
       <div id="fileTree__list">
 
       </div>
@@ -22,6 +22,7 @@
     <div id="contextMenu">
       <span onclick="createItem('file')">Create File</span>
       <span onclick="createItem('folder')">Create Folder</span>
+      <span onclick="deleteItem()" id="deleteButton">Delete</span>
     </div>
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script src="./assets/js/editor.js"></script>

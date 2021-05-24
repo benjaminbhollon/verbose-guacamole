@@ -104,9 +104,7 @@ function populateFiletree() {
           <summary
             onclick='focusItem(this, event)'
             ondblclick='this.parentNode.toggleAttribute("open")'
-            oncontextmenu='event.preventDefault();
-              focusItem(this, event);
-              showContextMenu(event)'
+            oncontextmenu="document.getElementById('deleteButton').style.display = 'block';focusItem(this, event);"
           >${item.name}</summary>
         </details>`;
         setTimeout(
@@ -118,9 +116,7 @@ function populateFiletree() {
         <span
           onclick='focusItem(this, event)'
           ondblclick='openItem(this)'
-          oncontextmenu='event.preventDefault();
-            focusItem(this, event);
-            showContextMenu(event)'
+          oncontextmenu="document.getElementById('deleteButton').style.display = 'block';focusItem(this, event);"
           id=${JSON.stringify(idFromPath(item.path))}
         >
           ${item.name}
@@ -231,6 +227,22 @@ function renameItem(e) {
 
   saveFile(projectPath, JSON.stringify(project));
 }
+function deleteItem() {
+  let item = document.querySelector('#fileTree .active');
+
+  let file = flatten(project.index).find(i => idFromPath(i.path) === item.id);
+
+  if (item.tagName === 'SPAN') {
+    fs.unlinkSync(path.resolve(path.dirname(projectPath), file.path));
+
+    file.delete = true;
+  }
+
+  project.index = project.index.filter(i => !i.delete);
+  saveFile(projectPath, JSON.stringify(project));
+
+  item.remove();
+}
 function showContextMenu(event) {
   contextMenu.style.top = event.clientY + 'px';
   contextMenu.style.left = event.clientX + 'px';
@@ -294,5 +306,8 @@ function showContextMenu(event) {
 });
 
 window.addEventListener("click", e => {
-  if (contextMenu.classList.contains('visible')) contextMenu.classList.toggle('visible');
+  if (contextMenu.classList.contains('visible')) {
+    contextMenu.classList.toggle('visible');
+    document.getElementById('deleteButton').style.display = 'none';
+  };
 });

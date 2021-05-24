@@ -50,3 +50,7 @@ header {
 #contextMenu.visible {
   display: block;
 }
+
+#contextMenu #deleteButton {
+  display: none;
+}
