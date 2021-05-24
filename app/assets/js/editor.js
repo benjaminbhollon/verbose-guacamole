@@ -72,14 +72,19 @@ function resetEditor() {
 }
 function openFile(p, n) {
   resetEditor();
+  clearing = true;
   const value = fs.readFileSync(path.resolve(path.dirname(projectPath), p), {
     encoding:'utf8',
     flag:'r'
   });
   editor.value(value);
+  currentFile = project.index.flat(Infinity).find(i => i.path === p);
+  clearing = false;
 }
-function saveFile(p) {
-  const value = editor.value();
+function saveFile(p, v) {
+  let value = null;
+  if (!v) value = editor.value();
+  else value = v;
 
   fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
 }
@@ -114,7 +119,7 @@ function populateFiletree() {
 
     document.getElementById(id).innerHTML += html;
   }
-  drawLayer(project.index, 'fileTree');
+  drawLayer(project.index, 'fileTree__list');
 }
 
 // Filetree items
@@ -126,6 +131,42 @@ function focusItem(e) {
 function openItem(e) {
   const file = project.index.flat(Infinity).find(i => idFromPath(i.path) === e.id);
   openFile(file.path, file.name);
+}
+function createFile(type) {
+  let folder = document.querySelector('#fileTree .active');
+  let parent = null;
+  if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
+    folder = folder.parentNode;
+  } else if (folder === null || folder.tagName !== 'DETAILS') {
+    parent = project.index;
+  }
+
+  if (parent === null) {
+    var parentFile = project.index.flat(Infinity).find(i => idFromPath(i.path) === folder.id);
+
+    let parent = parentFile.children;
+  }
+
+  const filePath = './content/' + fileName();
+
+  fs.writeFileSync(
+    path.resolve(path.dirname(projectPath), filePath),
+    '',
+    {
+      encoding: 'utf8',
+      flag: 'w'
+    }
+  );
+
+  if (type === 'file') parent.push({
+    name: 'New File',
+    path: filePath
+  });
+
+  saveFile(projectPath, JSON.stringify(project));
+
+  document.getElementById('fileTree__list').innerHTML = '';
+  populateFiletree();
 }
 
 (async () => {

@@ -10,7 +10,7 @@ body {
   border-right: 1px solid #ccc;
 }
 
-#fileTree span, #fileTree details {
+#fileTree span, #fileTree details, #fileTree button {
   padding: 0 0.3em;
   display: block;
   height: 1.75em;
