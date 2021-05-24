@@ -229,6 +229,7 @@ function renameItem(e) {
 }
 function deleteItem() {
   let item = document.querySelector('#fileTree .active');
+  if (!confirm(`Do you really want to delete this ${item.tagName === 'SPAN' ? 'file' : 'folder and everything in it'}? There is no undo.`)) return;
 
   let file = flatten(project.index).find(i => idFromPath(i.path) === (item.tagName === 'SPAN' ? item.id : item.parentNode.id));
 
