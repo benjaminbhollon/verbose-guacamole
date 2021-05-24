@@ -38,15 +38,17 @@ let project = {
   },
   index: [
     {
-      name: 'untitled',
+      name: 'New File',
       path: './content/' + fileName()
     }
   ]
 };
 let editor = null;
-let currentFile = project.index[0].path;
+let currentFile = project.index[0];
+let clearing = false;
 
 function resetEditor() {
+  clearing = true;
   if (editor) {
     editor.value('');
     editor.toTextArea();
@@ -54,7 +56,8 @@ function resetEditor() {
   placeholderN = (placeholderN + Math.floor(Math.random() * (placeholders.length - 1))) % placeholders.length;
   editor = new SimpleMDE({
     element: document.getElementById("editorTextarea"),
-    spellChecker: false, hideIcons: ['side-by-side', 'fullscreen'],
+    spellChecker: false,
+    hideIcons: ['side-by-side', 'fullscreen', 'image'],
     status: false,
     placeholder: placeholders[placeholderN],
   	insertTexts: {
@@ -62,9 +65,10 @@ function resetEditor() {
   	},
     autofocus: true
   });
-  editor.codemirror.on("change", function(){
-  	saveFile(currentFile.path);
+  editor.codemirror.on("change", function() {
+  	if (!clearing) saveFile(currentFile.path);
   });
+  clearing = false;
 }
 function openFile(p, n) {
   resetEditor();
@@ -78,6 +82,50 @@ function saveFile(p) {
   const value = editor.value();
 
   fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
+}
+function idFromPath(p) {
+  return p.split('/').slice(-1)[0].split('.')[0];
+}
+function populateFiletree() {
+  function drawLayer(layer, id) {
+    let html = '';
+
+    for (var item of layer) {
+      if (typeof item.children !== 'undefined') {
+        html += `
+        <details
+          onclick='focusItem(this)'
+          id=${JSON.stringify(idFromPath(item.path))}
+        >
+          <summary>${item.name}</summary>
+        </details>`;
+        populateFiletree(item.children, idFromPath(item.path));
+      } else {
+        html += `
+        <span
+          onclick='focusItem(this)'
+          ondblclick='openItem(this)'
+          id=${JSON.stringify(idFromPath(item.path))}
+        >
+          ${item.name}
+        </span>`;
+      }
+    }
+
+    document.getElementById(id).innerHTML += html;
+  }
+  drawLayer(project.index, 'fileTree');
+}
+
+// Filetree items
+function focusItem(e) {
+  if (document.querySelector('#fileTree .active'))
+    document.querySelector('#fileTree .active').classList.toggle('active');
+  e.classList.toggle('active');
+}
+function openItem(e) {
+  const file = project.index.flat(Infinity).find(i => idFromPath(i.path) === e.id);
+  openFile(file.path, file.name);
 }
 
 (async () => {
@@ -121,7 +169,8 @@ function saveFile(p) {
         }
       }
     );
-    console.log('Done!');
+    console.log('Done! Changing URL to avoid refresh-slipups.');
+    history.replaceState(null, null, './editor.html?f=' + projectPath);
   } else {
     project = JSON.parse(fs.readFileSync(projectPath, {
       encoding:'utf8',
@@ -131,4 +180,5 @@ function saveFile(p) {
   }
 })().finally(() => {
   openFile(currentFile.path, currentFile.name);
+  populateFiletree();
 });

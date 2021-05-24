@@ -7,4 +7,22 @@ body {
 #editor, #fileTree, #git {
   max-height: 100vh;
   overflow: auto;
+  border-right: 1px solid #ccc;
+}
+
+#fileTree span, #fileTree details {
+  padding: 0 0.3em;
+  display: block;
+  height: 1.75em;
+  line-height: 1.75em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+#fileTree .active {
+  background-color: #2D99F7;
+  color: #fff;
 }
