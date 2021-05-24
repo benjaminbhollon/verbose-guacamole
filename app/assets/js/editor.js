@@ -20,7 +20,10 @@ const placeholders = [
   'There was a boy called Eustace Clarence Scrubb, and he almost deserved it. (Voyage of the Dawn Treader)',
   'The drought had lasted now for ten million years, and the reign of the terrible lizards had long since ended. (2001: A Space Odyssey)',
   'When he was nearly thirteen, my brother Jem got his arm badly broken at the elbow. (To Kill a Mockingbird)',
-  'There was no possibility of taking a walk that day. (Jane Eyre)'
+  'There was no possibility of taking a walk that day. (Jane Eyre)',
+  'First the colors. Then the humans. (The Book Thief)',
+  '“Where’s Papa going with that ax?” (Charlotte\'s Web)',
+  'The thousand injuries of Fortunato I had borne as I best could, but when he ventured upon insult I vowed revenge. (The Cask of Amontillado)'
 ];
 let placeholderN = Math.floor(Math.random() * placeholders.length);
 function fileName() {
