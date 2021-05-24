@@ -191,26 +191,30 @@ function createItem(type) {
   populateFiletree();
 }
 function startRename(e) {
-  e.contentEditable = true;
-  e.focus();
-  document.execCommand('selectAll', false, null);
-  e.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      e.blur();
-    }
-    if (event.key === 'Escape') {
-      const file = flatten(project.index).find(i => idFromPath(i.path) === e.id);
-      e.innerText = file.name;
-      e.blur();
-    }
-  });
-  e.addEventListener('blur', renameItem.bind(this, e));
+  const isOpen = e.parentNode.open;
+  setTimeout(() => {
+    if (isOpen !== e.parentNode.open) return;
+    e.contentEditable = true;
+    e.focus();
+    document.execCommand('selectAll', false, null);
+    e.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        e.blur();
+      }
+      if (event.key === 'Escape') {
+        const file = flatten(project.index).find(i => idFromPath(i.path) === e.id);
+        e.innerText = file.name;
+        e.blur();
+      }
+    });
+    e.addEventListener('blur', renameItem.bind(this, e));
+  }, 300);
 }
 function renameItem(e) {
   e.removeAttribute('contenteditable');
 
-  const file = flatten(project.index).find(i => idFromPath(i.path) === e.id);
+  const file = flatten(project.index).find(i => idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
 
   if (e.innerText.length <= 0 || e.innerText === file.name) {
     e.innerText = file.name;
