@@ -230,18 +230,30 @@ function renameItem(e) {
 function deleteItem() {
   let item = document.querySelector('#fileTree .active');
 
-  let file = flatten(project.index).find(i => idFromPath(i.path) === item.id);
+  let file = flatten(project.index).find(i => idFromPath(i.path) === (item.tagName === 'SPAN' ? item.id : item.parentNode.id));
+
+  function deleteInFolder(folder) {
+    for (f of folder) {
+      if (f.children) {
+        deleteInFolder(f.children);
+      } else {
+        fs.unlinkSync(path.resolve(path.dirname(projectPath), f.path));
+      }
+    }
+  }
 
   if (item.tagName === 'SPAN') {
     fs.unlinkSync(path.resolve(path.dirname(projectPath), file.path));
-
-    file.delete = true;
+  } else if (item.tagName === 'SUMMARY') {
+    deleteInFolder(file.children);
   }
+
+  file.delete = true;
 
   project.index = project.index.filter(i => !i.delete);
   saveFile(projectPath, JSON.stringify(project));
 
-  item.remove();
+  (item.tagName === 'SPAN' ? item : item.parentNode).remove();
 }
 function showContextMenu(event) {
   contextMenu.style.top = event.clientY + 'px';
