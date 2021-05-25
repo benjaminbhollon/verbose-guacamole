@@ -91,9 +91,26 @@ function saveFile(p, v) {
 
   fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
 }
+function flatten(arr) {
+  let newArr = arr;
+  newArr = arr.map(i => {
+    if (i.children) return [i, flatten(i.children)];
+    else return i;
+  }).flat(Infinity);
+  return newArr;
+}
 function idFromPath(p) {
   return p.split('/').slice(-1)[0].split('.')[0];
 }
+
+//Git
+function populateGitHistory() {
+  git.log().then((history) => {
+    console.log(history);
+  });
+}
+
+// Filetree items
 function populateFiletree() {
   function drawLayer(layer, id) {
     let html = '';
@@ -131,16 +148,6 @@ function populateFiletree() {
   }
   drawLayer(project.index, 'fileTree__list');
 }
-function flatten(arr) {
-  let newArr = arr;
-  newArr = arr.map(i => {
-    if (i.children) return [i, flatten(i.children)];
-    else return i;
-  }).flat(Infinity);
-  return newArr;
-}
-
-// Filetree items
 function focusItem(e, event) {
   event.preventDefault();
   if (e.contentEditable === 'true') return;
