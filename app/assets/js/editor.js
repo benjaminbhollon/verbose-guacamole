@@ -152,6 +152,7 @@ function focusItem(e, event) {
 function openItem(e) {
   const file = flatten(project.index).find(i => idFromPath(i.path) === e.id);
   openFile(file.path, file.name);
+  return e;
 }
 function createItem(type) {
   let folder = document.querySelector('#fileTree .active');
@@ -194,6 +195,12 @@ function createItem(type) {
 
   document.getElementById('fileTree__list').innerHTML = '';
   populateFiletree();
+
+  if (type === 'file') openItem(document.getElementById(idFromPath(filePath))).click();
+  else {
+    document.getElementById(idFromPath(filePath)).click();
+    document.getElementById(idFromPath(filePath)).open = true;
+  }
 }
 function startRename(e) {
   const isOpen = e.parentNode.open;

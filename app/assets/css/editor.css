@@ -9,7 +9,7 @@ body {
 }
 
 #editor textarea {
-  display: none;
+  opacity: 0;
 }
 
 #editor, #fileTree, #git {
