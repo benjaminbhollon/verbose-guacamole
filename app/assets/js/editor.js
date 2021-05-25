@@ -127,8 +127,9 @@ function populateFiletree() {
             oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';focusItem(this, event);"
           >${item.name}</summary>
         </details>`;
+        const itemClone = {...item};
         setTimeout(
-          () => {drawLayer(item.children, idFromPath(item.path))},
+          () => {drawLayer(itemClone.children, idFromPath(itemClone.path))},
           0
         );
       } else {
@@ -203,8 +204,10 @@ function createItem(type) {
   document.getElementById('fileTree__list').innerHTML = '';
   populateFiletree();
 
-  if (type === 'file') openItem(document.getElementById(idFromPath(filePath))).click();
-  else {
+  if (type === 'file') {
+    openItem(document.getElementById(idFromPath(filePath))).click();
+    startRename(document.getElementById(idFromPath(filePath)));
+  } else {
     document.getElementById(idFromPath(filePath)).click();
     document.getElementById(idFromPath(filePath)).open = true;
   }
