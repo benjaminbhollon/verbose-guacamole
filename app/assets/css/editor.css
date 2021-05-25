@@ -60,6 +60,10 @@ a {
   text-align: center;
 }
 
+#git h3 {
+  margin-bottom: 0.25em;
+}
+
 #git__commitText, #git button {
   display: block;
   padding: 0.5em;
@@ -74,4 +78,47 @@ textarea {
 #git p:last-of-type {
   color: gray;
   margin-top: 0.5em;
+}
+
+#git__commits span {
+  padding: 0.25em 0.4em;
+  display: block;
+  border-top: 1px solid #777;
+}
+
+#git__commits span:hover {
+  background-color: #ccc5;
+}
+
+/* Context Menu */
+#contextMenu {
+  border: 1px solid #aaa;
+  width: 200px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #fff;
+  display: none;
+}
+
+#contextMenu span {
+  display: block;
+  cursor: default;
+  padding: 0.5em;
+}
+
+#contextMenu span:hover {
+  display: block;
+  cursor: default;
+  background-color: #ccc;
+  padding: 0.5em;
+}
+
+#contextMenu.visible {
+  display: block;
+}
+
+#contextMenu #deleteButton, #contextMenu #renameButton {
+  display: none;
 }

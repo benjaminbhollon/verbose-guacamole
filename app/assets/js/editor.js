@@ -104,10 +104,18 @@ function idFromPath(p) {
 }
 
 //Git
-function populateGitHistory() {
-  git.log().then((history) => {
-    console.log(history);
+async function populateGitHistory() {
+  await git.log().then((history) => {
+    let html = history.all.map(h => `<span id='commit-${h.hash}'>${h.message}</span>`).reverse().join('');
+    document.getElementById('git__commits').innerHTML = html;
   });
+}
+async function commit() {
+  const message = document.getElementById('git__commitText').value;
+  await git.add('./*');
+  await git.commit(message);
+  document.getElementById('git__commitText').value = '';
+  populateGitHistory();
 }
 
 // Filetree items
@@ -328,6 +336,8 @@ function showContextMenu(event) {
         }
       }
     );
+    console.info('Creating initial commit...');
+    git.add('./*').commit('Created project.');
     console.info('Done! Changing URL to avoid refresh-slipups.');
     history.replaceState(null, null, './editor.html?f=' + projectPath);
   } else {
@@ -340,6 +350,7 @@ function showContextMenu(event) {
 })().finally(() => {
   openFile(currentFile.path, currentFile.name);
   populateFiletree();
+  populateGitHistory();
 });
 
 window.addEventListener("click", e => {
