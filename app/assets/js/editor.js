@@ -144,7 +144,7 @@ function flatten(arr) {
 function focusItem(e, event) {
   event.preventDefault();
   if (e.contentEditable === 'true') return;
-  if (e.classList.contains('active') && event.type !== 'contextmenu') return startRename(e);
+  //if (e.classList.contains('active') && event.type !== 'contextmenu') return startRename(e);
   if (document.querySelector('#fileTree .active'))
     document.querySelector('#fileTree .active').classList.toggle('active');
   e.classList.toggle('active');
@@ -203,6 +203,10 @@ function startRename(e) {
     e.focus();
     document.execCommand('selectAll', false, null);
     e.addEventListener('keydown', (event) => {
+      if (event.key === ' ') {
+        event.preventDefault();
+        document.execCommand('insertText', false, ' ');
+      }
       if (event.key === 'Enter') {
         event.preventDefault();
         e.blur();

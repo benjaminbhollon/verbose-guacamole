@@ -8,6 +8,10 @@ body {
   grid-template-columns: 20% 60% 20%;
 }
 
+#editor textarea {
+  display: none;
+}
+
 #editor, #fileTree, #git {
   max-height: 100vh;
   overflow: auto;
