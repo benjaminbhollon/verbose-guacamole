@@ -337,7 +337,7 @@ function showContextMenu(event) {
       }
     );
     console.info('Creating initial commit...');
-    git.add('./*').commit('Created project.');
+    git.add('./*').commit('Create project');
     console.info('Done! Changing URL to avoid refresh-slipups.');
     history.replaceState(null, null, './editor.html?f=' + projectPath);
   } else {

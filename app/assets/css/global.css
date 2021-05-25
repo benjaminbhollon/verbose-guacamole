@@ -15,10 +15,20 @@ body {
   flex-direction: column;
   min-height: 100vh;
   background-color: hsl(118, 72%, 90%);
-  overflow: hidden;
 }
 
 header {
   background-color: hsl(118, 72%, 79%);
   padding: 1em;
+}
+
+article {
+  text-align: center;
+}
+
+article div {
+  text-align: left;
+  display: inline-block;
+  max-width: 95vw;
+  width: 700px;
 }
