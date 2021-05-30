@@ -1,0 +1,124 @@
+body, body * {
+  box-sizing: border-box;
+}
+
+body {
+  text-align: left;
+  display: grid;
+  grid-template-columns: 20% 60% 20%;
+}
+
+a {
+  color: inherit;
+}
+
+#editor textarea {
+  opacity: 0;
+}
+
+#editor, #fileTree, #git {
+  max-height: 100vh;
+  overflow: auto;
+  border-right: 1px solid #ccc;
+}
+
+/* Files */
+#fileTree span, #fileTree details summary, #fileTree button {
+  padding: 0 0.3em;
+  display: block;
+  height: 1.75em;
+  line-height: 1.75em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+#fileTree span[contenteditable], #fileTree details summary[contenteditable] {
+  text-overflow: inherit;
+  background-color: #fff;
+  color: #000;
+  outline: 3px solid orange;
+  user-select: text;
+  cursor: initial;
+}
+
+#fileTree details span, #fileTree details details {
+  padding-left: 1.5em;
+}
+
+#fileTree .active {
+  background-color: #2D99F7;
+  color: #fff;
+}
+
+/* Git */
+
+#git h3, p {
+  padding: 0 0.5em;
+  text-align: center;
+}
+
+#git h3 {
+  margin-bottom: 0.25em;
+}
+
+#git__commitText, #git button {
+  display: block;
+  padding: 0.5em;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+textarea {
+  text-align: left;
+}
+
+#git p:last-of-type {
+  color: gray;
+  margin-top: 0.5em;
+}
+
+#git__commits span {
+  padding: 0.25em 0.4em;
+  display: block;
+  border-top: 1px solid #777;
+}
+
+#git__commits span:hover {
+  background-color: #ccc5;
+}
+
+/* Context Menu */
+#contextMenu {
+  border: 1px solid #aaa;
+  width: 200px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #fff;
+  display: none;
+}
+
+#contextMenu span {
+  display: block;
+  cursor: default;
+  padding: 0.5em;
+}
+
+#contextMenu span:hover {
+  display: block;
+  cursor: default;
+  background-color: #ccc;
+  padding: 0.5em;
+}
+
+#contextMenu.visible {
+  display: block;
+}
+
+#contextMenu #deleteButton, #contextMenu #renameButton {
+  display: none;
+}

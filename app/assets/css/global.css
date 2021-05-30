@@ -1,0 +1,34 @@
+body, body * {
+  box-sizing: border-box;
+}
+
+body, html {
+  text-align: center;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Trebuchet MS', Calibri, sans-serif;
+  margin: 0;
+  font-size: 1.3em;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: hsl(118, 72%, 90%);
+}
+
+header {
+  background-color: hsl(118, 72%, 79%);
+  padding: 1em;
+}
+
+article {
+  text-align: center;
+}
+
+article div {
+  text-align: left;
+  display: inline-block;
+  max-width: 95vw;
+  width: 700px;
+}

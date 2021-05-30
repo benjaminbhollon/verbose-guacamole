@@ -1,0 +1,35 @@
+{
+  "name": "verbose-guacamole",
+  "version": "0.1.0",
+  "description": "A editor for writers (especially novelists) powered on the markdown and gittechnologies.",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benjaminbhollon/verbose-guacamole.git"
+  },
+  "author": "Benjamin Hollon",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/benjaminbhollon/verbose-guacamole/issues"
+  },
+  "homepage": "https://github.com/benjaminbhollon/verbose-guacamole#readme",
+  "devDependencies": {
+    "electron": "^11.2.0"
+  },
+  "dependencies": {
+    "simple-git": "^2.38.0"
+  },
+  "build": {
+    "fileAssociations": [
+      {
+        "ext": "vgp",
+        "name": "Verbose Guacamole Project",
+        "role": "Editor",
+        "perMachine": true
+      }
+    ]
+  }
+}

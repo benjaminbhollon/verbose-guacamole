@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Verbose Guacamole</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link rel="stylesheet" href="./assets/css/global.css">
+    <link rel="stylesheet" href="./assets/css/editor.css">
+  </head>
+  <body>
+    <section id="fileTree" oncontextmenu="showContextMenu(event)">
+      <div id="fileTree__list">
+
+      </div>
+    </section>
+    <section id="editor">
+      <textarea id="editorTextarea"></textarea>
+    </section>
+    <section id="git">
+      <h3>Commits</h3>
+      <div id="git__commits">
+
+      </div>
+      <textarea id="git__commitText" placeholder="Commit message"></textarea>
+      <button onclick='commit()'>Commit</button>
+      <p><a href="./help/commits.html" target="_blank">What are commits?</a></p>
+    </section>
+    <div id="contextMenu">
+      <span onclick="deleteItem()" id="deleteButton">Delete</span>
+      <span onclick="startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
+      <span onclick="createItem('file')">Create File</span>
+      <span onclick="createItem('folder')">Create Folder</span>
+    </div>
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <script src="./assets/js/editor.js"></script>
+  </body>
+</html>
