@@ -1,7 +1,3 @@
-body, body * {
-  box-sizing: border-box;
-}
-
 body {
   text-align: left;
   display: grid;
@@ -12,14 +8,28 @@ a {
   color: inherit;
 }
 
-#editor textarea {
-  opacity: 0;
-}
-
 #editor, #fileTree, #git {
   max-height: 100vh;
   overflow: auto;
   border-right: 1px solid #ccc;
+}
+
+/* Editor */
+
+#editor textarea {
+  opacity: 0;
+}
+
+#editor
+
+#editor__stats {
+  text-align: right;
+  background-color: inherit;
+  padding: 0.25em;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background-color: var(--background-color);
 }
 
 /* Files */
@@ -55,7 +65,7 @@ a {
 
 /* Git */
 
-#git h3, p {
+#git h3, #git p {
   padding: 0 0.5em;
   text-align: center;
 }

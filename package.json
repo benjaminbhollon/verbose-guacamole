@@ -20,6 +20,7 @@
     "electron": "^11.2.0"
   },
   "dependencies": {
+    "marked": "^2.0.6",
     "simple-git": "^2.38.0"
   },
   "build": {

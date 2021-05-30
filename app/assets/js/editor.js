@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const simpleGit = require('simple-git');
 const querystring = require('querystring');
+const marked = require('marked');
 const params = querystring.parse(location.search.slice(1));
 let projectPath = params.f;
 const git = simpleGit({
@@ -70,10 +71,12 @@ function resetEditor() {
   });
   editor.codemirror.on("change", function() {
   	if (!clearing) saveFile(currentFile.path);
+    updateStats();
   });
   clearing = false;
 }
-function openFile(p, n) {
+function openFile(p, n, first = false) {
+  if (currentFile === flatten(project.index).find(i => i.path === p) && !first) return;
   resetEditor();
   clearing = true;
   const value = fs.readFileSync(path.resolve(path.dirname(projectPath), p), {
@@ -101,6 +104,24 @@ function flatten(arr) {
 }
 function idFromPath(p) {
   return p.split('/').slice(-1)[0].split('.')[0];
+}
+function updateStats() {
+  let content = marked(editor.value());
+  var div = document.createElement("div");
+  div.innerHTML = content;
+  content = div.innerText.trim();
+  let stats = {};
+
+  stats.words = content
+    .replace(/[ ]{2,}/gi," ")
+    .replace(/\n /,"\n")
+    .split(/ |\n/)
+    .length + ' words';
+
+  stats.lines = content.split('\n').length + ' lines';
+
+  //Update stats element
+  document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
 }
 
 //Git
@@ -160,7 +181,7 @@ function populateFiletree() {
 function focusItem(e, event) {
   event.preventDefault();
   if (e.contentEditable === 'true') return;
-  //if (e.classList.contains('active') && event.type !== 'contextmenu') return startRename(e);
+  if (e.classList.contains('active') && event.type !== 'contextmenu') return startRename(e);
   if (document.querySelector('#fileTree .active'))
     document.querySelector('#fileTree .active').classList.toggle('active');
   e.classList.toggle('active');
@@ -221,9 +242,9 @@ function createItem(type) {
   }
 }
 function startRename(e) {
-  const isOpen = e.parentNode.open;
+  const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
   setTimeout(() => {
-    if (isOpen !== e.parentNode.open) return;
+    if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
     e.contentEditable = true;
     e.focus();
     document.execCommand('selectAll', false, null);
@@ -348,7 +369,7 @@ function showContextMenu(event) {
     currentFile = flatten(project.index)[0];
   }
 })().finally(() => {
-  openFile(currentFile.path, currentFile.name);
+  openFile(currentFile.path, currentFile.name, true);
   populateFiletree();
   populateGitHistory();
 });

@@ -4,7 +4,7 @@ A editor for writers (especially novelists) powered by markdown and git.
 ## Features
 
 ### Markdown editing
-All files are edited in Markdown, using [simplemde](https://simplemde.com/)
+All files are edited in Markdown, using [simplemde](https://simplemde.com/). The placeholder for an empty file is random first sentence of a famous novel.
 
 ### Git Commits
 Commits can be created for version control via [simple-git](https://github.com/steveukx/git-js). As of v0.1.0, commits can be created. More features related to this are planned.
@@ -14,3 +14,6 @@ VerbGuac projects are split into files, which can be separated into folders. v0.
 
 ## Screenshots
 ![v0.1.0 Editor](./screenshots/v0.1.0-editor.png)
+
+## License
+Verbose Guacamole is released under the [GPL-3.0](./LICENSE) license.
