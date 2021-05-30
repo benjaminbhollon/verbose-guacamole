@@ -33,6 +33,10 @@ a {
 }
 
 /* Files */
+#fileTree {
+  padding-bottom: 1.5em;
+}
+
 #fileTree span, #fileTree details summary, #fileTree button {
   padding: 0 0.3em;
   display: block;

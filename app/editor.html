@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./assets/css/editor.css">
   </head>
   <body>
-    <section id="fileTree" oncontextmenu="showContextMenu(event)">
+    <section id="fileTree" oncontextmenu="showContextMenu(event)"  ondrop="moveItem(event, true)" ondragover="event.preventDefault()">
       <div id="fileTree__list">
 
       </div>

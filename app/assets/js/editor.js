@@ -61,13 +61,17 @@ function resetEditor() {
   editor = new SimpleMDE({
     element: document.getElementById("editorTextarea"),
     spellChecker: false,
-    hideIcons: ['side-by-side', 'fullscreen', 'image'],
+    hideIcons: ['side-by-side', 'image'],
     status: false,
     placeholder: placeholders[placeholderN],
   	insertTexts: {
   		image: ["![](https://", ")"],
   	},
     autofocus: true
+  });
+  editor.toolbarElements.fullscreen.addEventListener('click', () => {
+    document.exitFullscreen();
+    document.documentElement.requestFullscreen();
   });
   editor.codemirror.on("change", function() {
   	if (!clearing) saveFile(currentFile.path);
@@ -149,6 +153,8 @@ function populateFiletree() {
         html += `
         <details
           id=${JSON.stringify(idFromPath(item.path))}
+          ondragover='event.preventDefault()'
+          ondrop='moveItem(event)'
         >
           <summary
             onclick='focusItem(this, event)'
@@ -167,6 +173,9 @@ function populateFiletree() {
           onclick='focusItem(this, event)'
           ondblclick='openItem(this)'
           oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';focusItem(this, event);"
+          draggable="true"
+          ondragstart="startMoveItem(event)"
+          ondragend="stopMoveItem(event)"
           id=${JSON.stringify(idFromPath(item.path))}
         >
           ${item.name}
@@ -314,6 +323,26 @@ function showContextMenu(event) {
   contextMenu.style.left = event.clientX + 'px';
 
   if (!contextMenu.classList.contains('visible')) contextMenu.classList.toggle('visible');
+}
+function startMoveItem(event) {
+  event.currentTarget.style.backgroundColor = '#fff';
+  event.currentTarget.style.color = '#000';
+}
+function stopMoveItem(event) {
+  event.currentTarget.style.backgroundColor = '';
+  event.currentTarget.style.color = '';
+}
+function moveItem(event, main = false) {
+  if (main && event.path.find(e => e.tagName === 'DETAILS')) return;
+  let order = false;
+  if (event.toElement.tagName === 'SPAN') order = true;
+  if (order) return; // TEMPORARY: Don't do moves that require the order to matter.
+
+  const parent = flatten(project.index.find(i => {
+    if (i) return true;
+  }));
+
+  console.log(parent);
 }
 
 (async () => {
