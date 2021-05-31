@@ -120,8 +120,11 @@ function updateStats() {
   stats.words = content
     .replace(/[ ]{2,}/gi," ")
     .replace(/\n /,"\n")
-    .split(/ |\n/)
-    .length + ' words';
+    .split(/ |\n/);
+
+  if (stats.words.length === 1 && stats.words[0] === '') stats.words = [];
+
+  stats.words = stats.words.length + ' words'
 
   stats.lines = content.split('\n').length + ' lines';
 
@@ -428,6 +431,7 @@ function moveItem(event, main = false) {
   openFile(currentFile.path, currentFile.name, true);
   populateFiletree();
   populateGitHistory();
+  updateStats();
 });
 
 window.addEventListener("click", e => {
