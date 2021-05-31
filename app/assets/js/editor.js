@@ -50,6 +50,7 @@ let project = {
 let editor = null;
 let currentFile = project.index[0];
 let clearing = false;
+let currentlyDragging = null;
 
 function resetEditor() {
   clearing = true;
@@ -327,6 +328,7 @@ function showContextMenu(event) {
 function startMoveItem(event) {
   event.currentTarget.style.backgroundColor = '#fff';
   event.currentTarget.style.color = '#000';
+  currentlyDragging = flatten(project.index).find(i => idFromPath(i.path) === event.currentTarget.id);
 }
 function stopMoveItem(event) {
   event.currentTarget.style.backgroundColor = '';
@@ -338,11 +340,36 @@ function moveItem(event, main = false) {
   if (event.toElement.tagName === 'SPAN') order = true;
   if (order) return; // TEMPORARY: Don't do moves that require the order to matter.
 
-  const parent = flatten(project.index.find(i => {
-    if (i) return true;
-  }));
+  const item = currentlyDragging;
+  let parent = flatten(project.index).find(i => {
+    if (
+      i.children &&
+      (
+        i.children.indexOf(currentlyDragging) !== -1
+      )
+    )
+      return true;
+  });
 
-  console.log(parent);
+  if (!parent) parent = project.index;
+  else parent = parent.children;
+
+  let target = (
+    main ?
+    project.index :
+    flatten(project.index).find(i => idFromPath(i.path) === event.path.find(e => e.tagName === 'DETAILS').id).children
+  );
+
+  if (!order) target.push(currentlyDragging);
+
+  parent.splice(parent.indexOf(currentlyDragging), 1);
+
+  document.getElementById('fileTree__list').innerHTML = '';
+  populateFiletree();
+
+  saveFile(projectPath, JSON.stringify(project));
+
+  currentlyDragging = null;
 }
 
 (async () => {
