@@ -45,7 +45,8 @@ let project = {
       name: 'New File',
       path: './content/' + fileName()
     }
-  ]
+  ],
+  openFolders: []
 };
 let editor = null;
 let currentFile = project.index[0];
@@ -134,6 +135,7 @@ function updateStats() {
 
 //Git
 async function populateGitHistory() {
+  document.getElementById('git__commitText').value = '';
   await git.log().then((history) => {
     let html = history.all.map(h => `<span id='commit-${h.hash}'>${h.message}</span>`).reverse().join('');
     document.getElementById('git__commits').innerHTML = html;
@@ -141,13 +143,40 @@ async function populateGitHistory() {
 }
 async function commit() {
   const message = document.getElementById('git__commitText').value;
-  await git.add('./*');
-  await git.commit(message);
-  document.getElementById('git__commitText').value = '';
-  populateGitHistory();
+
+  try {
+    git.add('./*');
+    await git.commit(message).then(populateGitHistory);
+  } catch (err) {
+    window.alert(err);
+  }
 }
 
 // Filetree items
+function setOpenFolders() {
+  let folders = [...document.querySelectorAll('#fileTree__list details')];
+
+  folders = folders.map(folder => {
+    return {
+      id: folder.id,
+      open: folder.open
+    };
+  });
+
+  project.openFolders = [...folders];
+
+  saveFile(projectPath, JSON.stringify(project));
+}
+function restoreOpenFolders() {
+  const toOpen = project.openFolders;
+  for (const folder of toOpen) {
+    try {
+      document.getElementById(folder.id).open = folder.open;
+    } catch (err) {
+      setTimeout(restoreOpenFolders, 0);
+    }
+  }
+}
 function populateFiletree() {
   function drawLayer(layer, id) {
     let html = '';
@@ -162,7 +191,7 @@ function populateFiletree() {
         >
           <summary
             onclick='focusItem(this, event)'
-            ondblclick='this.parentNode.toggleAttribute("open")'
+            ondblclick='this.parentNode.toggleAttribute("open");setOpenFolders();'
             oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';focusItem(this, event);"
           >${item.name}</summary>
         </details>`;
@@ -190,6 +219,8 @@ function populateFiletree() {
     document.getElementById(id).innerHTML += html;
   }
   drawLayer(project.index, 'fileTree__list');
+
+  restoreOpenFolders();
 }
 function focusItem(e, event) {
   event.preventDefault();
@@ -247,8 +278,10 @@ function createItem(type) {
   populateFiletree();
 
   if (type === 'file') {
-    openItem(document.getElementById(idFromPath(filePath))).click();
-    startRename(document.getElementById(idFromPath(filePath)));
+    setTimeout(() => {
+      openItem(document.getElementById(idFromPath(filePath))).click();
+      startRename(document.getElementById(idFromPath(filePath)));
+    }, 0);
   } else {
     document.getElementById(idFromPath(filePath)).click();
     document.getElementById(idFromPath(filePath)).open = true;
@@ -417,20 +450,25 @@ function moveItem(event, main = false) {
       }
     );
     console.info('Creating initial commit...');
-    git.add('./*').commit('Create project');
-    console.info('Done! Changing URL to avoid refresh-slipups.');
-    history.replaceState(null, null, './editor.html?f=' + projectPath);
+    git.add('./*');
+    await git.commit('Create project')
+    .then(populateGitHistory)
+    .then(() => {
+      console.info('Done! Changing URL to avoid refresh-slipups.');
+      history.replaceState(null, null, './editor.html?f=' + projectPath);
+    });
   } else {
+    populateGitHistory();
     project = JSON.parse(fs.readFileSync(projectPath, {
       encoding:'utf8',
       flag:'r'
     }));
     currentFile = flatten(project.index)[0];
+    if (typeof project.openFolders === 'undefined') project.openFolders = [];
   }
 })().finally(() => {
   openFile(currentFile.path, currentFile.name, true);
   populateFiletree();
-  populateGitHistory();
   updateStats();
 });
 
