@@ -52,6 +52,17 @@ let editor = null;
 let currentFile = project.index[0];
 let clearing = false;
 let currentlyDragging = null;
+let hoveringOver = null;
+let cursorX = 0;
+let cursorY = 0;
+
+(function() {
+    document.onmousemove = handleMouseMove;
+    function handleMouseMove(event) {
+      cursorX = event.clientX;
+      cursorY = event.clientY;
+    }
+})();
 
 function resetEditor() {
   clearing = true;
@@ -216,6 +227,7 @@ function populateFiletree() {
           draggable="true"
           ondragstart="startMoveItem(event)"
           ondragend="stopMoveItem(event)"
+          onmouseenter="setHovering(this)"
           id=${JSON.stringify(idFromPath(item.path))}
         >
           ${item.name}
@@ -370,12 +382,22 @@ function startMoveItem(event) {
   event.currentTarget.style.backgroundColor = '#fff';
   event.currentTarget.style.color = '#000';
   const idToMove = (event.currentTarget.tagName === 'SUMMARY' ? event.currentTarget.parentNode.id : event.currentTarget.id);
-  console.log(idToMove);
   currentlyDragging = flatten(project.index).find(i => idFromPath(i.path) === idToMove);
 }
 function stopMoveItem(event) {
   event.currentTarget.style.backgroundColor = '';
   event.currentTarget.style.color = '';
+}
+function setHovering(element) {
+  hoveringOver = element;
+}
+function getDraggingIndex() {
+  let index = [...hoveringOver.parentNode.children].indexOf(hoveringOver) - 1;;
+  const rect = hoveringOver.getBoundingClientRect();
+
+  if (cursorY > rect.top + (rect.height / 2)) index++;
+
+  return index;
 }
 function moveItem(event, main = false) {
   event.stopPropagation();
@@ -386,7 +408,6 @@ function moveItem(event, main = false) {
   );
   let order = false;
   if (event.toElement.tagName === 'SPAN') order = true;
-  if (order) return; // TEMP: Don't do moves that require the order to matter.
 
   // Get current parent
   let parent = flatten(project.index).find(f => {
@@ -396,7 +417,12 @@ function moveItem(event, main = false) {
   if (typeof parent === 'undefined') parent = {children: project.index};
 
   // Add to target
-  target.children.push(currentlyDragging);
+  if (order) {
+    console.log(getDraggingIndex());
+    target.children.splice(getDraggingIndex(), 0, currentlyDragging);
+  } else {
+    target.children.push(currentlyDragging);
+  }
 
   // Remove from parent
   parent.children.splice(parent.children.indexOf(currentlyDragging), 1);
