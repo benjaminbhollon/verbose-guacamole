@@ -194,6 +194,9 @@ function populateFiletree() {
           ondrop='moveItem(event)'
         >
           <summary
+            draggable="true"
+            ondragstart="startMoveItem(event)"
+            ondragend="stopMoveItem(event)"
             onclick='focusItem(this, event)'
             ondblclick='this.parentNode.toggleAttribute("open");setOpenFolders();'
             oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';focusItem(this, event);"
@@ -366,7 +369,9 @@ function showContextMenu(event) {
 function startMoveItem(event) {
   event.currentTarget.style.backgroundColor = '#fff';
   event.currentTarget.style.color = '#000';
-  currentlyDragging = flatten(project.index).find(i => idFromPath(i.path) === event.currentTarget.id);
+  const idToMove = (event.currentTarget.tagName === 'SUMMARY' ? event.currentTarget.parentNode.id : event.currentTarget.id);
+  console.log(idToMove);
+  currentlyDragging = flatten(project.index).find(i => idFromPath(i.path) === idToMove);
 }
 function stopMoveItem(event) {
   event.currentTarget.style.backgroundColor = '';
