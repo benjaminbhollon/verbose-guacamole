@@ -377,17 +377,18 @@ function moveItem(event, main = false) {
   const target = (
     event.path.find(e => e.tagName === 'DETAILS') ?
     flatten(project.index).find(f => idFromPath(f.path) === event.path.find(e => e.tagName === 'DETAILS').id) :
-    project.index
+    {children: project.index}
   );
   let order = false;
   if (event.toElement.tagName === 'SPAN') order = true;
   if (order) return; // TEMP: Don't do moves that require the order to matter.
 
   // Get current parent
-  const parent = flatten(project.index).find(f => {
+  let parent = flatten(project.index).find(f => {
     if (typeof f.children === 'undefined') return false;
     return f.children.indexOf(currentlyDragging) !== -1;
   });
+  if (typeof parent === 'undefined') parent = {children: project.index};
 
   // Add to target
   target.children.push(currentlyDragging);
@@ -396,6 +397,9 @@ function moveItem(event, main = false) {
   parent.children.splice(parent.children.indexOf(currentlyDragging), 1);
 
   populateFiletree();
+
+  // Save
+  saveFile(projectPath, JSON.stringify(project));
 }
 
 (async () => {

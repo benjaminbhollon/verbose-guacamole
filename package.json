@@ -1,6 +1,6 @@
 {
   "name": "verbose-guacamole",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A editor for writers (especially novelists) powered on the markdown and gittechnologies.",
   "main": "index.js",
   "scripts": {
