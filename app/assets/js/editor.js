@@ -136,10 +136,12 @@ function updateStats() {
 //Git
 async function populateGitHistory() {
   document.getElementById('git__commitText').value = '';
-  await git.log().then((history) => {
-    let html = history.all.map(h => `<span id='commit-${h.hash}'>${h.message}</span>`).reverse().join('');
+  try {
+    let html = (await git.log()).all.map(h => `<span id='commit-${h.hash}'>${h.message}</span>`).reverse().join('');
     document.getElementById('git__commits').innerHTML = html;
-  });
+  } catch (err) {
+    console.error(err);
+  }
 }
 async function commit() {
   const message = document.getElementById('git__commitText').value;
@@ -178,6 +180,8 @@ function restoreOpenFolders() {
   }
 }
 function populateFiletree() {
+  document.getElementById('fileTree__list').innerHTML = '';
+
   function drawLayer(layer, id) {
     let html = '';
 
@@ -274,18 +278,16 @@ function createItem(type) {
 
   saveFile(projectPath, JSON.stringify(project));
 
-  document.getElementById('fileTree__list').innerHTML = '';
   populateFiletree();
-
-  if (type === 'file') {
-    setTimeout(() => {
+  setTimeout(() => {
+    if (type === 'file') {
       openItem(document.getElementById(idFromPath(filePath))).click();
       startRename(document.getElementById(idFromPath(filePath)));
-    }, 0);
-  } else {
-    document.getElementById(idFromPath(filePath)).click();
-    document.getElementById(idFromPath(filePath)).open = true;
-  }
+    } else {
+      document.getElementById(idFromPath(filePath)).click();
+      document.getElementById(idFromPath(filePath)).open = true;
+    }
+  }, 0);
 }
 function startRename(e) {
   const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
@@ -371,41 +373,29 @@ function stopMoveItem(event) {
   event.currentTarget.style.color = '';
 }
 function moveItem(event, main = false) {
-  if (main && event.path.find(e => e.tagName === 'DETAILS')) return;
+  event.stopPropagation();
+  const target = (
+    event.path.find(e => e.tagName === 'DETAILS') ?
+    flatten(project.index).find(f => idFromPath(f.path) === event.path.find(e => e.tagName === 'DETAILS').id) :
+    project.index
+  );
   let order = false;
   if (event.toElement.tagName === 'SPAN') order = true;
-  if (order) return; // TEMPORARY: Don't do moves that require the order to matter.
+  if (order) return; // TEMP: Don't do moves that require the order to matter.
 
-  const item = currentlyDragging;
-  let parent = flatten(project.index).find(i => {
-    if (
-      i.children &&
-      (
-        i.children.indexOf(currentlyDragging) !== -1
-      )
-    )
-      return true;
+  // Get current parent
+  const parent = flatten(project.index).find(f => {
+    if (typeof f.children === 'undefined') return false;
+    return f.children.indexOf(currentlyDragging) !== -1;
   });
 
-  if (!parent) parent = project.index;
-  else parent = parent.children;
+  // Add to target
+  target.children.push(currentlyDragging);
 
-  let target = (
-    main ?
-    project.index :
-    flatten(project.index).find(i => idFromPath(i.path) === event.path.find(e => e.tagName === 'DETAILS').id).children
-  );
+  // Remove from parent
+  parent.children.splice(parent.children.indexOf(currentlyDragging), 1);
 
-  if (!order) target.push(currentlyDragging);
-
-  parent.splice(parent.indexOf(currentlyDragging), 1);
-
-  document.getElementById('fileTree__list').innerHTML = '';
   populateFiletree();
-
-  saveFile(projectPath, JSON.stringify(project));
-
-  currentlyDragging = null;
 }
 
 (async () => {
@@ -449,10 +439,10 @@ function moveItem(event, main = false) {
         }
       }
     );
-    console.info('Creating initial commit...');
+    //console.info('Creating initial commit...');
     git.add('./*');
-    await git.commit('Create project')
-    .then(populateGitHistory)
+    //git.commit('Create project')
+    populateGitHistory()
     .then(() => {
       console.info('Done! Changing URL to avoid refresh-slipups.');
       history.replaceState(null, null, './editor.html?f=' + projectPath);
