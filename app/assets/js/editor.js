@@ -409,6 +409,11 @@ function moveItem(event, main = false) {
   let order = false;
   if (event.toElement.tagName === 'SPAN') order = true;
 
+  // Check if moving folder into itself
+  if (typeof currentlyDragging.children !== 'undefined') {
+    if (event.path.find(e => e.id === idFromPath(currentlyDragging.path))) return;
+  }
+
   // Get current parent
   let parent = flatten(project.index).find(f => {
     if (typeof f.children === 'undefined') return false;
