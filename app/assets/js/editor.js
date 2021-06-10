@@ -56,13 +56,11 @@ let hoveringOver = null;
 let cursorX = 0;
 let cursorY = 0;
 
-(function() {
-    document.onmousemove = handleMouseMove;
-    function handleMouseMove(event) {
-      cursorX = event.clientX;
-      cursorY = event.clientY;
-    }
-})();
+function updatePageXY(event) {
+  cursorX = event.clientX;
+  cursorY = event.clientY;
+}
+document.onmousemove = updatePageXY;
 
 function resetEditor() {
   clearing = true;
@@ -227,7 +225,8 @@ function populateFiletree() {
           draggable="true"
           ondragstart="startMoveItem(event)"
           ondragend="stopMoveItem(event)"
-          onmouseenter="setHovering(this)"
+          ondragover="setHovering(this)"
+          ondrag="updatePageXY(event)"
           id=${JSON.stringify(idFromPath(item.path))}
         >
           ${item.name}
@@ -390,6 +389,7 @@ function stopMoveItem(event) {
 }
 function setHovering(element) {
   hoveringOver = element;
+  getDraggingIndex();
 }
 function getDraggingIndex() {
   let index = [...hoveringOver.parentNode.children].indexOf(hoveringOver) - 1;;
@@ -416,16 +416,20 @@ function moveItem(event, main = false) {
   });
   if (typeof parent === 'undefined') parent = {children: project.index};
 
+  // Remove from parent
+  parent.children.splice(parent.children.indexOf(currentlyDragging), 1);
+
   // Add to target
   if (order) {
-    console.log(getDraggingIndex());
-    target.children.splice(getDraggingIndex(), 0, currentlyDragging);
+    target.children.splice(getDraggingIndex(), 0, JSON.stringify(currentlyDragging));
   } else {
     target.children.push(currentlyDragging);
   }
 
-  // Remove from parent
-  parent.children.splice(parent.children.indexOf(currentlyDragging), 1);
+  target.children = target.children.map(c => {
+    if (typeof c === 'string') return JSON.parse(c);
+    else return c;
+  });
 
   populateFiletree();
 
