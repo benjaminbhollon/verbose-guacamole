@@ -69,7 +69,9 @@ function resetEditor() {
     editor.value('');
     editor.toTextArea();
   }
-  placeholderN = (placeholderN + Math.floor(Math.random() * (placeholders.length - 1))) % placeholders.length;
+  placeholderN = (
+    placeholderN + Math.floor(Math.random() * (placeholders.length - 1))
+  ) % placeholders.length;
   editor = new SimpleMDE({
     element: document.getElementById("editorTextarea"),
     spellChecker: false,

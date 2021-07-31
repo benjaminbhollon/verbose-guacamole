@@ -8,12 +8,13 @@ function createWindow () {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
-      contexIsolation: true
+      contextIsolation: false
     }
   });
+  win.hide();
+  win.maximize();
 
   win.loadFile('./app/index.html');
-  win.maximize();
 }
 
 app.whenReady().then(createWindow);
