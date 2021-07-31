@@ -111,7 +111,7 @@ function resetEditor() {
   clearing = false;
 }
 
-
+// Open file
 function openFile(p, n, first = false) {
   if (currentFile === flatten(project.index).find(i => i.path === p) && !first) return;
   resetEditor();
@@ -124,6 +124,8 @@ function openFile(p, n, first = false) {
   currentFile = flatten(project.index).find(i => i.path === p);
   clearing = false;
 }
+
+// Save file
 function saveFile(p, v) {
   let value = null;
   if (!v) value = editor.value();
@@ -131,17 +133,24 @@ function saveFile(p, v) {
 
   fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
 }
+
+// Flatten an array of files and folders completely
 function flatten(arr) {
   let newArr = arr;
   newArr = arr.map(i => {
+    // If there are children, add them to the top-level list
     if (i.children) return [i, flatten(i.children)];
     else return i;
   }).flat(Infinity);
   return newArr;
 }
+
+// Get the id of a file or folder from the filepath given
 function idFromPath(p) {
   return p.split('/').slice(-1)[0].split('.')[0];
 }
+
+// Update the stats bar
 function updateStats() {
   let content = marked(editor.value());
   var div = document.createElement("div");
@@ -161,7 +170,8 @@ function updateStats() {
   document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
 }
 
-//Git
+/* Git */
+// Updates the Commit History list
 async function populateGitHistory() {
   try {
     let html = (await git.log()).all.map(h => `<span id='commit-${h.hash}'>${h.message}</span>`).reverse().join('');
@@ -170,6 +180,8 @@ async function populateGitHistory() {
     console.error(err);
   }
 }
+
+// Creates a commit
 async function commit() {
   const message = document.getElementById('git__commitText').value;
   document.getElementById('git__commitButton').innerText = 'Working...';
@@ -187,7 +199,8 @@ async function commit() {
   setTimeout(populateGitHistory, 250);
 }
 
-// Filetree items
+/* Filetree items */
+// Saves the list of open folders
 function setOpenFolders() {
   let folders = [...document.querySelectorAll('#fileTree__list details')];
 
@@ -202,6 +215,8 @@ function setOpenFolders() {
 
   saveFile(projectPath, JSON.stringify(project));
 }
+
+// Restores the open folders
 function restoreOpenFolders() {
   const toOpen = project.openFolders;
   for (const folder of toOpen) {
@@ -212,6 +227,8 @@ function restoreOpenFolders() {
     }
   }
 }
+
+// Creates the HTML for the filetree
 function populateFiletree() {
   document.getElementById('fileTree__list').innerHTML = '';
 
@@ -264,6 +281,8 @@ function populateFiletree() {
 
   restoreOpenFolders();
 }
+
+// Focus on a file or folder (onclick)
 function focusItem(e, event) {
   event.preventDefault();
   if (e.contentEditable === 'true') return;
@@ -272,11 +291,15 @@ function focusItem(e, event) {
     document.querySelector('#fileTree .active').classList.toggle('active');
   e.classList.toggle('active');
 }
+
+// Open a file
 function openItem(e) {
   const file = flatten(project.index).find(i => idFromPath(i.path) === e.id);
   openFile(file.path, file.name);
   return e;
 }
+
+// Creates a file or folder
 function createItem(type) {
   let folder = document.querySelector('#fileTree .active');
   let parent = null;
@@ -327,6 +350,8 @@ function createItem(type) {
     }
   }, 0);
 }
+
+// Makes the title of a folder editable
 function startRename(e) {
   const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
   setTimeout(() => {
@@ -352,6 +377,8 @@ function startRename(e) {
     e.addEventListener('blur', renameItem.bind(this, e));
   }, 300);
 }
+
+// Runs when user is done renaming file or folder
 function renameItem(e) {
   e.removeAttribute('contenteditable');
 
@@ -366,6 +393,8 @@ function renameItem(e) {
 
   saveFile(projectPath, JSON.stringify(project));
 }
+
+// Deletes a file or folder (recursively, with a warning)
 function deleteItem() {
   let item = document.querySelector('#fileTree .active');
   if (!confirm(`Do you really want to delete this ${item.tagName === 'SPAN' ? 'file' : 'folder and everything in it'}? There is no undo.`)) return;
@@ -398,26 +427,36 @@ function deleteItem() {
     saveFile(projectPath, JSON.stringify(project));
   }, 0);
 }
+
+// Shows the context menu
 function showContextMenu(event) {
   contextMenu.style.top = event.clientY + 'px';
   contextMenu.style.left = event.clientX + 'px';
 
   if (!contextMenu.classList.contains('visible')) contextMenu.classList.toggle('visible');
 }
+
+// Runs when user starts dragging
 function startMoveItem(event) {
   event.currentTarget.style.backgroundColor = '#fff';
   event.currentTarget.style.color = '#000';
   const idToMove = (event.currentTarget.tagName === 'SUMMARY' ? event.currentTarget.parentNode.id : event.currentTarget.id);
   currentlyDragging = flatten(project.index).find(i => idFromPath(i.path) === idToMove);
 }
+
+// Runs when user stops dragging
 function stopMoveItem(event) {
   event.currentTarget.style.backgroundColor = '';
   event.currentTarget.style.color = '';
 }
+
+// Sets the item being hovered over
 function setHovering(element) {
   hoveringOver = element;
   getDraggingIndex();
 }
+
+// Gets the index an item should be inserted at
 function getDraggingIndex() {
   let index = [...hoveringOver.parentNode.children].indexOf(hoveringOver) - 1;;
   const rect = hoveringOver.getBoundingClientRect();
@@ -426,6 +465,8 @@ function getDraggingIndex() {
 
   return index;
 }
+
+// Actually moves the item
 function moveItem(event, main = false) {
   event.stopPropagation();
   const target = (
@@ -469,6 +510,7 @@ function moveItem(event, main = false) {
   saveFile(projectPath, JSON.stringify(project));
 }
 
+// Init
 (async () => {
   if (params.new) {
     console.info('New project alert! Let me get that set up for you...');
@@ -535,8 +577,8 @@ function moveItem(event, main = false) {
   updateStats();
 });
 
-//setInterval(populateGitHistory, 3000);
 
+// Hide the context menu on click
 window.addEventListener("click", e => {
   if (contextMenu.classList.contains('visible')) {
     contextMenu.classList.toggle('visible');
