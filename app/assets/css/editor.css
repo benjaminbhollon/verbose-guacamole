@@ -137,3 +137,47 @@ textarea {
 #contextMenu #deleteButton, #contextMenu #renameButton {
   display: none;
 }
+
+
+/* Loading */
+
+#loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--background-color);
+  z-index: 1000;
+}
+
+#loading p {
+  margin: 0;
+  position: absolute;
+  left: 50vw;
+  top: 50vh;
+  transform: translate(-50%, -50%);
+  font-size: 1.5em;
+}
+
+#loading p::after {
+  content: '';
+  animation: dots 1.5s infinite;
+  width: 0;
+  display: inline-block;
+}
+
+@keyframes dots {
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.'
+  }
+  50% {
+    content: '..'
+  }
+  75% {
+    content: '...'
+  }
+}

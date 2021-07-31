@@ -6,9 +6,33 @@
     <link rel="stylesheet" href="./assets/css/simplemde.css">
     <link rel="stylesheet" href="./assets/css/global.css">
     <link rel="stylesheet" href="./assets/css/editor.css">
-    <link rel="stylesheet" href="./assets/css/fontawesome.min.css">
   </head>
   <body>
+    <div id="loading">
+      <p></p>
+      <script>
+          const wittyLoaders = [
+            'Stealing Hemingway\'s notes',
+            'Banishing writers\' block',
+            'Summoning infinite monkeys',
+            'Drinking too much coffee',
+            'Retconning continuity flaws',
+            'Suspending disbelief',
+            'Hanging from cliffs',
+            'Streaming consciousness',
+            'Checking wikipedia',
+            'Padding word count',
+            'Living happily ever after',
+            'Procrastinating',
+            'Quoting the Raven'
+          ];
+          document.querySelector('#loading p').innerText = wittyLoaders[Date.now() % wittyLoaders.length];
+
+        setTimeout(() => {
+          document.getElementById('loading').style.display = 'none';
+        }, 4000);
+      </script>
+    </div>
     <section id="fileTree" oncontextmenu="showContextMenu(event)"  ondrop="moveItem(event, true)" ondragover="event.preventDefault()">
       <div id="fileTree__list">
 
@@ -33,6 +57,6 @@
       <span onclick="createItem('file')">Create File</span>
       <span onclick="createItem('folder')">Create Folder</span>
     </div>
-    <script src="./assets/js/editor.js"></script>
+    <script src="./assets/js/editor.js" defer></script>
   </body>
 </html>
