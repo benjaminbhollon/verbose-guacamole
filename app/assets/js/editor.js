@@ -1,14 +1,21 @@
+// Include packages
 const fs = require('fs');
 const path = require('path');
 const simpleGit = require('simple-git');
 const querystring = require('querystring');
 const marked = require('marked');
 const SimpleMDE = require('simplemde');
+
+// Get path parameters
 const params = querystring.parse(location.search.slice(1));
 let projectPath = params.f;
+
+// Initialize Git with the project directory
 const git = simpleGit({
   baseDir: (params.new ? projectPath : path.dirname(projectPath))
 });
+
+// Each placeholder is a famous first line from a novel in the format "quote (Book title)"
 const placeholders = [
   'It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair, we had everything before us, we had nothing before us, we were all going to Heaven, we were all going direct the other way. (A Tale of Two Cities)',
   'It was a dark and stormy night. (A Wrinkle in Time)',
@@ -28,10 +35,14 @@ const placeholders = [
   'The thousand injuries of Fortunato I had borne as I best could, but when he ventured upon insult I vowed revenge. (The Cask of Amontillado)'
 ];
 let placeholderN = Math.floor(Math.random() * placeholders.length);
+
+// Creates a random filename--36^16=7,958,661,109,946,400,884,391,936 possible
 function fileName() {
   const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
   return (new Array(16)).fill().map(l=>chars[Math.floor(Math.random() * chars.length)]).join('') + '.md';
 }
+
+// Initialize the project object for new projects
 let project = {
   metadata: {
     title: {
@@ -49,6 +60,8 @@ let project = {
   ],
   openFolders: []
 };
+
+// Initialize other variables
 let editor = null;
 let currentFile = project.index[0];
 let clearing = false;
@@ -57,14 +70,18 @@ let hoveringOver = null;
 let cursorX = 0;
 let cursorY = 0;
 
+// Store the current mouse location for draggable events
 function updatePageXY(event) {
   cursorX = event.clientX;
   cursorY = event.clientY;
 }
 document.onmousemove = updatePageXY;
 
+// Reset the editor (usually to open a file)
 function resetEditor() {
   clearing = true;
+
+  // If the editor already exists, clear it
   if (editor) {
     editor.value('');
     editor.toTextArea();
@@ -93,6 +110,8 @@ function resetEditor() {
   });
   clearing = false;
 }
+
+
 function openFile(p, n, first = false) {
   if (currentFile === flatten(project.index).find(i => i.path === p) && !first) return;
   resetEditor();
@@ -127,19 +146,16 @@ function updateStats() {
   let content = marked(editor.value());
   var div = document.createElement("div");
   div.innerHTML = content;
-  content = div.innerText.trim();
+  content = div.innerText;
   let stats = {};
 
   stats.words = content
-    .replace(/[ ]{2,}/gi," ")
-    .replace(/\n /,"\n")
-    .split(/ |\n/);
-
-  if (stats.words.length === 1 && stats.words[0] === '') stats.words = [];
+    .split(/ |\n/)
+    .filter(w => w.length);
 
   stats.words = stats.words.length + ' words'
 
-  stats.lines = content.split('\n').length + ' lines';
+  stats.lines = content.split('\n').filter(l => l.length).length + ' lines';
 
   //Update stats element
   document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
@@ -509,6 +525,8 @@ function moveItem(event, main = false) {
       flag:'r'
     }));
     currentFile = flatten(project.index)[0];
+
+    // For compatibility with v0.1.0
     if (typeof project.openFolders === 'undefined') project.openFolders = [];
   }
 })().finally(() => {

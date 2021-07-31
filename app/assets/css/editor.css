@@ -20,16 +20,17 @@ a {
   opacity: 0;
 }
 
-#editor
-
 #editor__stats {
   text-align: right;
   background-color: inherit;
-  padding: 0.25em;
-  position: sticky;
-  bottom: 0;
+  height: 2em;
+  line-height: 2em;
   z-index: 2;
   background-color: var(--background-color);
+}
+
+#editor .CodeMirror {
+  height: calc(100% - 50px - 2em);
 }
 
 /* Files */
