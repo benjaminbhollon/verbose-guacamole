@@ -7,7 +7,8 @@ function createWindow () {
   const win = new BrowserWindow({
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      contexIsolation: true
     }
   });
 

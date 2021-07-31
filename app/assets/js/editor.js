@@ -3,6 +3,7 @@ const path = require('path');
 const simpleGit = require('simple-git');
 const querystring = require('querystring');
 const marked = require('marked');
+const SimpleMDE = require('simplemde');
 const params = querystring.parse(location.search.slice(1));
 let projectPath = params.f;
 const git = simpleGit({
@@ -144,7 +145,6 @@ function updateStats() {
 
 //Git
 async function populateGitHistory() {
-  document.getElementById('git__commitText').value = '';
   try {
     let html = (await git.log()).all.map(h => `<span id='commit-${h.hash}'>${h.message}</span>`).reverse().join('');
     document.getElementById('git__commits').innerHTML = html;
@@ -154,13 +154,19 @@ async function populateGitHistory() {
 }
 async function commit() {
   const message = document.getElementById('git__commitText').value;
+  document.getElementById('git__commitButton').innerText = 'Working...';
+  console.info('Committing: ' + message);
 
   try {
-    git.add('./*');
-    await git.commit(message).then(populateGitHistory);
+    await git.add('./*').commit(message)._chain;
+    console.info('Committed.');
+    document.getElementById('git__commitButton').innerText = 'Commit';
+    document.getElementById('git__commitText').value = '';
   } catch (err) {
     window.alert(err);
   }
+
+  setTimeout(populateGitHistory, 250);
 }
 
 // Filetree items
@@ -367,9 +373,12 @@ function deleteItem() {
   file.delete = true;
 
   project.index = project.index.filter(i => !i.delete);
-  saveFile(projectPath, JSON.stringify(project));
 
   (item.tagName === 'SPAN' ? item : item.parentNode).remove();
+  setTimeout(() => {
+    console.log(project);
+    saveFile(projectPath, JSON.stringify(project));
+  }, 0);
 }
 function showContextMenu(event) {
   contextMenu.style.top = event.clientY + 'px';
@@ -483,10 +492,10 @@ function moveItem(event, main = false) {
         }
       }
     );
-    //console.info('Creating initial commit...');
-    git.add('./*');
-    //git.commit('Create project')
-    populateGitHistory()
+    console.info('Creating initial commit...');
+    await git.add('./*');
+    await git.commit('Create project')
+    await populateGitHistory()
     .then(() => {
       console.info('Done! Changing URL to avoid refresh-slipups.');
       history.replaceState(null, null, './editor.html?f=' + projectPath);
@@ -505,6 +514,8 @@ function moveItem(event, main = false) {
   populateFiletree();
   updateStats();
 });
+
+//setInterval(populateGitHistory, 3000);
 
 window.addEventListener("click", e => {
   if (contextMenu.classList.contains('visible')) {
