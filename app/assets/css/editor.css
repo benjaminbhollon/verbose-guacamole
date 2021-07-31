@@ -1,7 +1,3 @@
-body, body * {
-  box-sizing: border-box;
-}
-
 body {
   text-align: left;
   display: grid;
@@ -12,17 +8,36 @@ a {
   color: inherit;
 }
 
-#editor textarea {
-  opacity: 0;
-}
-
 #editor, #fileTree, #git {
   max-height: 100vh;
   overflow: auto;
   border-right: 1px solid #ccc;
 }
 
+/* Editor */
+
+#editor textarea {
+  opacity: 0;
+}
+
+#editor__stats {
+  text-align: right;
+  background-color: inherit;
+  height: 2em;
+  line-height: 2em;
+  z-index: 2;
+  background-color: var(--background-color);
+}
+
+#editor .CodeMirror {
+  height: calc(100% - 50px - 2em);
+}
+
 /* Files */
+#fileTree {
+  padding-bottom: 1.5em;
+}
+
 #fileTree span, #fileTree details summary, #fileTree button {
   padding: 0 0.3em;
   display: block;
@@ -55,7 +70,7 @@ a {
 
 /* Git */
 
-#git h3, p {
+#git h3, #git p {
   padding: 0 0.5em;
   text-align: center;
 }

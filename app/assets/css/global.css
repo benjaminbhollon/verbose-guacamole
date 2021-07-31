@@ -8,13 +8,14 @@ body, html {
 }
 
 body {
+  --background-color: hsl(118, 72%, 90%);
   font-family: 'Trebuchet MS', Calibri, sans-serif;
   margin: 0;
   font-size: 1.3em;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: hsl(118, 72%, 90%);
+  background-color: var(--background-color);
 }
 
 header {

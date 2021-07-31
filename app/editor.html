@@ -3,26 +3,28 @@
   <head>
     <meta charset="UTF-8">
     <title>Verbose Guacamole</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link rel="stylesheet" href="./assets/css/simplemde.css">
     <link rel="stylesheet" href="./assets/css/global.css">
     <link rel="stylesheet" href="./assets/css/editor.css">
+    <link rel="stylesheet" href="./assets/css/fontawesome.min.css">
   </head>
   <body>
-    <section id="fileTree" oncontextmenu="showContextMenu(event)">
+    <section id="fileTree" oncontextmenu="showContextMenu(event)"  ondrop="moveItem(event, true)" ondragover="event.preventDefault()">
       <div id="fileTree__list">
 
       </div>
     </section>
     <section id="editor">
       <textarea id="editorTextarea"></textarea>
+      <footer id="editor__stats">0 words.</footer>
     </section>
     <section id="git">
       <h3>Commits</h3>
       <div id="git__commits">
 
       </div>
-      <textarea id="git__commitText" placeholder="Commit message"></textarea>
-      <button onclick='commit()'>Commit</button>
+      <textarea id="git__commitText" placeholder="Commit message" spellcheck="false"></textarea>
+      <button onclick='commit()' id="git__commitButton">Commit</button>
       <p><a href="./help/commits.html" target="_blank">What are commits?</a></p>
     </section>
     <div id="contextMenu">
@@ -31,7 +33,6 @@
       <span onclick="createItem('file')">Create File</span>
       <span onclick="createItem('folder')">Create Folder</span>
     </div>
-    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script src="./assets/js/editor.js"></script>
   </body>
 </html>

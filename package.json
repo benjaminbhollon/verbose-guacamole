@@ -1,6 +1,6 @@
 {
   "name": "verbose-guacamole",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A editor for writers (especially novelists) powered on the markdown and gittechnologies.",
   "main": "index.js",
   "scripts": {
@@ -17,10 +17,12 @@
   },
   "homepage": "https://github.com/benjaminbhollon/verbose-guacamole#readme",
   "devDependencies": {
-    "electron": "^11.2.0"
+    "electron": "^11.4.10"
   },
   "dependencies": {
-    "simple-git": "^2.38.0"
+    "marked": "^2.1.3",
+    "simple-git": "^2.42.0",
+    "simplemde": "^1.11.2"
   },
   "build": {
     "fileAssociations": [
