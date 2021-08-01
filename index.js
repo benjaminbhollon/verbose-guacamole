@@ -1,7 +1,7 @@
 "use strict";
 
 // Import modules
-const { app, BrowserWindow, Menu, MenuItem, dialog } = require('electron');
+const { app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('electron');
 const url = require('url');
 const path = require('path');
 
@@ -35,6 +35,45 @@ app.on('activate', () => {
   }
 });
 
+/* Projects */
+// Create project
+function newProject() {
+  dialog.showMessageBox(win, {
+    message: 'You will need to select an empty folder to place your files in.'
+  }).then(() => {
+    dialog.showOpenDialog(
+      {
+        "properties": [ 'openDirectory' ]
+      }).then(result => {
+      if (result.canceled !== true) {
+        win.loadURL(url.format({
+          protocol: 'file',
+          slashes: 'true',
+          pathname: path.join(__dirname, `./app/editor.html`)
+        }) + `?f=${encodeURIComponent(result.filePaths[0])}&new=true`);
+      }
+    });
+  });
+}
+function openProject() {
+  dialog.showOpenDialog({
+    "filters": [
+      {
+        "name": "Verbose Guacamole Project",
+        "extensions": ["vgp"]
+      }
+    ]
+  }).then(result => {
+    if (result.canceled !== true) {
+      win.loadURL(url.format({
+        protocol: 'file',
+        slashes: 'true',
+        pathname: path.join(__dirname, `./app/editor.html`)
+      }) + `?f=${encodeURIComponent(result.filePaths[0])}`);
+    }
+  });
+}
+
 /* Application menu */
 const appMenu = Menu.buildFromTemplate([
   {
@@ -44,44 +83,14 @@ const appMenu = Menu.buildFromTemplate([
         label: 'Open Project',
         accelerator: 'CommandOrControl+O',
         click() {
-          dialog.showOpenDialog({
-            "filters": [
-              {
-                "name": "Verbose Guacamole Project",
-                "extensions": ["vgp"]
-              }
-            ]
-          }).then(result => {
-            if (result.canceled !== true) {
-              win.loadURL(url.format({
-                protocol: 'file',
-                slashes: 'true',
-                pathname: path.join(__dirname, `./app/editor.html`)
-              }) + `?f=${encodeURIComponent(result.filePaths[0])}`);
-            }
-          });
+          openProject();
         }
       },
       {
         label: 'New Project',
         accelerator: 'CommandOrControl+Shift+N',
         click() {
-          dialog.showMessageBox(win, {
-            message: 'You will need to select an empty folder to place your files in.'
-          }).then(() => {
-            dialog.showOpenDialog(
-              {
-                "properties": [ 'openDirectory' ]
-              }).then(result => {
-              if (result.canceled !== true) {
-                win.loadURL(url.format({
-                  protocol: 'file',
-                  slashes: 'true',
-                  pathname: path.join(__dirname, `./app/editor.html`)
-                }) + `?f=${encodeURIComponent(result.filePaths[0])}&new=true`);
-              }
-            });
-          });
+          newProject();
         }
       },
       {
@@ -162,3 +171,12 @@ const appMenu = Menu.buildFromTemplate([
 ])
 
 Menu.setApplicationMenu(appMenu);
+
+/* Messages from renderer process */
+ipcMain.on('openProject', (event) => {
+  openProject();
+});
+ipcMain.on('newProject', (event) => {
+  newProject();
+  console.log('time to create a project!');
+});

@@ -8,6 +8,7 @@ let api = {};
   const querystring = require('querystring');
   const marked = require('marked');
   const SimpleMDE = require('simplemde');
+  const { ipcRenderer } = require('electron');
 
   // Initialize variables
   let git = null;
@@ -498,6 +499,12 @@ let api = {};
 
       //Update stats element
       document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
+    },
+    openProject: () => {
+      ipcRenderer.send('openProject');
+    },
+    newProject: () => {
+      ipcRenderer.send('newProject');
     },
   };
 
