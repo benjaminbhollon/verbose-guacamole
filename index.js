@@ -10,7 +10,6 @@ let win = null;
 function createWindow () {
   win = new BrowserWindow({
     webPreferences: {
-      contextIsolation: true,
       spellcheck: false,
       preload: path.join(app.getAppPath(), 'preload.js')
     }
