@@ -22,7 +22,8 @@
   "dependencies": {
     "marked": "^2.1.3",
     "simple-git": "^2.42.0",
-    "simplemde": "^1.11.2"
+    "simplemde": "^1.11.2",
+    "typo-js": "^1.2.0"
   },
   "build": {
     "fileAssociations": [

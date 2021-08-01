@@ -9,6 +9,7 @@ let api = {};
   const marked = require('marked');
   const SimpleMDE = require('simplemde');
   const { ipcRenderer } = require('electron');
+  const Typo = require('typo-js');
 
   // Initialize variables
   let git = null;
@@ -35,9 +36,15 @@ let api = {};
   let clearing = false;
   let currentlyDragging = null;
   let hoveringOver = null;
+  const dictionary = new Typo('en_US');
 
 
   api = {
+    checkWord: (w) => {
+      return dictionary.check(w) ?
+        true :
+        api.suggestWords(w);
+    },
     commit: async () => {
       const message = document.getElementById('git__commitText').value;
       document.getElementById('git__commitButton').innerText = 'Working...';
@@ -366,7 +373,7 @@ let api = {};
       placeholderN = Date.now() % (api.placeholders.length - 1);
       editor = new SimpleMDE({
         element: document.getElementById("editorTextarea"),
-        spellChecker: false,
+        //spellChecker: true,
         hideIcons: ['side-by-side', 'image'],
         status: false,
         placeholder: api.placeholders[placeholderN],
@@ -409,6 +416,9 @@ let api = {};
       project.openFolders = [...folders];
 
       api.saveProject();
+    },
+    suggestWords: (w) => {
+      return dictionary.suggest(w);
     },
     renameItem: (e) => {
       e.removeAttribute('contenteditable');
