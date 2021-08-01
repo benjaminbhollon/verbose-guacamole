@@ -39,8 +39,7 @@ a {
 }
 
 #fileTree span, #fileTree details summary, #fileTree button {
-  padding: 0 0.3em;
-  display: block;
+  padding: 0 0.5em;
   height: 1.75em;
   line-height: 1.75em;
   text-overflow: ellipsis;
@@ -50,22 +49,59 @@ a {
   user-select: none;
 }
 
-#fileTree span[contenteditable], #fileTree details summary[contenteditable] {
+#fileTree__list span {
+  display: block;
+}
+
+#fileTree__list:not(.searching) .active {
+  background-color: #2D99F7;
+  color: #fff;
+}
+
+#fileTree #fileTree__list span[contenteditable], #fileTree #fileTree__list details summary[contenteditable] {
   text-overflow: inherit;
   background-color: #fff;
   color: #000;
   outline: 3px solid orange;
   user-select: text;
   cursor: initial;
+  padding: 0;
 }
 
 #fileTree details span, #fileTree details details {
-  padding-left: 1.5em;
+  margin-left: 1.5em;
 }
 
-#fileTree .active {
-  background-color: #2D99F7;
-  color: #fff;
+#fileTree__actions {
+  height: 2em;
+  padding: 0.5em;
+}
+
+#fileTree__actions > div{
+  display: inline-block;
+}
+
+#fileTree__actions .left {
+  float: left;
+}
+
+#fileTree__actions .right {
+  float: right;
+}
+
+#fileTree__search {
+  display: block;
+  width: 100%;
+  font-size: 1em;
+  padding: 0.5em;
+}
+
+#fileTree__search.hidden {
+  display: none;
+}
+
+#fileTree__list.searching span:not(.result), #fileTree__list.searching details summary:not(.result) {
+  color: #bbb;
 }
 
 /* Git */
@@ -136,4 +172,48 @@ textarea {
 
 #contextMenu #deleteButton, #contextMenu #renameButton {
   display: none;
+}
+
+
+/* Loading */
+
+#loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--background-color);
+  z-index: 1000;
+}
+
+#loading p {
+  margin: 0;
+  position: absolute;
+  left: 50vw;
+  top: 50vh;
+  transform: translate(-50%, -50%);
+  font-size: 1.5em;
+}
+
+#loading p::after {
+  content: '...';
+  animation: dots 1.5s infinite;
+  width: 0;
+  display: inline-block;
+}
+
+@keyframes dots {
+  0% {
+    content: '...';
+  }
+  25% {
+    content: ''
+  }
+  50% {
+    content: '.'
+  }
+  75% {
+    content: '..'
+  }
 }

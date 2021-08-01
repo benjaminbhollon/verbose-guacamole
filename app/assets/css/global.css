@@ -33,3 +33,8 @@ article div {
   max-width: 95vw;
   width: 700px;
 }
+
+
+a.fa {
+  text-decoration: none;
+}
