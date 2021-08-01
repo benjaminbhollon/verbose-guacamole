@@ -40,7 +40,6 @@ a {
 
 #fileTree span, #fileTree details summary, #fileTree button {
   padding: 0 0.5em;
-  display: block;
   height: 1.75em;
   line-height: 1.75em;
   text-overflow: ellipsis;
@@ -50,7 +49,16 @@ a {
   user-select: none;
 }
 
-#fileTree span[contenteditable], #fileTree details summary[contenteditable] {
+#fileTree__list span {
+  display: block;
+}
+
+#fileTree__list:not(.searching) .active {
+  background-color: #2D99F7;
+  color: #fff;
+}
+
+#fileTree #fileTree__list span[contenteditable], #fileTree #fileTree__list details summary[contenteditable] {
   text-overflow: inherit;
   background-color: #fff;
   color: #000;
@@ -64,13 +72,36 @@ a {
   margin-left: 1.5em;
 }
 
-#fileTree .active {
-  background-color: #2D99F7;
-  color: #fff;
+#fileTree__actions {
+  height: 2em;
+  padding: 0.5em;
 }
 
-#fileTree__actions {
+#fileTree__actions > div{
+  display: inline-block;
+}
+
+#fileTree__actions .left {
+  float: left;
+}
+
+#fileTree__actions .right {
+  float: right;
+}
+
+#fileTree__search {
+  display: block;
+  width: 100%;
+  font-size: 1em;
   padding: 0.5em;
+}
+
+#fileTree__search.hidden {
+  display: none;
+}
+
+#fileTree__list.searching span:not(.result), #fileTree__list.searching details summary:not(.result) {
+  color: #bbb;
 }
 
 /* Git */

@@ -242,6 +242,7 @@ let api = {};
       }, 3000);
     },
     moveItem: (event, index, main = false) => {
+      console.log(event);
       event.stopPropagation();
       const target = (
         event.path.find(e => e.tagName === 'DETAILS') ?
@@ -478,7 +479,7 @@ let api = {};
         try {
           document.getElementById(folder.id).open = folder.open;
         } catch (err) {
-          setTimeout(restoreOpenFolders, 0);
+          setTimeout(api.restoreOpenFolders, 0);
         }
       }
     },

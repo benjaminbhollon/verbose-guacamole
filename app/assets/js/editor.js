@@ -1,7 +1,7 @@
 // Get path parameters
 const params = location.search.slice(1);
 
-// Initialize other variables
+/* Mouse Move */
 let cursorX = 0;
 let cursorY = 0;
 
@@ -11,7 +11,6 @@ function updatePageXY(event) {
   cursorY = event.clientY;
 }
 document.onmousemove = updatePageXY;
-
 
 function getDraggingIndex() {
   let index = [...hoveringOver.parentNode.children].indexOf(hoveringOver) - 1;;
@@ -35,6 +34,29 @@ function showContextMenu(event) {
   contextMenu.style.left = event.clientX + 'px';
 
   if (!contextMenu.classList.contains('visible')) contextMenu.classList.toggle('visible');
+}
+
+/* Search */
+function toggleSearch() {
+  document.getElementById('fileTree__search').classList.toggle('hidden');
+  if (!document.getElementById('fileTree__search').classList.contains('hidden'))
+    document.getElementById('fileTree__search').focus();
+}
+
+function search(value) {
+  if (value.length) {
+    document.getElementById('fileTree__list').classList.add('searching');
+
+    for (result of document.querySelectorAll('#fileTree__list summary, #fileTree__list span')) {
+      if (result.innerText.toUpperCase().indexOf(value.toUpperCase()) === -1) {
+        result.classList.remove('result');
+      } else {
+        result.classList.add('result');
+      }
+    }
+  } else {
+    document.getElementById('fileTree__list').classList.remove('searching');
+  }
 }
 
 // Hide the context menu on click
