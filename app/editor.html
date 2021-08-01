@@ -33,7 +33,7 @@
         }, 4000);
       </script>
     </div>
-    <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, true)" ondragover="event.preventDefault()">
+    <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="api.moveItem(event, true)" ondragover="event.preventDefault()">
       <div id="fileTree__actions">
         <a href="#" title="Create File or Folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
       </div>
@@ -51,14 +51,14 @@
 
       </div>
       <textarea id="git__commitText" placeholder="Commit message" spellcheck="false"></textarea>
-      <button onclick='commit()' id="git__commitButton">Commit</button>
+      <button onclick='api.commit()' id="git__commitButton">Commit</button>
       <p><a href="./help/commits.html" target="_blank">What are commits?</a></p>
     </section>
     <div id="contextMenu">
-      <span onclick="deleteItem()" id="deleteButton">Delete</span>
-      <span onclick="startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
-      <span onclick="createItem('file')">Create File</span>
-      <span onclick="createItem('folder')">Create Folder</span>
+      <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
+      <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
+      <span onclick="api.createItem('file')">Create File</span>
+      <span onclick="api.createItem('folder')">Create Folder</span>
     </div>
     <script src="./assets/js/editor.js" defer></script>
   </body>
