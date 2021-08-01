@@ -33,7 +33,10 @@
         }, 4000);
       </script>
     </div>
-    <section id="fileTree"  ondrop="moveItem(event, true)" ondragover="event.preventDefault()">
+    <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, true)" ondragover="event.preventDefault()">
+      <div id="fileTree__actions">
+        <a href="#" title="Create File or Folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
+      </div>
       <div id="fileTree__list">
 
       </div>

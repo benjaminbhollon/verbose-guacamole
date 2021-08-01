@@ -428,6 +428,7 @@ function deleteItem() {
 
 // Shows the context menu
 function showContextMenu(event) {
+  event.stopPropagation();
   contextMenu.style.top = event.clientY + 'px';
   contextMenu.style.left = event.clientX + 'px';
 
@@ -461,6 +462,8 @@ function getDraggingIndex() {
 
   if (cursorY > rect.top + (rect.height / 2)) index++;
 
+  if (index < 0) index = 0;
+
   return index;
 }
 
@@ -473,7 +476,7 @@ function moveItem(event, main = false) {
     {children: project.index}
   );
   let order = false;
-  if (event.toElement.tagName === 'SPAN') order = true;
+  if (event.toElement.tagName === 'SPAN' || event.toElement.id === 'fileTree__actions') order = true;
 
   // Check if moving folder into itself
   if (typeof currentlyDragging.children !== 'undefined') {
@@ -498,6 +501,11 @@ function moveItem(event, main = false) {
   }
 
   target.children = target.children.map(c => {
+    if (typeof c === 'string') return JSON.parse(c);
+    else return c;
+  });
+
+  project.index = project.index.map(c => {
     if (typeof c === 'string') return JSON.parse(c);
     else return c;
   });

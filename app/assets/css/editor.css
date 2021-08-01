@@ -68,6 +68,10 @@ a {
   color: #fff;
 }
 
+#fileTree__actions {
+  padding: 0.5em 0.25em;
+}
+
 /* Git */
 
 #git h3, #git p {
@@ -161,7 +165,7 @@ textarea {
 }
 
 #loading p::after {
-  content: '';
+  content: '...';
   animation: dots 1.5s infinite;
   width: 0;
   display: inline-block;
@@ -169,15 +173,15 @@ textarea {
 
 @keyframes dots {
   0% {
-    content: '';
+    content: '...';
   }
   25% {
-    content: '.'
+    content: ''
   }
   50% {
-    content: '..'
+    content: '.'
   }
   75% {
-    content: '...'
+    content: '..'
   }
 }
