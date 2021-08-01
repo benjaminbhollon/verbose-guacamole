@@ -33,7 +33,7 @@
         }, 4000);
       </script>
     </div>
-    <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="api.moveItem(event, true)" ondragover="event.preventDefault()">
+    <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="api.moveItem(event, getDraggingIndex(), true)" ondragover="event.preventDefault()">
       <div id="fileTree__actions">
         <a href="#" title="Create File or Folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
       </div>
@@ -60,6 +60,7 @@
       <span onclick="api.createItem('file')">Create File</span>
       <span onclick="api.createItem('folder')">Create Folder</span>
     </div>
+    <script src="./assets/js/api.js"></script>
     <script src="./assets/js/editor.js" defer></script>
   </body>
 </html>
