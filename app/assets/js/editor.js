@@ -294,6 +294,8 @@ function focusItem(e, event) {
 function openItem(e) {
   const file = flatten(project.index).find(i => idFromPath(i.path) === e.id);
   openFile(file.path, file.name);
+  project.openFile = e.id;
+  saveFile(projectPath, JSON.stringify(project));
   return e;
 }
 
@@ -575,6 +577,10 @@ setTimeout(async () => {
 
     // For compatibility with v0.1.0
     if (typeof project.openFolders === 'undefined') project.openFolders = [];
+
+    // For compatibility with <v0.1.2
+    if (typeof project.openFile === 'undefined') project.openFile = idFromPath(currentFile.path);
+    else currentFile = flatten(project.index).find(f => idFromPath(f.path) === project.openFile);
   }
 
   openFile(currentFile.path, currentFile.name, true);
