@@ -40,11 +40,9 @@ let api = {};
     commit: async () => {
       const message = document.getElementById('git__commitText').value;
       document.getElementById('git__commitButton').innerText = 'Working...';
-      console.info('Committing: ' + message);
 
       try {
         await git.add('./*').commit(message)._chain;
-        console.info('Committed.');
         document.getElementById('git__commitButton').innerText = 'Commit';
         document.getElementById('git__commitText').value = '';
       } catch (err) {
@@ -131,7 +129,6 @@ let api = {};
 
       (item.tagName === 'SPAN' ? item : item.parentNode).remove();
       setTimeout(() => {
-        console.log(project);
         api.saveProject();
       }, 0);
     },
