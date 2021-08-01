@@ -12,7 +12,7 @@ Spellcheck is currently disabled.
 Git is used for version control via [simple-git](https://github.com/steveukx/git-js). As of v0.1.0, commits can be created. More features related to this are planned.
 
 ### Filesystem
-VerbGuac projects are split into files, which can be separated into folders. v0.1.1 supports file and folder creating, renaming, moving, editing, and deleting. Open folders are also maintained between open sessions.
+VerbGuac projects are split into files, which can be separated into folders. >=v0.1.1 supports file and folder creating, renaming, moving, editing, and deleting. Open folders are also maintained between open sessions.
 
 ### The Future
 VerbGuac is still under development. Future features include:
@@ -24,7 +24,7 @@ VerbGuac is still under development. Future features include:
 - Support for custom Javascript plugins and CSS themes, possibly with an official database of endorsed plugins and themes.
 
 ## Screenshots
-![v0.1.0 Editor](./screenshots/v0.1.0-editor.png)
+![v0.2.0 Editor](./screenshots/v0.2.0-editor.png)
 
 ## License
 Verbose Guacamole is released under the [GPL-3.0](./LICENSE) license.
