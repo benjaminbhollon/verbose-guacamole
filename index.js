@@ -10,10 +10,9 @@ let win = null;
 function createWindow () {
   win = new BrowserWindow({
     webPreferences: {
-      nodeIntegration: true,
-      enableRemoteModule: true,
-      contextIsolation: false,
-      spellcheck: false
+      contextIsolation: true,
+      spellcheck: false,
+      preload: path.join(app.getAppPath(), 'preload.js')
     }
   });
   win.hide();

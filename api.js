@@ -69,7 +69,7 @@ let api = {};
 
       if (type === 'file') {
         fs.writeFileSync(
-          path.resolve(path.dirname(projectPath), filePath),
+          path.resolve(path.dirname(this.projectPath), filePath),
           '',
           {
             encoding: 'utf8',
@@ -112,13 +112,13 @@ let api = {};
           if (f.children) {
             deleteInFolder(f.children);
           } else {
-            fs.unlinkSync(path.resolve(path.dirname(projectPath), f.path));
+            fs.unlinkSync(path.resolve(path.dirname(this.projectPath), f.path));
           }
         }
       }
 
       if (item.tagName === 'SPAN') {
-        fs.unlinkSync(path.resolve(path.dirname(projectPath), file.path));
+        fs.unlinkSync(path.resolve(path.dirname(this.projectPath), file.path));
       } else if (item.tagName === 'SUMMARY') {
         deleteInFolder(file.children);
       }
@@ -158,13 +158,13 @@ let api = {};
     idFromPath: (p) => {
       return p.split('/').slice(-1)[0].split('.')[0];
     },
-    init: async () => {
+    init: async (params) => {
       this.params = querystring.parse(params);
       this.projectPath = this.params.f;
 
       // Initialize git in project directory
       git = simpleGit({
-        baseDir: (params.new ? projectPath : path.dirname(projectPath))
+        baseDir: (params.new ? this.projectPath : path.dirname(this.projectPath))
       });
 
       if (this.params.new) {
@@ -172,9 +172,9 @@ let api = {};
         console.info('Initializing git repository...');
         await git.init();
         console.info('Creating project file...');
-        projectPath = path.resolve(projectPath, 'project.vgp');
+        this.projectPath = path.resolve(this.projectPath, 'project.vgp');
         await fs.writeFile(
-          projectPath,
+          this.projectPath,
           JSON.stringify(project),
           {
             encoding: 'utf8',
@@ -189,12 +189,12 @@ let api = {};
         );
         console.info('Creating initial file...');
         try {
-          fs.mkdirSync(path.resolve(path.dirname(projectPath), './content'));
+          fs.mkdirSync(path.resolve(path.dirname(this.projectPath), './content'));
         } catch(err) {
           console.warn(err);
         }
         await fs.writeFile(
-          path.resolve(path.dirname(projectPath), project.index[0].path),
+          path.resolve(path.dirname(this.projectPath), project.index[0].path),
           '',
           {
             encoding: 'utf8',
@@ -214,11 +214,11 @@ let api = {};
         await api.populateGitHistory()
         .then(() => {
           console.info('Done! Changing URL to avoid refresh-slipups.');
-          history.replaceState(null, null, './editor.html?f=' + projectPath);
+          history.replaceState(null, null, './editor.html?f=' + this.projectPath);
         });
       } else {
         api.populateGitHistory();
-        project = JSON.parse(fs.readFileSync(projectPath, {
+        project = JSON.parse(fs.readFileSync(this.projectPath, {
           encoding:'utf8',
           flag:'r'
         }));
@@ -291,7 +291,7 @@ let api = {};
       if (currentFile === api.flatten(project.index).find(i => i.path === p) && !first) return;
       api.resetEditor();
       clearing = true;
-      const value = fs.readFileSync(path.resolve(path.dirname(projectPath), p), {
+      const value = fs.readFileSync(path.resolve(path.dirname(this.projectPath), p), {
         encoding:'utf8',
         flag:'r'
       });
@@ -403,10 +403,10 @@ let api = {};
       if (!v) value = editor.value();
       else value = v;
 
-      fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
+      fs.writeFileSync(path.resolve(path.dirname(this.projectPath), p), value);
     },
     saveProject: () => {
-      fs.writeFileSync(path.resolve(projectPath), JSON.stringify(project));
+      fs.writeFileSync(path.resolve(this.projectPath), JSON.stringify(project));
     },
     setOpenFolders: () => {
       let folders = [...document.querySelectorAll('#fileTree__list details')];
@@ -521,3 +521,5 @@ let api = {};
 
   let placeholderN = Date.now() % api.placeholders.length;
 })()
+
+module.exports = api;
