@@ -63,7 +63,7 @@ let project = {
 
 // Initialize other variables
 let editor = null;
-let currentFile = project.index[0];
+let currentFile = null;
 let clearing = false;
 let currentlyDragging = null;
 let hoveringOver = null;
@@ -571,7 +571,7 @@ setTimeout(async () => {
       encoding:'utf8',
       flag:'r'
     }));
-    currentFile = flatten(project.index)[0];
+    currentFile = flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
 
     // For compatibility with v0.1.0
     if (typeof project.openFolders === 'undefined') project.openFolders = [];
@@ -580,6 +580,10 @@ setTimeout(async () => {
   openFile(currentFile.path, currentFile.name, true);
   populateFiletree();
   updateStats();
+
+  setTimeout(() => {
+    document.getElementById(idFromPath(currentFile.path)).click();
+  }, 3000);
 
   // Hide the context menu on click
   window.addEventListener("click", e => {
