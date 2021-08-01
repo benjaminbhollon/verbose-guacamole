@@ -240,6 +240,7 @@ let api = {
           }
         }
       );
+      currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
       console.info('Creating initial commit...');
       await git.add('./*');
       await git.commit('Create project')

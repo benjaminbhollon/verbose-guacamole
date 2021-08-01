@@ -1,14 +1,19 @@
 "use strict";
 
-//Import modules
-const { app, BrowserWindow } = require('electron');
+// Import modules
+const { app, BrowserWindow, Menu, MenuItem, dialog } = require('electron');
+const url = require('url');
+const path = require('path');
+
+let win = null;
 
 function createWindow () {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
-      contextIsolation: false
+      contextIsolation: false,
+      spellcheck: false
     }
   });
   win.hide();
@@ -30,3 +35,90 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+/* Application menu */
+const appMenu = Menu.buildFromTemplate([
+  {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Open Project',
+        accelerator: 'CommandOrControl+O',
+        click() {
+          dialog.showOpenDialog({
+            "filters": [
+              {
+                "name": "Verbose Guacamole Project",
+                "extensions": ["vgp"]
+              }
+            ]
+          }).then(result => {
+            if (result.canceled !== true) {
+              win.loadURL(url.format({
+                protocol: 'file',
+                slashes: 'true',
+                pathname: path.join(__dirname, `./app/editor.html`)
+              }) + `?f=${encodeURIComponent(result.filePaths[0])}`);
+            }
+          });
+        }
+      },
+      {
+        label: 'New Project',
+        accelerator: 'CommandOrControl+Shift+N',
+        click() {
+          dialog.showMessageBox(win, {
+            message: 'You will need to select an empty folder to place your files in.'
+          }).then(() => {
+            dialog.showOpenDialog(
+              {
+                "properties": [ 'openDirectory' ]
+              }).then(result => {
+              if (result.canceled !== true) {
+                win.loadURL(url.format({
+                  protocol: 'file',
+                  slashes: 'true',
+                  pathname: path.join(__dirname, `./app/editor.html`)
+                }) + `?f=${encodeURIComponent(result.filePaths[0])}&new=true`);
+              }
+            });
+          });
+        }
+      }
+    ]
+  },
+  {
+    label: 'Window',
+    submenu: [
+      {
+        label: 'Reload',
+        role: 'reload'
+      }
+    ]
+  },
+  {
+    label: 'Debug',
+    submenu: [
+      {
+        label: 'Dev Tools',
+        role: 'toggleDevTools'
+      },
+      {
+        label: 'Report Bug',
+        click() {
+          const report = new BrowserWindow({
+            webPreferences: {
+              nodeIntegration: false,
+              enableRemoteModule: false,
+              contextIsolation: true
+            }
+          });
+
+          report.loadURL('https://github.com/benjaminbhollon/verbose-guacamole/issues/new');
+        }
+      }
+    ]
+  }
+])
+
+Menu.setApplicationMenu(appMenu);
