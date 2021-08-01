@@ -84,6 +84,9 @@ const appMenu = Menu.buildFromTemplate([
             });
           });
         }
+      },
+      {
+        type: 'separator'
       }
     ]
   },
@@ -93,6 +96,44 @@ const appMenu = Menu.buildFromTemplate([
       {
         label: 'Reload',
         role: 'reload'
+      }
+    ]
+  },
+  {
+    label: 'Tools',
+    submenu: [
+      {
+        label: 'Preferences',
+        accelerator: 'CommandOrControl+,',
+        click() {
+          dialog.showMessageBox({
+            message: 'Preferences coming soon to a VerbGuac outlet near you!'
+          });
+        }
+      }
+    ]
+  },
+  {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'Git',
+        submenu: [
+          {
+            label: 'What are commits?',
+            click() {
+              const help = new BrowserWindow({
+                webPreferences: {
+                  nodeIntegration: false,
+                  enableRemoteModule: false,
+                  contextIsolation: true
+                }
+              });
+
+              help.loadFile('./app/help/git/commits.html');
+            }
+          }
+        ]
       }
     ]
   },

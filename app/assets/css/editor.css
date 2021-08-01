@@ -39,7 +39,7 @@ a {
 }
 
 #fileTree span, #fileTree details summary, #fileTree button {
-  padding: 0 0.3em;
+  padding: 0 0.5em;
   display: block;
   height: 1.75em;
   line-height: 1.75em;
@@ -69,7 +69,7 @@ a {
 }
 
 #fileTree__actions {
-  padding: 0.5em 0.25em;
+  padding: 0.5em;
 }
 
 /* Git */
