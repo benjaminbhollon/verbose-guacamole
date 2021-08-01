@@ -59,6 +59,47 @@ function search(value) {
   }
 }
 
+/* Moving */
+let currentlyDragging = null;
+function startMoveItem(event) {
+  event.currentTarget.style.backgroundColor = '#fff';
+  event.currentTarget.style.color = '#000';
+  const idToMove = (event.currentTarget.tagName === 'SUMMARY' ? event.currentTarget.parentNode.id : event.currentTarget.id);
+  currentlyDragging = api.flatten(api.getProject().index).find(i => api.idFromPath(i.path) === idToMove).path;
+}
+
+function stopMoveItem(event) {
+  event.currentTarget.style.backgroundColor = '';
+  event.currentTarget.style.color = '';
+}
+
+function moveItem(event, index, main = false) {
+  event.stopPropagation();
+  const target = (
+    event.path.find(e => e.tagName === 'DETAILS') ?
+    api.flatten(api.getProject().index).find(f => api.idFromPath(f.path) === event.path.find(e => e.tagName === 'DETAILS').id).path :
+    false
+  );
+
+  let order = false;
+  if (event.toElement.tagName === 'SPAN' || event.toElement.id === 'fileTree__actions') order = true;
+
+  // Check if moving folder into itself
+  if (typeof currentlyDragging.children !== 'undefined') {
+    if (event.path.find(e => e.id === api.idFromPath(currentlyDragging.path))) return;
+  }
+
+  // Get current parent
+  let parent = api.flatten(api.getProject().index).find(f => {
+    if (typeof f.children === 'undefined') return false;
+    return f.children.find(f => f.path === currentlyDragging);
+  });
+  if (typeof parent === 'undefined') parent = false;
+  else parent = parent.path;
+
+  api.moveItem(parent, target, currentlyDragging, index, order, main);
+}
+
 // Hide the context menu on click
 window.addEventListener("click", e => {
   if (contextMenu.classList.contains('visible')) {

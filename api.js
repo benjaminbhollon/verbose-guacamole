@@ -156,6 +156,9 @@ let api = {};
         document.querySelector('#fileTree .active').classList.toggle('active');
       element.classList.toggle('active');
     },
+    getProject: () => {
+      return {...project}
+    },
     idFromPath: (p) => {
       return p.split('/').slice(-1)[0].split('.')[0];
     },
@@ -241,28 +244,11 @@ let api = {};
         document.getElementById(api.idFromPath(currentFile.path)).click();
       }, 3000);
     },
-    moveItem: (event, index, main = false) => {
-      console.log(event);
-      event.stopPropagation();
-      const target = (
-        event.path.find(e => e.tagName === 'DETAILS') ?
-        api.flatten(project.index).find(f => api.idFromPath(f.path) === event.path.find(e => e.tagName === 'DETAILS').id) :
-        {children: project.index}
-      );
-      let order = false;
-      if (event.toElement.tagName === 'SPAN' || event.toElement.id === 'fileTree__actions') order = true;
-
-      // Check if moving folder into itself
-      if (typeof currentlyDragging.children !== 'undefined') {
-        if (event.path.find(e => e.id === api.idFromPath(currentlyDragging.path))) return;
-      }
-
-      // Get current parent
-      let parent = api.flatten(project.index).find(f => {
-        if (typeof f.children === 'undefined') return false;
-        return f.children.indexOf(currentlyDragging) !== -1;
-      });
-      if (typeof parent === 'undefined') parent = {children: project.index};
+    moveItem: (p, t, c, index, order, main = false) => {
+      const parent = p ? api.flatten(project.index).find(f => f.path === p) : {children: project.index};
+      const target = t ? api.flatten(project.index).find(f => f.path === t) : {children: project.index};
+      //throw new Error(JSON.stringify(target));
+      const currentlyDragging = api.flatten(project.index).find(f => f.path === c);
 
       // Remove from parent
       parent.children.splice(parent.children.indexOf(currentlyDragging), 1);
@@ -321,15 +307,15 @@ let api = {};
             <details
               id=${JSON.stringify(api.idFromPath(item.path))}
               ondragover='event.preventDefault()'
-              ondrop='api.moveItem(event, getDraggingIndex())'
+              ondrop='moveItem(event, getDraggingIndex())'
             >
               <summary
                 draggable="true"
-                ondragstart="api.startMoveItem(event)"
-                ondragend="api.stopMoveItem(event)"
+                ondragstart="console.log(event);startMoveItem(event)"
+                ondragend="stopMoveItem(event)"
                 onclick='event.preventDefault();api.focusItem(this.parentNode.id);'
                 ondblclick='this.parentNode.toggleAttribute("open");api.setOpenFolders();'
-                oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.id);"
+                oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
               >${item.name}</summary>
             </details>`;
             const itemClone = {...item};
@@ -344,8 +330,8 @@ let api = {};
               ondblclick='api.openItem(this.id)'
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.id);"
               draggable="true"
-              ondragstart="api.startMoveItem(event)"
-              ondragend="api.stopMoveItem(event)"
+              ondragstart="startMoveItem(event)"
+              ondragend="stopMoveItem(event)"
               ondragover="setHovering(this)"
               ondrag="updatePageXY(event)"
               id=${JSON.stringify(api.idFromPath(item.path))}
@@ -438,12 +424,6 @@ let api = {};
 
       api.saveProject();
     },
-    startMoveItem: (event) => {
-      event.currentTarget.style.backgroundColor = '#fff';
-      event.currentTarget.style.color = '#000';
-      const idToMove = (event.currentTarget.tagName === 'SUMMARY' ? event.currentTarget.parentNode.id : event.currentTarget.id);
-      currentlyDragging = api.flatten(project.index).find(i => api.idFromPath(i.path) === idToMove);
-    },
     startRename: (e) => {
       const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
       setTimeout(() => {
@@ -468,10 +448,6 @@ let api = {};
         });
         e.addEventListener('blur', api.renameItem.bind(this, e));
       }, 300);
-    },
-    stopMoveItem: (event) => {
-      event.currentTarget.style.backgroundColor = '';
-      event.currentTarget.style.color = '';
     },
     restoreOpenFolders: () => {
       const toOpen = project.openFolders;
