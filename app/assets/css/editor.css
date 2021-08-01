@@ -57,10 +57,11 @@ a {
   outline: 3px solid orange;
   user-select: text;
   cursor: initial;
+  padding: 0;
 }
 
 #fileTree details span, #fileTree details details {
-  padding-left: 1.5em;
+  margin-left: 1.5em;
 }
 
 #fileTree .active {

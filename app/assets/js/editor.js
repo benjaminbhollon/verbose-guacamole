@@ -124,12 +124,12 @@ let api = {
       children: []
     });
 
-    api.saveFile(projectPath, JSON.stringify(project));
+    api.saveProject();
 
     api.populateFiletree();
     setTimeout(() => {
       if (type === 'file') {
-        api.openItem(document.getElementById(api.idFromPath(filePath))).click();
+        api.openItem(api.idFromPath(filePath)).click();
         api.startRename(document.getElementById(api.idFromPath(filePath)));
       } else {
         document.getElementById(api.idFromPath(filePath)).click();
@@ -166,7 +166,7 @@ let api = {
     (item.tagName === 'SPAN' ? item : item.parentNode).remove();
     setTimeout(() => {
       console.log(project);
-      api.saveFile(projectPath, JSON.stringify(project));
+      api.saveProject();
     }, 0);
   },
   flatten: (arr) => {
@@ -178,23 +178,15 @@ let api = {
     }).flat(Infinity);
     return newArr;
   },
-  focusItem: (e, event) => {
-    event.preventDefault();
-    if (e.contentEditable === 'true') return;
-    if (e.classList.contains('active') && event.type !== 'contextmenu') return api.startRename(e);
+  focusItem: (id) => {
+    const element = document.getElementById(id).tagName === 'SPAN' ?
+      document.getElementById(id) :
+      document.getElementById(id).querySelector('summary');
+    if (element.contentEditable === 'true') return;
+    if (element.classList.contains('active') && event.type !== 'contextmenu') return api.startRename(element);
     if (document.querySelector('#fileTree .active'))
       document.querySelector('#fileTree .active').classList.toggle('active');
-    e.classList.toggle('active');
-  },
-  getDraggingIndex: () => {
-    let index = [...hoveringOver.parentNode.children].indexOf(hoveringOver) - 1;;
-    const rect = hoveringOver.getBoundingClientRect();
-
-    if (cursorY > rect.top + (rect.height / 2)) index++;
-
-    if (index < 0) index = 0;
-
-    return index;
+    element.classList.toggle('active');
   },
   idFromPath: (p) => {
     return p.split('/').slice(-1)[0].split('.')[0];
@@ -300,7 +292,7 @@ let api = {
 
     // Add to target
     if (order) {
-      target.children.splice(api.getDraggingIndex(), 0, JSON.stringify(currentlyDragging));
+      target.children.splice(getDraggingIndex(), 0, JSON.stringify(currentlyDragging));
     } else {
       target.children.push(currentlyDragging);
     }
@@ -318,7 +310,7 @@ let api = {
     api.populateFiletree();
 
     // Save
-    api.saveFile(projectPath, JSON.stringify(project));
+    api.saveProject();
   },
   openFile: (p, n, first = false) => {
     if (currentFile === api.flatten(project.index).find(i => i.path === p) && !first) return;
@@ -332,12 +324,12 @@ let api = {
     currentFile = api.flatten(project.index).find(i => i.path === p);
     clearing = false;
   },
-  openItem: (e) => {
-    const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === e.id);
+  openItem: (id) => {
+    const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === id);
     api.openFile(file.path, file.name);
-    project.openFile = e.id;
-    api.saveFile(projectPath, JSON.stringify(project));
-    return e;
+    project.openFile = id;
+    api.saveProject();
+    return document.getElementById(id);
   },
   populateFiletree: () => {
     document.getElementById('fileTree__list').innerHTML = '';
@@ -357,9 +349,9 @@ let api = {
               draggable="true"
               ondragstart="api.startMoveItem(event)"
               ondragend="api.stopMoveItem(event)"
-              onclick='api.focusItem(this, event)'
+              onclick='event.preventDefault();api.focusItem(this.parentNode.id);'
               ondblclick='this.parentNode.toggleAttribute("open");api.setOpenFolders();'
-              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';api.focusItem(this, event);"
+              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.id);"
             >${item.name}</summary>
           </details>`;
           const itemClone = {...item};
@@ -370,13 +362,13 @@ let api = {
         } else {
           html += `
           <span
-            onclick='api.focusItem(this, event)'
-            ondblclick='api.openItem(this)'
-            oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';api.focusItem(this, event);"
+            onclick='event.preventDefault();api.focusItem(this.id)'
+            ondblclick='api.openItem(this.id)'
+            oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.id);"
             draggable="true"
             ondragstart="api.startMoveItem(event)"
             ondragend="api.stopMoveItem(event)"
-            ondragover="api.setHovering(this)"
+            ondragover="setHovering(this)"
             ondrag="updatePageXY(event)"
             id=${JSON.stringify(api.idFromPath(item.path))}
           >
@@ -424,17 +416,21 @@ let api = {
       document.documentElement.requestFullscreen();
     });
     editor.codemirror.on("change", function() {
-    	if (!clearing) api.saveFile(currentFile.path);
+    	if (!clearing) api.saveFile();
       api.updateStats();
     });
     clearing = false;
   },
-  saveFile: (p, v) => {
+  saveFile: (v) => {
+    let p = currentFile.path;
     let value = null;
     if (!v) value = editor.value();
     else value = v;
 
     fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
+  },
+  saveProject: () => {
+    fs.writeFileSync(path.resolve(projectPath), JSON.stringify(project));
   },
   setOpenFolders: () => {
     let folders = [...document.querySelectorAll('#fileTree__list details')];
@@ -448,7 +444,7 @@ let api = {
 
     project.openFolders = [...folders];
 
-    api.saveFile(projectPath, JSON.stringify(project));
+    api.saveProject();
   },
   renameItem: (e) => {
     e.removeAttribute('contenteditable');
@@ -462,11 +458,7 @@ let api = {
 
     file.name = e.innerText;
 
-    api.saveFile(projectPath, JSON.stringify(project));
-  },
-  setHovering: (element) => {
-    hoveringOver = element;
-    api.getDraggingIndex();
+    api.saveProject();
   },
   startMoveItem: (event) => {
     event.currentTarget.style.backgroundColor = '#fff';
@@ -539,6 +531,22 @@ function updatePageXY(event) {
   cursorY = event.clientY;
 }
 document.onmousemove = updatePageXY;
+
+
+function getDraggingIndex() {
+  let index = [...hoveringOver.parentNode.children].indexOf(hoveringOver) - 1;;
+  const rect = hoveringOver.getBoundingClientRect();
+
+  if (cursorY > rect.top + (rect.height / 2)) index++;
+
+  if (index < 0) index = 0;
+
+  return index;
+}
+
+function setHovering(element) {
+  hoveringOver = element;
+}
 
 // Shows the context menu
 function showContextMenu(event) {
