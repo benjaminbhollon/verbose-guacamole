@@ -1,10 +1,13 @@
 {
   "name": "verbose-guacamole",
+  "productName": "Verbose Guacamole",
   "version": "0.2.1",
   "description": "A editor for writers (especially novelists) powered on the markdown and gittechnologies.",
   "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package:all": "electron-packager ./ --all --out ./out/ --icon ./icons/icon",
+    "build:windows": "node ./build/windows.js"
   },
   "repository": {
     "type": "git",
@@ -17,9 +20,12 @@
   },
   "homepage": "https://github.com/benjaminbhollon/verbose-guacamole#readme",
   "devDependencies": {
-    "electron": "^13.1.7"
+    "electron": "^13.1.7",
+    "electron-packager": "^15.3.0",
+    "electron-winstaller": "^5.0.0"
   },
   "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
     "marked": "^2.1.3",
     "simple-git": "^2.42.0",
     "simplemde": "^1.11.2",
