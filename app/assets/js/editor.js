@@ -120,7 +120,9 @@ document.getElementById('editor').addEventListener('contextmenu', (event) => {
 
     const menu = document.getElementById('spellcheckMenu');
 
-    menu.innerHTML = suggestions.join('');
+    menu.innerHTML = suggestions.join('') +
+      (suggestions.length ? '<hr>' : '') +
+      `<span onclick="console.log(api.addToDictionary('${event.path[0].innerText}'));spellChecking.classList.remove('cm-spell-error')">Add to Dictionary</span>`;
     menu.classList.add('visible');
     menu.style.top = event.clientY + 'px';
     menu.style.left = event.clientX + 'px';

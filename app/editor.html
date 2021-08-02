@@ -49,7 +49,7 @@
       </div>
     </section>
     <section id="editor">
-      <textarea id="editorTextarea"></textarea>
+      <textarea id="editorTextarea" autocorrect='on'></textarea>
       <footer id="editor__stats">0 words.</footer>
     </section>
     <section id="git">
@@ -64,6 +64,7 @@
     <div id="contextMenu">
       <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
       <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
+      <hr>
       <span onclick="api.createItem('file')">Create File</span>
       <span onclick="api.createItem('folder')">Create Folder</span>
     </div>
