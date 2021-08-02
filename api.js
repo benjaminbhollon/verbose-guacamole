@@ -9,6 +9,7 @@ let api = {};
   const marked = require('marked');
   const SimpleMDE = require('simplemde');
   const { ipcRenderer } = require('electron');
+  const Typo = require('typo-js');
 
   // Initialize variables
   let git = null;
@@ -35,9 +36,40 @@ let api = {};
   let clearing = false;
   let currentlyDragging = null;
   let hoveringOver = null;
+  let appPath = null;
+  const dictionary = new Typo('en_US');
+
+  let customDictionary = [];
+
+  // Define what separates a word
+	var rx_word = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~ ";
+
+  // From https://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
+  function textNodesUnder(el){
+    var n, a=[], walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false);
+    while(n=walk.nextNode()) a.push(n);
+    return a;
+  }
+
+  // Respond to main process
+  ipcRenderer.on('updateProjectDetails', () => {
+    api.showModal('projectDetails');
+  });
 
 
   api = {
+    addToDictionary: (w) => {
+      customDictionary.push(w);
+      fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), customDictionary.join('\n'));
+
+      return true;
+    },
+    checkWord: (w) => {
+      if (customDictionary.indexOf(w) !== -1) return true;
+      return dictionary.check(w) ?
+        true :
+        api.suggestWords(w);
+    },
     commit: async () => {
       const message = document.getElementById('git__commitText').value;
       document.getElementById('git__commitButton').innerText = 'Working...';
@@ -163,6 +195,27 @@ let api = {};
       return p.split('/').slice(-1)[0].split('.')[0];
     },
     init: async (params) => {
+      // Get app data directory
+      await (new Promise((resolve, reject) => {
+        ipcRenderer.send('appDataDir');
+        ipcRenderer.on('appDataDir', (event, args) => {
+          appPath = args;
+          resolve();
+        });
+      }));
+
+      try {
+        customDictionary = fs.readFileSync(path.resolve(appPath, './customdictionary.txt'), {
+          encoding:'utf8',
+          flag:'r'
+        }).split('\n').filter(l => l.length);
+
+        console.log(customDictionary);
+      } catch (err) {
+        console.error(err);
+        fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), '');
+      }
+
       this.params = querystring.parse(params);
       this.projectPath = this.params.f;
 
@@ -234,6 +287,10 @@ let api = {};
         // For compatibility with <v0.1.2
         if (typeof project.openFile === 'undefined') project.openFile = api.idFromPath(currentFile.path);
         else currentFile = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
+
+        // For compatibility with <v0.2.1
+        if (typeof project.metadata.title !== 'string')
+          project.metadata.title = project.metadata.title.final;
       }
 
       api.openFile(currentFile.path, currentFile.name, true);
@@ -382,8 +439,37 @@ let api = {};
       editor.codemirror.on("change", function() {
       	if (!clearing) api.saveFile();
         api.updateStats();
+
+        /*setTimeout(() => {
+          [...document.querySelectorAll('.cm-spell-error')]
+            .filter(w => customDictionary.indexOf(w.innerText) !== -1)
+            .forEach(e => e.classList.remove('cm-spell-error'))
+        }, 0);*/
       });
       clearing = false;
+
+      editor.codemirror.addOverlay({
+        token: function(stream) {
+          // Based on https://github.com/sparksuite/codemirror-spell-checker/blob/master/src/js/spell-checker.js
+  				var ch = stream.peek();
+  				var word = "";
+
+  				if(rx_word.includes(ch)) {
+  					stream.next();
+  					return null;
+  				}
+
+  				while((ch = stream.peek()) != null && !rx_word.includes(ch)) {
+  					word += ch;
+  					stream.next();
+  				}
+
+  				if(api.checkWord(word) !== true)
+  					return "spell-error"; // CSS class: cm-spell-error
+
+  				return null;
+  			}
+      });
     },
     saveFile: (v) => {
       let p = currentFile.path;
@@ -409,6 +495,26 @@ let api = {};
       project.openFolders = [...folders];
 
       api.saveProject();
+    },
+    showModal: (name) => {
+      switch (name) {
+        case 'projectDetails':
+          const modal = document.getElementById('projectDetails');
+
+          // Restore values
+          document.getElementById('projectDetails__title').value = project.metadata.title;
+          document.getElementById('projectDetails__author').value = project.metadata.author;
+          document.getElementById('projectDetails__synopsis').value = project.metadata.synopsis;
+
+          modal.classList.add('visible');
+          break;
+        default:
+          throw new Error(`There is no modal named '${name}'`);
+          break;
+      }
+    },
+    suggestWords: (w) => {
+      return dictionary.suggest(w);
     },
     renameItem: (e) => {
       e.removeAttribute('contenteditable');
@@ -477,6 +583,12 @@ let api = {};
       //Update stats element
       document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
     },
+    updateDetails: (toUpdate) => {
+      for (var key of Object.keys(toUpdate)) {
+        if (project.metadata[key] !== undefined) project.metadata[key] = toUpdate[key];
+      }
+      api.saveProject();
+    },
     openProject: () => {
       ipcRenderer.send('openProject');
     },
@@ -487,10 +599,7 @@ let api = {};
 
   let project = {
     metadata: {
-      title: {
-        working: 'Untitled Novel',
-        final: 'Untitled Novel'
-      },
+      title: 'Untitled Novel',
       author: '',
       synopsis: ''
     },

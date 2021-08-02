@@ -4,6 +4,7 @@
 const { app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('electron');
 const url = require('url');
 const path = require('path');
+const fs = require('fs');
 
 let win = null;
 
@@ -98,6 +99,17 @@ const appMenu = Menu.buildFromTemplate([
     ]
   },
   {
+    label: 'Edit',
+    submenu: [
+      {
+        label: 'Update Project Details',
+        click() {
+          win.webContents.send('updateProjectDetails');
+        }
+      }
+    ]
+  },
+  {
     label: 'Window',
     submenu: [
       {
@@ -178,4 +190,13 @@ ipcMain.on('openProject', (event) => {
 ipcMain.on('newProject', (event) => {
   newProject();
   console.log('time to create a project!');
+});
+
+// Make appData directory
+try {
+  fs.mkdirSync(path.resolve(app.getPath('appData'), './verbose-guacamole/'));
+} catch (err) {}
+
+ipcMain.on('appDataDir', (event) => {
+  event.reply('appDataDir', path.resolve(app.getPath('appData'), './verbose-guacamole/'));
 });
