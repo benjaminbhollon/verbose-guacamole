@@ -141,6 +141,10 @@ textarea {
   background-color: #ccc5;
 }
 
+#git__commitText {
+  border: 1px solid #858585;
+}
+
 /* Context Menu */
 #contextMenu, #spellcheckMenu {
   border: 1px solid #aaa;
@@ -220,4 +224,89 @@ textarea {
   75% {
     content: '..'
   }
+}
+
+/* Modals */
+.modal {
+  --background-color: #444;
+  --color: #fff;
+  --light-color: #fff8;
+  width: 95vw;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: auto;
+  position: fixed;
+  background-color: var(--background-color);
+  color: var(--color);
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  padding: 1em;
+  border-radius: 0.5em;
+  display: none;
+}
+
+.modal.visible {
+  display: block;
+}
+
+.modal h3 {
+  text-align: center;
+}
+
+.modal a.button {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  padding: 0.5em;
+  border: 2px solid;
+}
+
+
+/* Forms */
+form {
+  text-align: left;
+  display: inline-block;
+  width: 100%;
+  max-width: 700px;
+}
+
+input, textarea, label {
+  color: var(--color);
+  background-color: transparent;
+  margin: 0.5em 0;
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--light-color);
+}
+
+label {
+  font-weight: bold;
+  padding: initial;
+  border: 0;
+}
+
+input, textarea {
+  padding: 1em;
+}
+
+input[type="checkbox"] {
+  display: inline;
+  width: auto;
+}
+
+.success, .failure {
+  background-color:green;
+  padding:1em;
+  color:white;
+}
+
+.failure {
+  background-color:red;
 }

@@ -34,7 +34,7 @@ app.on('activate', () => {
     createWindow();
   }
 });
-  
+
 /* Projects */
 // Create project
 function newProject() {
@@ -95,6 +95,17 @@ const appMenu = Menu.buildFromTemplate([
       },
       {
         type: 'separator'
+      }
+    ]
+  },
+  {
+    label: 'Edit',
+    submenu: [
+      {
+        label: 'Update Project Details',
+        click() {
+          win.webContents.send('updateProjectDetails');
+        }
       }
     ]
   },

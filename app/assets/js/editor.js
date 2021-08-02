@@ -100,6 +100,15 @@ function moveItem(event, index, main = false) {
   api.moveItem(parent, target, currentlyDragging, index, order, main);
 }
 
+/* Modals */
+function updateProjectDetails() {
+  api.updateDetails({
+    title: document.getElementById('projectDetails__title').value,
+    author: document.getElementById('projectDetails__author').value,
+    synopsis: document.getElementById('projectDetails__synopsis').value,
+  });
+}
+
 // Hide the context menu on click
 window.addEventListener("click", e => {
   if (contextMenu.classList.contains('visible')) {

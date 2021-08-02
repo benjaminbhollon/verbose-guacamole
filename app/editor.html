@@ -31,7 +31,7 @@
 
         setTimeout(() => {
           document.getElementById('loading').style.display = 'none';
-        }, 4000);
+        }, 000);
       </script>
     </div>
     <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, getDraggingIndex(), false)" ondragover="event.preventDefault()">
@@ -71,5 +71,23 @@
     <div id="spellcheckMenu">
     </div>
     <script src="./assets/js/editor.js" defer></script>
+    <div id="projectDetails" class="modal">
+      <h3>Update Project Details</h3>
+      <form>
+        <label>
+          Title
+          <input placeholder="The Adventures of Sir Guacamole" type="text" id="projectDetails__title" required>
+        </label>
+          <label>
+            Author
+            <input placeholder="John Doe" type="text" id="projectDetails__author" required>
+          </label>
+        <label>
+          Synopsis
+          <textarea id="projectDetails__synopsis" placeholder="Tell me all about it..."></textarea>
+        </label>
+      </form>
+      <a href="#" onclick="this.parentNode.classList.remove('visible');updateProjectDetails()" class="button">Save and Close</a>
+    </div>
   </body>
 </html>

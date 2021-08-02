@@ -51,6 +51,11 @@ let api = {};
     return a;
   }
 
+  // Respond to main process
+  ipcRenderer.on('updateProjectDetails', () => {
+    api.showModal('projectDetails');
+  });
+
 
   api = {
     addToDictionary: (w) => {
@@ -282,6 +287,10 @@ let api = {};
         // For compatibility with <v0.1.2
         if (typeof project.openFile === 'undefined') project.openFile = api.idFromPath(currentFile.path);
         else currentFile = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
+
+        // For compatibility with <v0.2.1
+        if (typeof project.metadata.title !== 'string')
+          project.metadata.title = project.metadata.title.final;
       }
 
       api.openFile(currentFile.path, currentFile.name, true);
@@ -487,6 +496,23 @@ let api = {};
 
       api.saveProject();
     },
+    showModal: (name) => {
+      switch (name) {
+        case 'projectDetails':
+          const modal = document.getElementById('projectDetails');
+
+          // Restore values
+          document.getElementById('projectDetails__title').value = project.metadata.title;
+          document.getElementById('projectDetails__author').value = project.metadata.author;
+          document.getElementById('projectDetails__synopsis').value = project.metadata.synopsis;
+
+          modal.classList.add('visible');
+          break;
+        default:
+          throw new Error(`There is no modal named '${name}'`);
+          break;
+      }
+    },
     suggestWords: (w) => {
       return dictionary.suggest(w);
     },
@@ -557,6 +583,12 @@ let api = {};
       //Update stats element
       document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
     },
+    updateDetails: (toUpdate) => {
+      for (var key of Object.keys(toUpdate)) {
+        if (project.metadata[key] !== undefined) project.metadata[key] = toUpdate[key];
+      }
+      api.saveProject();
+    },
     openProject: () => {
       ipcRenderer.send('openProject');
     },
@@ -567,10 +599,7 @@ let api = {};
 
   let project = {
     metadata: {
-      title: {
-        working: 'Untitled Novel',
-        final: 'Untitled Novel'
-      },
+      title: 'Untitled Novel',
       author: '',
       synopsis: ''
     },
