@@ -142,7 +142,7 @@ textarea {
 }
 
 /* Context Menu */
-#contextMenu {
+#contextMenu, #spellcheckMenu {
   border: 1px solid #aaa;
   width: 200px;
   position: fixed;
@@ -153,20 +153,20 @@ textarea {
   display: none;
 }
 
-#contextMenu span {
+#contextMenu span, #spellcheckMenu span {
   display: block;
   cursor: default;
   padding: 0.5em;
 }
 
-#contextMenu span:hover {
+#contextMenu span:hover, #spellcheckMenu span:hover {
   display: block;
   cursor: default;
   background-color: #ccc;
   padding: 0.5em;
 }
 
-#contextMenu.visible {
+#contextMenu.visible, #spellcheckMenu.visible {
   display: block;
 }
 

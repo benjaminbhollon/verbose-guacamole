@@ -38,6 +38,13 @@ let api = {};
   let hoveringOver = null;
   const dictionary = new Typo('en_US');
 
+  // From https://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
+  function textNodesUnder(el){
+    var n, a=[], walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false);
+    while(n=walk.nextNode()) a.push(n);
+    return a;
+  }
+
 
   api = {
     checkWord: (w) => {
@@ -373,7 +380,7 @@ let api = {};
       placeholderN = Date.now() % (api.placeholders.length - 1);
       editor = new SimpleMDE({
         element: document.getElementById("editorTextarea"),
-        //spellChecker: true,
+        spellChecker: true,
         hideIcons: ['side-by-side', 'image'],
         status: false,
         placeholder: api.placeholders[placeholderN],

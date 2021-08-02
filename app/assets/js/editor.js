@@ -106,6 +106,25 @@ window.addEventListener("click", e => {
     contextMenu.classList.toggle('visible');
     document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'none';
   };
+  document.getElementById('spellcheckMenu').classList.remove('visible');
+});
+
+// Spellcheck
+let spellChecking = null;
+document.getElementById('editor').addEventListener('contextmenu', (event) => {
+  if (event.path[0].classList.contains('cm-spell-error')) {
+    spellChecking = event.path[0];
+    const suggestions = api
+      .suggestWords(event.path[0].innerText)
+      .map(w => `<span onclick="spellChecking.innerText='${w}';spellChecking.classList.remove('cm-spell-error')">${w}</span>`);
+
+    const menu = document.getElementById('spellcheckMenu');
+
+    menu.innerHTML = suggestions.join('');
+    menu.classList.add('visible');
+    menu.style.top = event.clientY + 'px';
+    menu.style.left = event.clientX + 'px';
+  }
 });
 
 api.init(params);
