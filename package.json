@@ -5,9 +5,9 @@
   "description": "A editor for writers (especially novelists) powered on the markdown and gittechnologies.",
   "main": "index.js",
   "scripts": {
-    "start": "electron .",
-    "package:all": "electron-packager ./ --all --out ./out/ --icon ./icons/icon",
-    "build:windows": "node ./build/windows.js"
+    "start": "electron-forge start",
+    "make": "electron-forge make",
+    "package": "electron-forge package"
   },
   "repository": {
     "type": "git",
@@ -20,9 +20,12 @@
   },
   "homepage": "https://github.com/benjaminbhollon/verbose-guacamole#readme",
   "devDependencies": {
-    "electron": "^13.1.7",
-    "electron-packager": "^15.3.0",
-    "electron-winstaller": "^5.0.0"
+    "@electron-forge/cli": "^6.0.0-beta.59",
+    "@electron-forge/maker-deb": "^6.0.0-beta.59",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.59",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
+    "@electron-forge/maker-zip": "^6.0.0-beta.59",
+    "electron": "^13.1.7"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
@@ -40,5 +43,32 @@
         "perMachine": true
       }
     ]
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "verbose_guacamole"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }
