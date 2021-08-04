@@ -42,14 +42,7 @@ let api = {};
   let customDictionary = [];
 
   // Define what separates a word
-	var rx_word = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~ ";
-
-  // From https://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
-  function textNodesUnder(el){
-    var n, a=[], walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false);
-    while(n=walk.nextNode()) a.push(n);
-    return a;
-  }
+	var rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
 
   // Respond to main process
   ipcRenderer.on('updateProjectDetails', () => {
@@ -464,7 +457,7 @@ let api = {};
   					stream.next();
   				}
 
-  				if(api.checkWord(word) !== true)
+  				if(api.checkWord(word.replace(/‘|’/g, "'")) !== true)
   					return "spell-error"; // CSS class: cm-spell-error
 
   				return null;
