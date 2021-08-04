@@ -193,7 +193,6 @@ ipcMain.on('openProject', (event) => {
 });
 ipcMain.on('newProject', (event) => {
   newProject();
-  console.log('time to create a project!');
 });
 
 // Make appData directory

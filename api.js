@@ -58,7 +58,10 @@ let api = {};
       return true;
     },
     checkWord: (w) => {
-      if (customDictionary.indexOf(w) !== -1) return true;
+      if (
+        customDictionary.indexOf(w) !== -1 ||
+        !isNaN(w)
+      ) return true;
       return dictionary.check(w) ?
         true :
         api.suggestWords(w);
@@ -202,8 +205,6 @@ let api = {};
           encoding:'utf8',
           flag:'r'
         }).split('\n').filter(l => l.length);
-
-        console.log(customDictionary);
       } catch (err) {
         console.error(err);
         fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), '');
@@ -361,7 +362,7 @@ let api = {};
             >
               <summary
                 draggable="true"
-                ondragstart="console.log(event);startMoveItem(event)"
+                ondragstart="startMoveItem(event)"
                 ondragend="stopMoveItem(event)"
                 onclick='event.preventDefault();api.focusItem(this.parentNode.id);'
                 ondblclick='this.parentNode.toggleAttribute("open");api.setOpenFolders();'
