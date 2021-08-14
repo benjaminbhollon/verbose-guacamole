@@ -606,7 +606,7 @@ let api = {};
       // If in the future the current word count should be saved as it updates, create a debounced function for it.
       // Currently, the word count is updated on init(), so the editor doesn't need to update the file.
 
-      stats.words = stats.words + ' words';
+      stats.words = stats.words.toLocaleString() + ' words';
 
       stats.lines = content.split('\n').filter(l => l.length).length + ' lines';
 
@@ -619,8 +619,8 @@ let api = {};
         .flatten(api.getProject().index)
         .filter(i => i.words)
         .reduce((a, b) => a.words + b.words);
-      document.getElementById('novelStats__words').innerText = totalWords +
-        ` (${(totalWords < startingWords ? '+' : '') + (totalWords - startingWords)})`;
+      document.getElementById('novelStats__words').innerText = totalWords.toLocaleString() +
+        ` (${(totalWords < startingWords ? '' : '+') + (totalWords - startingWords).toLocaleString()})`;
     },
     updateDetails: (toUpdate) => {
       for (var key of Object.keys(toUpdate)) {
