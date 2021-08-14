@@ -430,16 +430,11 @@ let api = {};
         document.exitFullscreen();
         document.documentElement.requestFullscreen();
       });
-      editor.codemirror.on("change", function() {
+      editor.codemirror.on("change", api.debounce(async () => {
       	if (!clearing) api.saveFile();
         api.updateStats();
-
-        /*setTimeout(() => {
-          [...document.querySelectorAll('.cm-spell-error')]
-            .filter(w => customDictionary.indexOf(w.innerText) !== -1)
-            .forEach(e => e.classList.remove('cm-spell-error'))
-        }, 0);*/
-      });
+        console.log('hello');
+      }, 500));
       clearing = false;
 
       editor.codemirror.addOverlay({
@@ -472,6 +467,13 @@ let api = {};
       else value = v;
 
       fs.writeFileSync(path.resolve(path.dirname(this.projectPath), p), value);
+    },
+    debounce: (f, delay) => {
+      let interval = null;
+      return () => {
+        if (interval !== null) clearInterval(interval);
+        interval = setTimeout(f, delay);
+      }
     },
     saveProject: () => {
       fs.writeFileSync(path.resolve(this.projectPath), JSON.stringify(project));
