@@ -108,7 +108,8 @@ let api = {};
 
         parent.push({
           name: 'New File',
-          path: filePath
+          path: filePath,
+          words: 0
         });
       }
       else if (type === 'folder') parent.push({
@@ -129,6 +130,13 @@ let api = {};
           document.getElementById(api.idFromPath(filePath)).open = true;
         }
       }, 0);
+    },
+    debounce: (f, delay) => {
+      let interval = null;
+      return () => {
+        if (interval !== null) clearInterval(interval);
+        interval = setTimeout(f, delay);
+      }
     },
     deleteItem: () => {
       let item = document.querySelector('#fileTree .active');
@@ -283,6 +291,14 @@ let api = {};
         }));
         currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
 
+        // Calculate word counts
+        api.flatten(project.index).filter(i => typeof i.children === 'undefined').forEach(file => {
+          file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(this.projectPath), file.path), {
+            encoding:'utf8',
+            flag:'r'
+          }));
+        });
+
         // For compatibility with v0.1.0
         if (typeof project.openFolders === 'undefined') project.openFolders = [];
 
@@ -306,7 +322,6 @@ let api = {};
     moveItem: (p, t, c, index, order, main = false) => {
       const parent = p ? api.flatten(project.index).find(f => f.path === p) : {children: project.index};
       const target = t ? api.flatten(project.index).find(f => f.path === t) : {children: project.index};
-      //throw new Error(JSON.stringify(target));
       const currentlyDragging = api.flatten(project.index).find(f => f.path === c);
 
       // Remove from parent
@@ -334,6 +349,9 @@ let api = {};
       // Save
       api.saveProject();
     },
+    newProject: () => {
+      ipcRenderer.send('newProject');
+    },
     openFile: (p, n, first = false) => {
       if (currentFile === api.flatten(project.index).find(i => i.path === p) && !first) return;
       api.resetEditor();
@@ -352,6 +370,9 @@ let api = {};
       project.openFile = id;
       api.saveProject();
       return document.getElementById(id);
+    },
+    openProject: () => {
+      ipcRenderer.send('openProject');
     },
     placeholders,
     populateFiletree: () => {
@@ -438,10 +459,13 @@ let api = {};
         document.exitFullscreen();
         document.documentElement.requestFullscreen();
       });
-      editor.codemirror.on("change", api.debounce(async () => {
-      	if (!clearing) api.saveFile();
+      const debouncedSaveFile = api.debounce(async () => {
+        if (!clearing) api.saveFile();
+      }, 500);
+      editor.codemirror.on("change", () => {
         api.updateStats();
-      }, 500));
+        debouncedSaveFile();
+      });
       clearing = false;
 
       editor.codemirror.addOverlay({
@@ -474,13 +498,6 @@ let api = {};
       else value = v;
 
       fs.writeFileSync(path.resolve(path.dirname(this.projectPath), p), value);
-    },
-    debounce: (f, delay) => {
-      let interval = null;
-      return () => {
-        if (interval !== null) clearInterval(interval);
-        interval = setTimeout(f, delay);
-      }
     },
     saveProject: () => {
       fs.writeFileSync(path.resolve(this.projectPath), JSON.stringify(project));
@@ -519,20 +536,6 @@ let api = {};
     suggestWords: (w) => {
       return dictionary.suggest(w);
     },
-    renameItem: (e) => {
-      e.removeAttribute('contenteditable');
-
-      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
-
-      if (e.innerText.length <= 0 || e.innerText === file.name) {
-        e.innerText = file.name;
-        return;
-      }
-
-      file.name = e.innerText;
-
-      api.saveProject();
-    },
     startRename: (e) => {
       const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
       setTimeout(() => {
@@ -558,6 +561,20 @@ let api = {};
         e.addEventListener('blur', api.renameItem.bind(this, e));
       }, 300);
     },
+    renameItem: (e) => {
+      e.removeAttribute('contenteditable');
+
+      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
+
+      if (e.innerText.length <= 0 || e.innerText === file.name) {
+        e.innerText = file.name;
+        return;
+      }
+
+      file.name = e.innerText;
+
+      api.saveProject();
+    },
     restoreOpenFolders: () => {
       const toOpen = project.openFolders;
       for (const folder of toOpen) {
@@ -575,11 +592,14 @@ let api = {};
       content = div.innerText;
       let stats = {};
 
-      stats.words = content
-        .split(/ |\n/)
-        .filter(w => w.length);
+      stats.words = api.wordCount(content);
 
-      stats.words = stats.words.length + ' words'
+      api.flatten(project.index).find(i => i.path === currentFile.path).words = stats.words;
+
+      // If in the future the current word count should be saved as it updates, create a debounced function for it.
+      // Currently, the word count is updated on init(), so the editor doesn't need to update the file.
+
+      stats.words = stats.words + ' words';
 
       stats.lines = content.split('\n').filter(l => l.length).length + ' lines';
 
@@ -592,11 +612,23 @@ let api = {};
       }
       api.saveProject();
     },
-    openProject: () => {
-      ipcRenderer.send('openProject');
-    },
-    newProject: () => {
-      ipcRenderer.send('newProject');
+    wordCount: (t) => {
+      let value = t;
+
+      if (!t) {
+        let content = marked(editor.value());
+        var div = document.createElement("div");
+        div.innerHTML = content;
+        value = div.innerText;
+      }
+
+      return value
+        .split(/ |\n/)
+        .filter(w => w.length)
+        .length;
+
+      // For future use, you can get the total word count with:
+      // api.flatten(api.getProject().index).filter(i => i.words).reduce((a, b) => a.words + b.words)
     },
   };
 
@@ -609,7 +641,8 @@ let api = {};
     index: [
       {
         name: 'New File',
-        path: './content/' + api.fileName()
+        path: './content/' + api.fileName(),
+        words: 0
       }
     ],
     openFolders: []
