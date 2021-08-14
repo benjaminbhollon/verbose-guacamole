@@ -37,6 +37,7 @@ let api = {};
   let currentlyDragging = null;
   let hoveringOver = null;
   let appPath = null;
+  let startingWords = 0;
   const dictionary = new Typo('en_US');
 
   let customDictionary = [];
@@ -298,6 +299,10 @@ let api = {};
             flag:'r'
           }));
         });
+        startingWords = api
+          .flatten(api.getProject().index)
+          .filter(i => i.words)
+          .reduce((a, b) => a.words + b.words);
 
         // For compatibility with v0.1.0
         if (typeof project.openFolders === 'undefined') project.openFolders = [];
@@ -363,6 +368,8 @@ let api = {};
       editor.value(value);
       currentFile = api.flatten(project.index).find(i => i.path === p);
       clearing = false;
+
+      api.updateStats();
     },
     openItem: (id) => {
       const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === id);
@@ -603,8 +610,17 @@ let api = {};
 
       stats.lines = content.split('\n').filter(l => l.length).length + ' lines';
 
-      //Update stats element
+      // Update stats element
       document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
+
+      // Update novel stats
+      document.getElementById('novelStats__open').innerText = currentFile.name;
+      const totalWords = api
+        .flatten(api.getProject().index)
+        .filter(i => i.words)
+        .reduce((a, b) => a.words + b.words);
+      document.getElementById('novelStats__words').innerText = totalWords +
+        ` (${(totalWords < startingWords ? '+' : '') + (totalWords - startingWords)})`;
     },
     updateDetails: (toUpdate) => {
       for (var key of Object.keys(toUpdate)) {
@@ -626,9 +642,6 @@ let api = {};
         .split(/ |\n/)
         .filter(w => w.length)
         .length;
-
-      // For future use, you can get the total word count with:
-      // api.flatten(api.getProject().index).filter(i => i.words).reduce((a, b) => a.words + b.words)
     },
   };
 

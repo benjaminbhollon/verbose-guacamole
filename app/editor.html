@@ -61,6 +61,14 @@
       <button onclick='api.commit()' id="git__commitButton">Commit</button>
       <p><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
     </section>
+    <section id="novelStats">
+      <div class="left">
+        <span>Editing <span id="novelStats__open">New File</span></span>
+      </div>
+      <div class="right">
+        <span>Total words: <span id="novelStats__words">0</span></span>
+      </div>
+    </section>
     <div id="contextMenu">
       <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
       <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
