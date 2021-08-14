@@ -161,6 +161,14 @@ let api = {};
         api.saveProject();
       }, 0);
     },
+    editorValue: (v) => {
+      if (v) {
+        return editor.value(v);
+      } else {
+        if (editor === null) return;
+        return editor.value();
+      }
+    },
     fileName: () => {
       const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
       return (new Array(16)).fill().map(l=>chars[Math.floor(Math.random() * chars.length)]).join('') + '.md';
@@ -433,7 +441,6 @@ let api = {};
       editor.codemirror.on("change", api.debounce(async () => {
       	if (!clearing) api.saveFile();
         api.updateStats();
-        console.log('hello');
       }, 500));
       clearing = false;
 

@@ -125,7 +125,7 @@ document.getElementById('editor').addEventListener('contextmenu', (event) => {
     spellChecking = event.path[0];
     const suggestions = api
       .suggestWords(event.path[0].innerText)
-      .map(w => `<span onclick="spellChecking.innerText='${w}';spellChecking.classList.remove('cm-spell-error')">${w}</span>`);
+      .map(w => `<span onclick="spellCheckReplace('${w}');">${w}</span>`);
 
     const menu = document.getElementById('spellcheckMenu');
 
@@ -137,6 +137,27 @@ document.getElementById('editor').addEventListener('contextmenu', (event) => {
     menu.style.left = event.clientX + 'px';
   }
 });
+
+function spellCheckReplace(word) {
+  spellChecking.innerText = word;
+
+  api.editorValue(document.querySelector('.CodeMirror-scroll').innerText);
+
+  return;
+  const errors = [...document.querySelectorAll('.cm-spell-error')]
+    .filter(e => e.innerText === spellChecking.innerText);
+
+  const index = errors.indexOf(spellChecking);
+
+  const value = api.editorValue();
+
+  let newValue = value.split(spellChecking.innerText);
+  newValue.splice(index, 2, newValue[index] + word + newValue[index + 1]);
+
+  api.editorValue(newValue.join(spellChecking.innerText));
+
+  //spellChecking.classList.remove('cm-spell-error');
+}
 
 api.init(params);
 
