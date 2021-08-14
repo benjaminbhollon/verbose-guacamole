@@ -591,7 +591,7 @@ let api = {};
           const secondsLeft = Math.floor(timeLeft / (1000));
 
           document.getElementById('wordSprint__timeLeft').innerText = `${hoursLeft}:${minutesLeft < 10 ? 0 : ''}${minutesLeft}:${secondsLeft < 10 ? 0 : ''}${secondsLeft}`;
-        }, 300),
+        }, Math.max(Math.floor((end - start) / (360 * 10)), 5)),
       };
 
       document.getElementById('wordSprint').classList.add('pie');

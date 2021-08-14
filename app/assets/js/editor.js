@@ -2,7 +2,7 @@
 const params = location.search.slice(1);
 
 // Quick version of document.querySelector
-const q = id => document.getElementById(id);
+const q = s => document.querySelector(s);
 
 /* Mouse Move */
 let cursorX = 0;
@@ -161,8 +161,8 @@ function startSprint() {
 }
 
 function resetSprint() {
-  q('#timeLeft') = '';
-  q('#status') = '';
+  q('#wordSprint__timeLeft').innerText = '';
+  q('#wordSprint__status').innerText = '';
   q('#wordSprint__modal').dataset.mode = 'set';
 }
 
