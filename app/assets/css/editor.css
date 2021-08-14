@@ -1,3 +1,7 @@
+body, body * {
+  box-sizing: border-box;
+}
+
 body {
   text-align: left;
   display: grid;
@@ -8,41 +12,16 @@ a {
   color: inherit;
 }
 
+.--hidden {
+  display: none!important;
+}
+
 #editor, #fileTree, #git {
   height: 100%;
   max-height: calc(100vh - 1.5em);
   overflow: auto;
   border-right: 1px solid #ccc;
-}
-
-/* Novel Stats */
-#novelStats {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 1.5em;
-  line-height: 1.5em;
-  background-color: #440;
-  color: var(--background-color);
-}
-
-#novelStats .left, #novelStats .right {
-  width: 50%;
-  font-size: 0.8em;
-}
-
-#novelStats .left {
-  float: left;
-  border-right: 1px solid;
-}
-
-#novelStats .right {
-  float: right;
-  text-align: right;
-}
-
-#novelStats > div > span {
-  margin: 0 0.4em;
+  z-index: 2;
 }
 
 /* Editor */
@@ -332,6 +311,18 @@ input[type="checkbox"] {
   width: auto;
 }
 
+input[type="submit"] {
+  cursor: pointer;
+}
+
+input[type="submit"]:hover, input[type="submit"]:focus {
+  background-color: #8883;
+}
+
+input[type="submit"]:active {
+  background-color: #8886;
+}
+
 .success, .failure {
   background-color:green;
   padding:1em;
@@ -340,4 +331,158 @@ input[type="checkbox"] {
 
 .failure {
   background-color:red;
+}
+
+/* Novel Stats */
+#novelStats {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 1.5em;
+  line-height: 1.5em;
+  background-color: #440;
+  color: var(--background-color);
+  z-index: 1;
+}
+
+#novelStats .left, #novelStats .right {
+  width: 50%;
+  font-size: 0.8em;
+}
+
+#novelStats .left {
+  float: left;
+  border-right: 1px solid;
+}
+
+#novelStats .right {
+  float: right;
+  text-align: right;
+}
+
+#novelStats > div > span {
+  margin: 0 0.4em;
+  display: inline;
+}
+
+/* Word Sprint */
+#wordSprint {
+  display: inline;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  height: 1.875em;
+  width: 1.875em;
+  padding: 0.31em 1em;
+}
+
+#wordSprint:hover {
+  background-color: #fff3;
+}
+
+#wordSprint i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  line-height: 1.875em;
+  transform: translate(-50%, -50%);
+}
+
+#wordSprint__checkbox:checked ~ #wordSprint {
+  background-color: var(--background-color);
+  color: #440;
+}
+
+#wordSprint__checkbox:checked ~ #wordSprint.pie {
+  --empty: #440;
+  --fill: var(--background-color);
+}
+
+#wordSprint__modal {
+  display: none;
+  position: fixed;
+  bottom: 1.5em;
+  right: 0em;
+  height: auto;
+  max-width: 400px;
+  width: 95%;
+  background-color: #fff;
+  padding: 1em;
+  z-index: 5;
+  text-align: center;
+  border-top: 3px solid var(--background-color);
+  border-left: 3px solid var(--background-color);
+}
+
+#wordSprint__modal.visible {
+  display: block;
+}
+
+#wordSprint__modal h2 {
+  margin: 0.25em;
+  color: #000;
+  max-width: 12em;
+  width: 95vw;
+  font-size: 1.3em;
+}
+
+#wordSprint__modal .running,
+#wordSprint__modal .running,
+#wordSprint__modal .finished,
+#wordSprint__modal .set,
+#wordSprint__modal[data-mode='finished'] #wordSprint__timeLeft {
+  display: none;
+}
+
+#wordSprint__modal[data-mode='running'] .running,
+#wordSprint__modal[data-mode='finished'] .running,
+#wordSprint__modal[data-mode='finished'] .finished,
+#wordSprint__modal[data-mode='set'] .set {
+  display: block;
+}
+
+/* Wordsprint pie chart */
+#wordSprint.pie {
+  --fill: #440;
+  --empty: var(--background-color);
+  --percent: 0;
+  padding: 0.5em 1em;
+  position: relative
+}
+
+#wordSprint .pie {
+  background-color: var(--empty);
+  background-image: linear-gradient(to right, transparent 50%, var(--fill) 0);
+  display: inline-block;
+  --size: 1.25em;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+}
+
+#wordSprint .pie::before {
+  content: '';
+  display: block;
+  margin-left: 50%;
+  height: 100%;
+  border-radius: 0 100% 100% 0 / 50%;
+  background-color: inherit;
+  transform-origin: left;
+  transform: rotate(calc(min(var(--percent), 0.5) * 360deg));
+}
+
+#wordSprint.more .pie::before {
+  content: '';
+  display: block;
+  margin-left: 50%;
+  height: 100%;
+  border-radius: 0 100% 100% 0 / 50%;
+  background-color: var(--fill);
+  transform-origin: left;
+  transform: rotate(calc(max(var(--percent), 0.5) * 360deg - 180deg));
 }

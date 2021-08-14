@@ -1,6 +1,9 @@
 // Get path parameters
 const params = location.search.slice(1);
 
+// Quick version of document.querySelector
+const q = id => document.getElementById(id);
+
 /* Mouse Move */
 let cursorX = 0;
 let cursorY = 0;
@@ -146,6 +149,25 @@ function spellCheckReplace(word) {
   return;
 }
 
-api.init(params);
+/* Word Sprints */
+function startSprint() {
+  let time = document.querySelector('#wordSprint__timeInput').value.split(':').reverse();
+
+  const seconds = (time[0] ? time[0]/1 : 0);
+  const minutes = (time[1] ? time[1]/1 : 0);
+  const hours = (time[2] ? time[2]/1 : 0);
+
+  api.startSprint(seconds, minutes, hours);
+}
+
+function resetSprint() {
+  q('#timeLeft') = '';
+  q('#status') = '';
+  q('#wordSprint__modal').dataset.mode = 'set';
+}
+
+api.init(params).then(() => {
+  //api.startSprint(10, 0, 0);
+});
 
 console.log('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.');

@@ -2,11 +2,12 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://kit.fontawesome.com">
     <title>Verbose Guacamole</title>
     <link rel="stylesheet" href="./assets/css/simplemde.css">
     <link rel="stylesheet" href="./assets/css/global.css">
     <link rel="stylesheet" href="./assets/css/editor.css">
+    <script src="https://kit.fontawesome.com/e41c010fae.js" crossorigin="anonymous"></script>
   </head>
   <body>
     <div id="loading">
@@ -66,19 +67,28 @@
         <span>Editing <span id="novelStats__open">New File</span></span>
       </div>
       <div class="right">
+        <input id="wordSprint__checkbox" type="checkbox" class="--hidden">
+        <label onclick="document.getElementById('wordSprint__modal').classList.toggle('visible')" title="Word Sprints" for="wordSprint__checkbox" id="wordSprint">
+          <i class="fas fa-running"></i>
+        </label>
         <span>Total words: <span id="novelStats__words">0</span></span>
       </div>
     </section>
-    <div id="contextMenu">
-      <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
-      <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
-      <hr>
-      <span onclick="api.createItem('file')">Create File</span>
-      <span onclick="api.createItem('folder')">Create Folder</span>
+    <div id="wordSprint__modal" data-mode="set">
+      <h2>Word Sprints</h2>
+      <div class="set">
+        <p>Start a new word sprint:</p>
+        <input type="text" id="wordSprint__timeInput" placeholder="Try 15:00 (15 mins) or 1:00:00 (1 hr)">
+        <input type="submit" value="Start Sprint" onclick="startSprint()">
+      </div>
+      <div class="running">
+        <p id="wordSprint__timeLeft"></p>
+        <p id="wordSprint__status"></p>
+      </div>
+      <div class="finished">
+        <input type="submit" value="Sprint Again" onclick="resetSprint()">
+      </div>
     </div>
-    <div id="spellcheckMenu">
-    </div>
-    <script src="./assets/js/editor.js" defer></script>
     <div id="projectDetails" class="modal">
       <h3>Update Project Details</h3>
       <form>
@@ -97,5 +107,15 @@
       </form>
       <a href="#" onclick="this.parentNode.classList.remove('visible');updateProjectDetails()" class="button">Save and Close</a>
     </div>
+    <div id="contextMenu">
+      <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
+      <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
+      <hr>
+      <span onclick="api.createItem('file')">Create File</span>
+      <span onclick="api.createItem('folder')">Create Folder</span>
+    </div>
+    <div id="spellcheckMenu">
+    </div>
+    <script src="./assets/js/editor.js" defer></script>
   </body>
 </html>

@@ -38,6 +38,7 @@ let api = {};
   let hoveringOver = null;
   let appPath = null;
   let startingWords = 0;
+  let sprint = {}
   const dictionary = new Typo('en_US');
 
   let customDictionary = [];
@@ -460,7 +461,8 @@ let api = {};
       	insertTexts: {
       		image: ["![](https://", ")"],
       	},
-        autofocus: true
+        autofocus: true,
+        autoDownloadFontAwesome: false
       });
       editor.toolbarElements.fullscreen.addEventListener('click', () => {
         document.exitFullscreen();
@@ -539,6 +541,70 @@ let api = {};
           throw new Error(`There is no modal named '${name}'`);
           break;
       }
+    },
+    startSprint: (s = 0, m = 0, h = 0) => {
+      if (!(s+m+h)) return; // smh = shaking my head (because you set a timer for 0)
+
+      const start = Date.now();
+      const end = start + (1000 * s) + (1000 * 60 * m) + (1000 * 60 * 60 * h);
+
+      document.querySelector('#wordSprint').click();
+
+      sprint = {
+        start,
+        end,
+        startingWords: api
+          .flatten(api.getProject().index)
+          .filter(i => i.words)
+          .reduce((a, b) => a.words + b.words),
+        total: end - start,
+        interval: setInterval(() => {
+          const currentWords = api
+            .flatten(api.getProject().index)
+            .filter(i => i.words)
+            .reduce((a, b) => a.words + b.words);
+          const written = currentWords - startingWords;
+          document.querySelector('#wordSprint__status').innerText =
+            `You've written ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Keep up the good work!`;
+
+          let timeLeft = sprint.end - Date.now();
+
+          let percent = 1 - (timeLeft / sprint.total);
+
+          document.querySelector('#wordSprint').style = `--percent:${percent};`;
+          if (percent > 0.5) document.querySelector('#wordSprint').classList.add('more');
+
+          if (timeLeft < 0) {
+            document.querySelector('#wordSprint__status').innerText =
+              `You wrote ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Impressive!`;
+
+            document.querySelector('#wordSprint').style = '';
+            document.querySelector('#wordSprint').classList.remove('more');
+            document.querySelector('#wordSprint__modal').dataset.mode = 'finished';
+            document.querySelector('#wordSprint').innerHTML = '<i class="fas fa-running"></i>';
+
+            if (!document.querySelector('#wordSprint__checkbox').checked)
+              document.querySelector('#wordSprint').click();
+
+            clearInterval(sprint.interval);
+            sprint = {};
+            return;
+          }
+
+          const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+          timeLeft -= hoursLeft * 1000 * 60 * 60;
+          const minutesLeft = Math.floor(timeLeft / (1000 * 60));
+          timeLeft -= minutesLeft * 1000 * 60;
+          const secondsLeft = Math.floor(timeLeft / (1000));
+
+          document.getElementById('wordSprint__timeLeft').innerText = `${hoursLeft}:${minutesLeft < 10 ? 0 : ''}${minutesLeft}:${secondsLeft < 10 ? 0 : ''}${secondsLeft}`;
+        }, 300),
+      };
+
+      document.getElementById('wordSprint').classList.add('pie');
+
+      document.getElementById('wordSprint').innerHTML = '<span class="pie"><span class="segment"></span></span>'
+      document.getElementById('wordSprint__modal').dataset.mode = 'running';
     },
     suggestWords: (w) => {
       return dictionary.suggest(w);
