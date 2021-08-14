@@ -369,6 +369,15 @@ let api = {};
       currentFile = api.flatten(project.index).find(i => i.path === p);
       clearing = false;
 
+      // Calculate word counts
+      api.flatten(project.index).filter(i => typeof i.children === 'undefined').forEach(file => {
+        file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
+          encoding:'utf8',
+          flag:'r'
+        }));
+      });
+      startingWords = api.wordCountTotal();
+
       api.updateStats();
     },
     openItem: (id) => {
@@ -706,7 +715,9 @@ let api = {};
         .filter(i => i.words);
       if (!totalWords.length) totalWords = 0;
       else if (totalWords.length === 1) totalWords = totalWords[0].words;
-      else totalWords = totalWords.reduce((a, b) => a.words + b.words);
+      else {
+        totalWords = totalWords.reduce((a, b) => (a.words ? a.words : a) + b.words);
+      }
 
       return totalWords;
     },
