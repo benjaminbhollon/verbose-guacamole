@@ -39,6 +39,8 @@ let api = {};
   let appPath = null;
   let startingWords = 0;
   let sprint = {}
+  let params = {};
+  let projectPath = {};
   const dictionary = new Typo('en_US');
 
   let customDictionary = [];
@@ -100,7 +102,7 @@ let api = {};
 
       if (type === 'file') {
         fs.writeFileSync(
-          path.resolve(path.dirname(this.projectPath), filePath),
+          path.resolve(path.dirname(projectPath), filePath),
           '',
           {
             encoding: 'utf8',
@@ -151,13 +153,13 @@ let api = {};
           if (f.children) {
             deleteInFolder(f.children);
           } else {
-            fs.unlinkSync(path.resolve(path.dirname(this.projectPath), f.path));
+            fs.unlinkSync(path.resolve(path.dirname(projectPath), f.path));
           }
         }
       }
 
       if (item.tagName === 'SPAN') {
-        fs.unlinkSync(path.resolve(path.dirname(this.projectPath), file.path));
+        fs.unlinkSync(path.resolve(path.dirname(projectPath), file.path));
       } else if (item.tagName === 'SUMMARY') {
         deleteInFolder(file.children);
       }
@@ -228,22 +230,22 @@ let api = {};
         fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), '');
       }
 
-      this.params = querystring.parse(params);
-      this.projectPath = this.params.f;
+      params = querystring.parse(params);
+      projectPath = params.f;
 
       // Initialize git in project directory
       git = simpleGit({
-        baseDir: (params.new ? this.projectPath : path.dirname(this.projectPath))
+        baseDir: (params.new ? projectPath : path.dirname(projectPath))
       });
 
-      if (this.params.new) {
+      if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
         console.info('Initializing git repository...');
         await git.init();
         console.info('Creating project file...');
-        this.projectPath = path.resolve(this.projectPath, 'project.vgp');
+        projectPath = path.resolve(projectPath, 'project.vgp');
         await fs.writeFile(
-          this.projectPath,
+          projectPath,
           JSON.stringify(project),
           {
             encoding: 'utf8',
@@ -258,12 +260,12 @@ let api = {};
         );
         console.info('Creating initial file...');
         try {
-          fs.mkdirSync(path.resolve(path.dirname(this.projectPath), './content'));
+          fs.mkdirSync(path.resolve(path.dirname(projectPath), './content'));
         } catch(err) {
           console.warn(err);
         }
         await fs.writeFile(
-          path.resolve(path.dirname(this.projectPath), project.index[0].path),
+          path.resolve(path.dirname(projectPath), project.index[0].path),
           '',
           {
             encoding: 'utf8',
@@ -283,11 +285,12 @@ let api = {};
         await api.populateGitHistory()
         .then(() => {
           console.info('Done! Changing URL to avoid refresh-slipups.');
-          history.replaceState(null, null, './editor.html?f=' + this.projectPath);
+          history.replaceState(null, null, './editor.html?f=' + projectPath);
+          startingWords = 0;
         });
       } else {
         api.populateGitHistory();
-        project = JSON.parse(fs.readFileSync(this.projectPath, {
+        project = JSON.parse(fs.readFileSync(projectPath, {
           encoding:'utf8',
           flag:'r'
         }));
@@ -295,15 +298,12 @@ let api = {};
 
         // Calculate word counts
         api.flatten(project.index).filter(i => typeof i.children === 'undefined').forEach(file => {
-          file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(this.projectPath), file.path), {
+          file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
             encoding:'utf8',
             flag:'r'
           }));
         });
-        startingWords = api
-          .flatten(api.getProject().index)
-          .filter(i => i.words)
-          .reduce((a, b) => a.words + b.words);
+        startingWords = api.wordCountTotal();
 
         // For compatibility with v0.1.0
         if (typeof project.openFolders === 'undefined') project.openFolders = [];
@@ -319,7 +319,6 @@ let api = {};
 
       api.openFile(currentFile.path, currentFile.name, true);
       api.populateFiletree();
-      api.updateStats();
 
       setTimeout(() => {
         document.getElementById(api.idFromPath(currentFile.path)).click();
@@ -362,7 +361,7 @@ let api = {};
       if (currentFile === api.flatten(project.index).find(i => i.path === p) && !first) return;
       api.resetEditor();
       clearing = true;
-      const value = fs.readFileSync(path.resolve(path.dirname(this.projectPath), p), {
+      const value = fs.readFileSync(path.resolve(path.dirname(projectPath), p), {
         encoding:'utf8',
         flag:'r'
       });
@@ -506,10 +505,10 @@ let api = {};
       if (!v) value = editor.value();
       else value = v;
 
-      fs.writeFileSync(path.resolve(path.dirname(this.projectPath), p), value);
+      fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
     },
     saveProject: () => {
-      fs.writeFileSync(path.resolve(this.projectPath), JSON.stringify(project));
+      fs.writeFileSync(path.resolve(projectPath), JSON.stringify(project));
     },
     setOpenFolders: () => {
       let folders = [...document.querySelectorAll('#fileTree__list details')];
@@ -553,16 +552,10 @@ let api = {};
       sprint = {
         start,
         end,
-        startingWords: api
-          .flatten(api.getProject().index)
-          .filter(i => i.words)
-          .reduce((a, b) => a.words + b.words),
+        startingWords: api.wordCountTotal(),
         total: end - start,
         interval: setInterval(() => {
-          const currentWords = api
-            .flatten(api.getProject().index)
-            .filter(i => i.words)
-            .reduce((a, b) => a.words + b.words);
+          const currentWords = api.wordCountTotal();
           const written = currentWords - startingWords;
           document.querySelector('#wordSprint__status').innerText =
             `You've written ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Keep up the good work!`;
@@ -681,10 +674,8 @@ let api = {};
 
       // Update novel stats
       document.getElementById('novelStats__open').innerText = currentFile.name;
-      const totalWords = api
-        .flatten(api.getProject().index)
-        .filter(i => i.words)
-        .reduce((a, b) => a.words + b.words);
+      let totalWords = api.wordCountTotal();
+
       document.getElementById('novelStats__words').innerText = totalWords.toLocaleString() +
         ` (${(totalWords < startingWords ? '' : '+') + (totalWords - startingWords).toLocaleString()})`;
     },
@@ -697,7 +688,7 @@ let api = {};
     wordCount: (t) => {
       let value = t;
 
-      if (!t) {
+      if (typeof t === 'undefined') {
         let content = marked(editor.value());
         var div = document.createElement("div");
         div.innerHTML = content;
@@ -708,6 +699,16 @@ let api = {};
         .split(/ |\n/)
         .filter(w => w.length)
         .length;
+    },
+    wordCountTotal: () => {
+      let totalWords = api
+        .flatten(api.getProject().index)
+        .filter(i => i.words);
+      if (!totalWords.length) totalWords = 0;
+      else if (totalWords.length === 1) totalWords = totalWords[0].words;
+      else totalWords = totalWords.reduce((a, b) => a.words + b.words);
+
+      return totalWords;
     },
   };
 
