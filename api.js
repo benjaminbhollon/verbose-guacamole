@@ -273,7 +273,6 @@ let api = {};
       git = simpleGit({
         baseDir: (params.new ? projectPath : path.dirname(projectPath))
       });
-      await git.stash([]);
 
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
