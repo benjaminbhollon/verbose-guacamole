@@ -68,8 +68,8 @@ let api = {};
 
       return true;
     },
-    checkout: async (what, editable) => {
-      if (!(what === 'master' && editable)) {
+    checkout: async (what, editable, stash = true) => {
+      if (!(what === 'master' && editable) && stash) {
         await git.stash();
       }
       const result = await git.checkout(what);
@@ -77,12 +77,13 @@ let api = {};
       if (!editable) {
         readOnly = true;
         q('body').dataset.readonly = 'true';
+        q('#git__revertButton').dataset.hash = what;
       } else {
         readOnly = false;
         q('body').dataset.readonly = 'false';
       }
 
-      if (what === 'master' && editable) {
+      if (what === 'master' && editable && stash) {
         await git.stash(['apply']);
       }
 
@@ -105,8 +106,8 @@ let api = {};
         true :
         api.suggestWords(w);
     },
-    commit: async () => {
-      const message = document.getElementById('git__commitText').value;
+    commit: async (m) => {
+      const message = m ? m : document.getElementById('git__commitText').value;
       document.getElementById('git__commitButton').innerText = 'Working...';
 
       try {
@@ -117,7 +118,7 @@ let api = {};
         window.alert(err);
       }
 
-      setTimeout(populateGitHistory, 250);
+      setTimeout(api.populateGitHistory, 250);
     },
     createItem: (type) => {
       let folder = q('#fileTree .active');
@@ -272,6 +273,7 @@ let api = {};
       git = simpleGit({
         baseDir: (params.new ? projectPath : path.dirname(projectPath))
       });
+      await git.stash([]);
 
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
@@ -560,6 +562,7 @@ let api = {};
       if (readOnly && !editor.isPreviewActive()) setTimeout(() => {togglePreview(editor)}, 0);
     },
     saveFile: (v) => {
+      if (readOnly) return false;
       let p = currentFile.path;
       let value = null;
       if (!v) value = editor.value();
@@ -568,6 +571,7 @@ let api = {};
       fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
     },
     saveProject: () => {
+      if (readOnly) return false;
       fs.writeFileSync(path.resolve(projectPath), JSON.stringify(project));
     },
     setOpenFolders: () => {
@@ -713,6 +717,21 @@ let api = {};
           setTimeout(api.restoreOpenFolders, 0);
         }
       }
+    },
+    revertTo: async (where, name) => {
+      const range = `${where}..HEAD`;
+
+      await git.reset({'--hard': null});
+
+      await api.checkout('master', false, false);
+
+      await git.stash();
+
+      await git.revert(range, {'--no-commit': null});
+
+      await api.commit(`Revert to "${q(`#commit-${where}`).innerText}"`);
+
+      await api.checkout('master', true, false);
     },
     updateStats: () => {
       let content = marked(editor.value());
