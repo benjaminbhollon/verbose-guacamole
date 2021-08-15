@@ -484,7 +484,11 @@ let api = {};
     },
     populateGitHistory: async () => {
       try {
-        let html = (await git.log()).all.map(h => `<span id='commit-${h.hash}'>${h.message}</span>`).reverse().join('');
+        const log = await git.log();
+        let html = log.all.map(h => {
+          const preview = `<span class="preview" onclick="api.checkout('${h.hash}', false)"><i class="fa fa-eye"></i>`;
+          return `<span id='commit-${h.hash}'>${h.message}${h.hash !== log.all[0].hash ? preview : ''}</span></span>`;
+        }).reverse().join('');
         document.getElementById('git__commits').innerHTML = html;
       } catch (err) {
         console.error(err);
