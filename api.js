@@ -377,7 +377,6 @@ let api = {};
           flag:'r'
         }));
       });
-      startingWords = api.wordCountTotal();
 
       api.updateStats();
     },
