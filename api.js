@@ -41,7 +41,7 @@ let api = {};
   let sprint = {}
   let params = {};
   let projectPath = {};
-  let readOnly = true;
+  let readOnly = false;
   let togglePreview = null;
   const endSprintSound = new Audio(path.resolve('./app/assets/audio/sprintDone.mp3'));
   const dictionary = new Typo('en_US');
@@ -67,6 +67,34 @@ let api = {};
       fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), customDictionary.join('\n'));
 
       return true;
+    },
+    checkout: async (what, editable) => {
+      if (!(what === 'master' && editable)) {
+        await git.stash();
+      }
+      const result = await git.checkout(what);
+
+      if (!editable) {
+        readOnly = true;
+        q('body').dataset.readonly = 'true';
+      } else {
+        readOnly = false;
+        q('body').dataset.readonly = 'false';
+      }
+
+      if (what === 'master' && editable) {
+        await git.stash(['apply']);
+      }
+
+      project = JSON.parse(fs.readFileSync(projectPath, {
+        encoding:'utf8',
+        flag:'r'
+      }));
+      currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
+
+      api.openFile(currentFile.path, currentFile.name, true);
+      api.populateFiletree();
+      api.populateGitHistory();
     },
     checkWord: (w) => {
       if (
@@ -296,6 +324,10 @@ let api = {};
           startingWords = 0;
         });
       } else {
+        if ((await git.branch()).current !== 'master') {
+          await git.checkout('master', true);
+        }
+
         api.populateGitHistory();
         project = JSON.parse(fs.readFileSync(projectPath, {
           encoding:'utf8',
