@@ -118,7 +118,7 @@ let api = {};
         window.alert(err);
       }
 
-      setTimeout(api.populateGitHistory, 250);
+      setTimeout(api.populateGitHistory, 500);
     },
     createItem: (type) => {
       let folder = q('#fileTree .active');
@@ -491,7 +491,9 @@ let api = {};
           const preview = `<span class="preview" onclick="api.checkout('${h.hash}', false)"><i class="fa fa-eye"></i>`;
           return `<span id='commit-${h.hash}'>${h.message}${h.hash !== log.all[0].hash ? preview : ''}</span></span>`;
         }).reverse().join('');
-        document.getElementById('git__commits').innerHTML = html;
+        q('#git__commits').innerHTML = html;
+
+        q('#git').scrollTop = q('#git').scrollHeight;
       } catch (err) {
         console.error(err);
       }

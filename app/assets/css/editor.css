@@ -126,7 +126,19 @@ a {
 }
 
 #git h3 {
-  margin-bottom: 0.25em;
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding: 0.5em 0 0.25em 0;
+  background-color: var(--background-color);
+  z-index: 2;
+  border-bottom: 1px solid #777;
+}
+
+#git .sticky-bottom {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: 0.2em;
 }
 
 #git__commitText, #git input[type="submit"] {

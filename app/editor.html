@@ -58,16 +58,18 @@
       <div id="git__commits">
 
       </div>
-      <div id="git__addCommit">
-        <textarea id="git__commitText" placeholder="Commit message" spellcheck="false"></textarea>
-          <input type="submit" onclick='api.commit()' id="git__commitButton" value="Commit">
+      <div class="sticky-bottom">
+        <div id="git__addCommit">
+          <textarea id="git__commitText" placeholder="Commit message" spellcheck="false"></textarea>
+            <input type="submit" onclick='api.commit()' id="git__commitButton" value="Commit">
+        </div>
+        <div class="git__checkedOut">
+          <p>You are viewing a past commit.</p>
+          <input type="submit" value="Return to Current Version" onclick="api.checkout('master', true)">
+          <input onclick="api.revertTo(this.dataset.hash)" id="git__revertButton" type="submit" value="Revert to this Commit">
+        </div>
+        <p class="help"><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
       </div>
-      <div class="git__checkedOut">
-        <p>You are viewing a past commit.</p>
-        <input type="submit" value="Return to Current Version" onclick="api.checkout('master', true)">
-        <input onclick="api.revertTo(this.dataset.hash)" id="git__revertButton" type="submit" value="Revert to this Commit">
-      </div>
-      <p class="help"><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
     </section>
     <section id="novelStats">
       <div class="left">
