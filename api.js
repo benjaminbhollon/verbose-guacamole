@@ -41,6 +41,8 @@ let api = {};
   let sprint = {}
   let params = {};
   let projectPath = {};
+  let readOnly = true;
+  let togglePreview = null;
   const endSprintSound = new Audio(path.resolve('./app/assets/audio/sprintDone.mp3'));
   const dictionary = new Typo('en_US');
 
@@ -329,6 +331,7 @@ let api = {};
         document.getElementById(api.idFromPath(currentFile.path)).click();
       }, 3000);
     },
+    isReadOnly: () => readOnly,
     moveItem: (p, t, c, index, order, main = false) => {
       const parent = p ? api.flatten(project.index).find(f => f.path === p) : {children: project.index};
       const target = t ? api.flatten(project.index).find(f => f.path === t) : {children: project.index};
@@ -464,7 +467,7 @@ let api = {};
         editor.toTextArea();
       }
       placeholderN = Date.now() % (api.placeholders.length - 1);
-      editor = new SimpleMDE({
+      let options = {
         element: document.getElementById("editorTextarea"),
         spellChecker: false,
         hideIcons: ['side-by-side', 'image'],
@@ -475,7 +478,12 @@ let api = {};
       	},
         autofocus: true,
         autoDownloadFontAwesome: false
-      });
+      };
+      if (readOnly) {
+        options.hideIcons = ['side-by-side', 'image', 'preview'];
+        options.placeholder = '';
+      }
+      editor = new SimpleMDE(options);
       editor.toolbarElements.fullscreen.addEventListener('click', () => {
         document.exitFullscreen();
         document.documentElement.requestFullscreen();
@@ -511,6 +519,9 @@ let api = {};
   				return null;
   			}
       });
+
+      togglePreview = editor.toolbar.find(t => t.name === 'preview').action;
+      if (readOnly && !editor.isPreviewActive()) setTimeout(() => {togglePreview(editor)}, 0);
     },
     saveFile: (v) => {
       let p = currentFile.path;
@@ -540,6 +551,7 @@ let api = {};
     showModal: (name) => {
       switch (name) {
         case 'projectDetails':
+          if (readOnly) return alert('You cannot update novel details while in Read Only mode.');
           const modal = document.getElementById('projectDetails');
 
           // Restore values
@@ -695,6 +707,7 @@ let api = {};
         ` (${(totalWords < startingWords ? '' : '+') + (totalWords - startingWords).toLocaleString()})`;
     },
     updateDetails: (toUpdate) => {
+      if (readOnly) return alert('You cannot update novel details while in Read Only mode.');
       for (var key of Object.keys(toUpdate)) {
         if (project.metadata[key] !== undefined) project.metadata[key] = toUpdate[key];
       }
