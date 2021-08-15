@@ -40,10 +40,10 @@ function showContextMenu(event) {
 }
 
 /* Search */
-function toggleSearch() {
+function toggleSearch(eventType, event) {
+  if (eventType === 'blur' && event.relatedTarget && event.relatedTarget.classList.contains('fa-search')) return;
   document.getElementById('fileTree__search').classList.toggle('hidden');
-  if (!document.getElementById('fileTree__search').classList.contains('hidden'))
-    document.getElementById('fileTree__search').focus();
+  document.getElementById('fileTree__search').focus();
 }
 
 function search(value) {
@@ -166,8 +166,6 @@ function resetSprint() {
   q('#wordSprint__modal').dataset.mode = 'set';
 }
 
-api.init(params).then(() => {
-  //api.startSprint(10, 0, 0);
-});
+api.init(params);
 
 console.log('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.');

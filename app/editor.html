@@ -41,10 +41,10 @@
           <a href="#" title="Create file or folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
         </div>
         <div class="right">
-          <a href="#" title="Search files and folders" class="fa fa-search" onclick="toggleSearch()"></a>
+          <a href="#" title="Search files and folders" class="fa fa-search" onclick="toggleSearch('click', event)"></a>
         </div>
       </div>
-      <input onblur="if (!this.value.length) toggleSearch()" oninput="search(this.value)" id="fileTree__search" class="hidden" placeholder="Search files...">
+      <input onblur="toggleSearch('blur', event)" oninput="search(this.value)" id="fileTree__search" class="hidden" placeholder="Search files...">
       <div id="fileTree__list">
 
       </div>
