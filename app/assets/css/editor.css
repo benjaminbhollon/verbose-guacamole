@@ -129,26 +129,30 @@ a {
   margin-bottom: 0.25em;
 }
 
-#git__commitText, #git button {
-  display: block;
-  padding: 0.5em;
-  min-width: 100%;
-  max-width: 100%;
+#git__commitText, #git input[type="submit"] {
+  background-color: #fff;
+  border-width: 1px;
+  margin: 0;
 }
 
 textarea {
   text-align: left;
 }
 
-#git p:last-of-type {
+#git .help {
   color: gray;
   margin-top: 0.5em;
 }
 
-#git__commits span {
-  padding: 0.25em 0.4em;
+#git__commits {
+  border-bottom: 1px solid #777;
+}
+
+#git__commits > span {
+  padding: 0.25em 0.5em;
   display: block;
   border-top: 1px solid #777;
+  position: relative;
 }
 
 #git__commits span:hover {
@@ -157,6 +161,42 @@ textarea {
 
 #git__commitText {
   border: 1px solid #858585;
+}
+
+[data-readonly='true'] #git__addCommit, [data-readonly='true'] #git__commits, .git__checkedOut {
+  display: none;
+}
+
+[data-readonly='true'] .git__checkedOut {
+  display: block;
+}
+
+[data-readonly='true'] #git__commits > span .preview {
+  display: none!important;
+}
+
+#git__commits > span .preview {
+  display: none;
+  text-align: center;
+  right: 0.5em;
+  top: 50%;
+  position: absolute;
+  transform: translateY(-50%);
+  z-index: 2;
+  font-size: 0.75em;
+  padding: 0.25em;
+  border-radius: 0.5em;
+  border: 1px solid #000;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+#git__commits > span .preview:hover {
+  background-color: #ddd;
+}
+
+#git__commits > span:hover .preview {
+  display: inline;
 }
 
 /* Context Menu */
