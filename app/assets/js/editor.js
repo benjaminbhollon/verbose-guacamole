@@ -1,6 +1,10 @@
 // Get path parameters
 const params = location.search.slice(1);
 
+// Quick versions of document.querySelector and document.querySelectorAll
+const q = s => document.querySelector(s);
+const qA = s => document.querySelectorAll(s);
+
 /* Mouse Move */
 let cursorX = 0;
 let cursorY = 0;
@@ -37,17 +41,17 @@ function showContextMenu(event) {
 }
 
 /* Search */
-function toggleSearch() {
+function toggleSearch(eventType, event) {
+  if (eventType === 'blur' && event.relatedTarget && event.relatedTarget.classList.contains('fa-search')) return;
   document.getElementById('fileTree__search').classList.toggle('hidden');
-  if (!document.getElementById('fileTree__search').classList.contains('hidden'))
-    document.getElementById('fileTree__search').focus();
+  document.getElementById('fileTree__search').focus();
 }
 
 function search(value) {
   if (value.length) {
     document.getElementById('fileTree__list').classList.add('searching');
 
-    for (result of document.querySelectorAll('#fileTree__list summary, #fileTree__list span')) {
+    for (result of qA('#fileTree__list summary, #fileTree__list span')) {
       if (result.innerText.toUpperCase().indexOf(value.toUpperCase()) === -1) {
         result.classList.remove('result');
       } else {
@@ -125,18 +129,48 @@ document.getElementById('editor').addEventListener('contextmenu', (event) => {
     spellChecking = event.path[0];
     const suggestions = api
       .suggestWords(event.path[0].innerText)
-      .map(w => `<span onclick="spellChecking.innerText='${w}';spellChecking.classList.remove('cm-spell-error')">${w}</span>`);
+      .map(w => `<span title='Correct to "${w}"' onclick="spellCheckReplace('${w}');">${w}</span>`);
 
     const menu = document.getElementById('spellcheckMenu');
 
     menu.innerHTML = suggestions.join('') +
       (suggestions.length ? '<hr>' : '') +
-      `<span onclick="console.log(api.addToDictionary('${event.path[0].innerText}'));spellChecking.classList.remove('cm-spell-error')">Add to Dictionary</span>`;
+      `<span onclick="api.addToDictionary('${event.path[0].innerText}');spellChecking.classList.remove('cm-spell-error')">Add to Dictionary</span>`;
     menu.classList.add('visible');
     menu.style.top = event.clientY + 'px';
     menu.style.left = event.clientX + 'px';
   }
 });
+
+function spellCheckReplace(word) {
+  spellChecking.innerText = word;
+
+  // IMPORTANT NOTE: the first item in the .replace() is a zero-width space. Yes, there _is_ something there.
+  // The zero-width space needs to be removed since it is added by CodeMirror, not the user.
+  const lines = [...qA('.CodeMirror-line')]
+    .map(l => l.innerText.replace('​', ''));
+
+  api.editorValue(lines.join('\n'));
+
+  return;
+}
+
+/* Word Sprints */
+function startSprint() {
+  let time = q('#wordSprint__timeInput').value.split(':').reverse();
+
+  const seconds = (time[0] ? time[0]/1 : 0);
+  const minutes = (time[1] ? time[1]/1 : 0);
+  const hours = (time[2] ? time[2]/1 : 0);
+
+  api.startSprint(seconds, minutes, hours);
+}
+
+function resetSprint() {
+  q('#wordSprint__timeLeft').innerText = '';
+  q('#wordSprint__status').innerText = '';
+  q('#wordSprint__modal').dataset.mode = 'set';
+}
 
 api.init(params);
 

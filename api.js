@@ -37,19 +37,23 @@ let api = {};
   let currentlyDragging = null;
   let hoveringOver = null;
   let appPath = null;
+  let startingWords = 0;
+  let sprint = {}
+  let params = {};
+  let projectPath = {};
+  let readOnly = false;
+  let togglePreview = null;
+  const endSprintSound = new Audio(path.resolve('./app/assets/audio/sprintDone.mp3'));
   const dictionary = new Typo('en_US');
 
   let customDictionary = [];
 
-  // Define what separates a word
-	var rx_word = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~ ";
+  // Quick versions of document.querySelector and document.querySelectorAll
+  const q = s => document.querySelector(s);
+  const qA = s => document.querySelectorAll(s);
 
-  // From https://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
-  function textNodesUnder(el){
-    var n, a=[], walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false);
-    while(n=walk.nextNode()) a.push(n);
-    return a;
-  }
+  // Define what separates a word
+	const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
 
   // Respond to main process
   ipcRenderer.on('updateProjectDetails', () => {
@@ -64,8 +68,39 @@ let api = {};
 
       return true;
     },
+    checkout: async (what, editable) => {
+      if (!(what === 'master' && editable)) {
+        await git.stash();
+      }
+      const result = await git.checkout(what);
+
+      if (!editable) {
+        readOnly = true;
+        q('body').dataset.readonly = 'true';
+      } else {
+        readOnly = false;
+        q('body').dataset.readonly = 'false';
+      }
+
+      if (what === 'master' && editable) {
+        await git.stash(['apply']);
+      }
+
+      project = JSON.parse(fs.readFileSync(projectPath, {
+        encoding:'utf8',
+        flag:'r'
+      }));
+      currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
+
+      api.openFile(currentFile.path, currentFile.name, true);
+      api.populateFiletree();
+      api.populateGitHistory();
+    },
     checkWord: (w) => {
-      if (customDictionary.indexOf(w) !== -1) return true;
+      if (
+        customDictionary.indexOf(w) !== -1 ||
+        !isNaN(w)
+      ) return true;
       return dictionary.check(w) ?
         true :
         api.suggestWords(w);
@@ -85,7 +120,7 @@ let api = {};
       setTimeout(populateGitHistory, 250);
     },
     createItem: (type) => {
-      let folder = document.querySelector('#fileTree .active');
+      let folder = q('#fileTree .active');
       let parent = null;
       if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
         folder = folder.parentNode;
@@ -102,7 +137,7 @@ let api = {};
 
       if (type === 'file') {
         fs.writeFileSync(
-          path.resolve(path.dirname(this.projectPath), filePath),
+          path.resolve(path.dirname(projectPath), filePath),
           '',
           {
             encoding: 'utf8',
@@ -112,7 +147,8 @@ let api = {};
 
         parent.push({
           name: 'New File',
-          path: filePath
+          path: filePath,
+          words: 0
         });
       }
       else if (type === 'folder') parent.push({
@@ -134,8 +170,15 @@ let api = {};
         }
       }, 0);
     },
+    debounce: (f, delay) => {
+      let interval = null;
+      return () => {
+        if (interval !== null) clearInterval(interval);
+        interval = setTimeout(f, delay);
+      }
+    },
     deleteItem: () => {
-      let item = document.querySelector('#fileTree .active');
+      let item = q('#fileTree .active');
       if (!confirm(`Do you really want to delete this ${item.tagName === 'SPAN' ? 'file' : 'folder and everything in it'}? There is no undo.`)) return;
 
       let file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (item.tagName === 'SPAN' ? item.id : item.parentNode.id));
@@ -145,13 +188,13 @@ let api = {};
           if (f.children) {
             deleteInFolder(f.children);
           } else {
-            fs.unlinkSync(path.resolve(path.dirname(this.projectPath), f.path));
+            fs.unlinkSync(path.resolve(path.dirname(projectPath), f.path));
           }
         }
       }
 
       if (item.tagName === 'SPAN') {
-        fs.unlinkSync(path.resolve(path.dirname(this.projectPath), file.path));
+        fs.unlinkSync(path.resolve(path.dirname(projectPath), file.path));
       } else if (item.tagName === 'SUMMARY') {
         deleteInFolder(file.children);
       }
@@ -164,6 +207,14 @@ let api = {};
       setTimeout(() => {
         api.saveProject();
       }, 0);
+    },
+    editorValue: (v) => {
+      if (v) {
+        return editor.value(v);
+      } else {
+        if (editor === null) return;
+        return editor.value();
+      }
     },
     fileName: () => {
       const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
@@ -184,8 +235,8 @@ let api = {};
         document.getElementById(id).querySelector('summary');
       if (element.contentEditable === 'true') return;
       if (element.classList.contains('active') && event.type !== 'contextmenu') return api.startRename(element);
-      if (document.querySelector('#fileTree .active'))
-        document.querySelector('#fileTree .active').classList.toggle('active');
+      if (q('#fileTree .active'))
+        q('#fileTree .active').classList.toggle('active');
       element.classList.toggle('active');
     },
     getProject: () => {
@@ -209,29 +260,27 @@ let api = {};
           encoding:'utf8',
           flag:'r'
         }).split('\n').filter(l => l.length);
-
-        console.log(customDictionary);
       } catch (err) {
         console.error(err);
         fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), '');
       }
 
-      this.params = querystring.parse(params);
-      this.projectPath = this.params.f;
+      params = querystring.parse(params);
+      projectPath = params.f;
 
       // Initialize git in project directory
       git = simpleGit({
-        baseDir: (params.new ? this.projectPath : path.dirname(this.projectPath))
+        baseDir: (params.new ? projectPath : path.dirname(projectPath))
       });
 
-      if (this.params.new) {
+      if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
         console.info('Initializing git repository...');
         await git.init();
         console.info('Creating project file...');
-        this.projectPath = path.resolve(this.projectPath, 'project.vgp');
+        projectPath = path.resolve(projectPath, 'project.vgp');
         await fs.writeFile(
-          this.projectPath,
+          projectPath,
           JSON.stringify(project),
           {
             encoding: 'utf8',
@@ -246,12 +295,12 @@ let api = {};
         );
         console.info('Creating initial file...');
         try {
-          fs.mkdirSync(path.resolve(path.dirname(this.projectPath), './content'));
+          fs.mkdirSync(path.resolve(path.dirname(projectPath), './content'));
         } catch(err) {
           console.warn(err);
         }
         await fs.writeFile(
-          path.resolve(path.dirname(this.projectPath), project.index[0].path),
+          path.resolve(path.dirname(projectPath), project.index[0].path),
           '',
           {
             encoding: 'utf8',
@@ -271,15 +320,29 @@ let api = {};
         await api.populateGitHistory()
         .then(() => {
           console.info('Done! Changing URL to avoid refresh-slipups.');
-          history.replaceState(null, null, './editor.html?f=' + this.projectPath);
+          history.replaceState(null, null, './editor.html?f=' + projectPath);
+          startingWords = 0;
         });
       } else {
+        if ((await git.branch()).current !== 'master') {
+          await api.checkout('master', true);
+        }
+
         api.populateGitHistory();
-        project = JSON.parse(fs.readFileSync(this.projectPath, {
+        project = JSON.parse(fs.readFileSync(projectPath, {
           encoding:'utf8',
           flag:'r'
         }));
         currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
+
+        // Calculate word counts
+        api.flatten(project.index).filter(i => typeof i.children === 'undefined').forEach(file => {
+          file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
+            encoding:'utf8',
+            flag:'r'
+          }));
+        });
+        startingWords = api.wordCountTotal();
 
         // For compatibility with v0.1.0
         if (typeof project.openFolders === 'undefined') project.openFolders = [];
@@ -295,16 +358,15 @@ let api = {};
 
       api.openFile(currentFile.path, currentFile.name, true);
       api.populateFiletree();
-      api.updateStats();
 
       setTimeout(() => {
         document.getElementById(api.idFromPath(currentFile.path)).click();
       }, 3000);
     },
+    isReadOnly: () => readOnly,
     moveItem: (p, t, c, index, order, main = false) => {
       const parent = p ? api.flatten(project.index).find(f => f.path === p) : {children: project.index};
       const target = t ? api.flatten(project.index).find(f => f.path === t) : {children: project.index};
-      //throw new Error(JSON.stringify(target));
       const currentlyDragging = api.flatten(project.index).find(f => f.path === c);
 
       // Remove from parent
@@ -332,17 +394,30 @@ let api = {};
       // Save
       api.saveProject();
     },
+    newProject: () => {
+      ipcRenderer.send('newProject');
+    },
     openFile: (p, n, first = false) => {
       if (currentFile === api.flatten(project.index).find(i => i.path === p) && !first) return;
       api.resetEditor();
       clearing = true;
-      const value = fs.readFileSync(path.resolve(path.dirname(this.projectPath), p), {
+      const value = fs.readFileSync(path.resolve(path.dirname(projectPath), p), {
         encoding:'utf8',
         flag:'r'
       });
       editor.value(value);
       currentFile = api.flatten(project.index).find(i => i.path === p);
       clearing = false;
+
+      // Calculate word counts
+      api.flatten(project.index).filter(i => typeof i.children === 'undefined').forEach(file => {
+        file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
+          encoding:'utf8',
+          flag:'r'
+        }));
+      });
+
+      api.updateStats();
     },
     openItem: (id) => {
       const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === id);
@@ -350,6 +425,9 @@ let api = {};
       project.openFile = id;
       api.saveProject();
       return document.getElementById(id);
+    },
+    openProject: () => {
+      ipcRenderer.send('openProject');
     },
     placeholders,
     populateFiletree: () => {
@@ -368,7 +446,7 @@ let api = {};
             >
               <summary
                 draggable="true"
-                ondragstart="console.log(event);startMoveItem(event)"
+                ondragstart="startMoveItem(event)"
                 ondragend="stopMoveItem(event)"
                 onclick='event.preventDefault();api.focusItem(this.parentNode.id);'
                 ondblclick='this.parentNode.toggleAttribute("open");api.setOpenFolders();'
@@ -421,7 +499,7 @@ let api = {};
         editor.toTextArea();
       }
       placeholderN = Date.now() % (api.placeholders.length - 1);
-      editor = new SimpleMDE({
+      let options = {
         element: document.getElementById("editorTextarea"),
         spellChecker: false,
         hideIcons: ['side-by-side', 'image'],
@@ -430,21 +508,24 @@ let api = {};
       	insertTexts: {
       		image: ["![](https://", ")"],
       	},
-        autofocus: true
-      });
+        autofocus: true,
+        autoDownloadFontAwesome: false
+      };
+      if (readOnly) {
+        options.hideIcons = ['side-by-side', 'image', 'preview'];
+        options.placeholder = '';
+      }
+      editor = new SimpleMDE(options);
       editor.toolbarElements.fullscreen.addEventListener('click', () => {
         document.exitFullscreen();
         document.documentElement.requestFullscreen();
       });
-      editor.codemirror.on("change", function() {
-      	if (!clearing) api.saveFile();
+      const debouncedSaveFile = api.debounce(async () => {
+        if (!clearing) api.saveFile();
+      }, 500);
+      editor.codemirror.on("change", () => {
         api.updateStats();
-
-        /*setTimeout(() => {
-          [...document.querySelectorAll('.cm-spell-error')]
-            .filter(w => customDictionary.indexOf(w.innerText) !== -1)
-            .forEach(e => e.classList.remove('cm-spell-error'))
-        }, 0);*/
+        debouncedSaveFile();
       });
       clearing = false;
 
@@ -464,12 +545,15 @@ let api = {};
   					stream.next();
   				}
 
-  				if(api.checkWord(word) !== true)
+  				if(api.checkWord(word.replace(/‘|’/g, "'")) !== true)
   					return "spell-error"; // CSS class: cm-spell-error
 
   				return null;
   			}
       });
+
+      togglePreview = editor.toolbar.find(t => t.name === 'preview').action;
+      if (readOnly && !editor.isPreviewActive()) setTimeout(() => {togglePreview(editor)}, 0);
     },
     saveFile: (v) => {
       let p = currentFile.path;
@@ -477,13 +561,13 @@ let api = {};
       if (!v) value = editor.value();
       else value = v;
 
-      fs.writeFileSync(path.resolve(path.dirname(this.projectPath), p), value);
+      fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
     },
     saveProject: () => {
-      fs.writeFileSync(path.resolve(this.projectPath), JSON.stringify(project));
+      fs.writeFileSync(path.resolve(projectPath), JSON.stringify(project));
     },
     setOpenFolders: () => {
-      let folders = [...document.querySelectorAll('#fileTree__list details')];
+      let folders = [...qA('#fileTree__list details')];
 
       folders = folders.map(folder => {
         return {
@@ -499,6 +583,7 @@ let api = {};
     showModal: (name) => {
       switch (name) {
         case 'projectDetails':
+          if (readOnly) return alert('You cannot update novel details while in Read Only mode.');
           const modal = document.getElementById('projectDetails');
 
           // Restore values
@@ -513,22 +598,68 @@ let api = {};
           break;
       }
     },
+    startSprint: (s = 0, m = 0, h = 0) => {
+      if (!(s+m+h)) return; // smh = shaking my head (because you set a timer for 0)
+
+      const start = Date.now();
+      const end = start + (1000 * s) + (1000 * 60 * m) + (1000 * 60 * 60 * h);
+
+      q('#wordSprint').click();
+
+      sprint = {
+        start,
+        end,
+        startingWords: api.wordCountTotal(),
+        total: end - start,
+        interval: setInterval(() => {
+          const currentWords = api.wordCountTotal();
+          const written = currentWords - startingWords;
+          q('#wordSprint__status').innerText =
+            `You've written ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Keep up the good work!`;
+
+          let timeLeft = sprint.end - Date.now();
+
+          let percent = 1 - (timeLeft / sprint.total);
+
+          q('#wordSprint').style = `--percent:${percent};`;
+          if (percent > 0.5) q('#wordSprint').classList.add('more');
+
+          if (timeLeft < 0) {
+            q('#wordSprint__status').innerText =
+              `You wrote ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Impressive!`;
+
+            q('#wordSprint').style = '';
+            q('#wordSprint').classList.remove('more');
+            q('#wordSprint__modal').dataset.mode = 'finished';
+            q('#wordSprint').innerHTML = '<i class="fas fa-running"></i>';
+
+            if (!q('#wordSprint__checkbox').checked)
+              q('#wordSprint').click();
+
+            endSprintSound.play();
+
+            clearInterval(sprint.interval);
+            sprint = {};
+            return;
+          }
+
+          const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+          timeLeft -= hoursLeft * 1000 * 60 * 60;
+          const minutesLeft = Math.floor(timeLeft / (1000 * 60));
+          timeLeft -= minutesLeft * 1000 * 60;
+          const secondsLeft = Math.floor(timeLeft / (1000));
+
+          document.getElementById('wordSprint__timeLeft').innerText = `${hoursLeft}:${minutesLeft < 10 ? 0 : ''}${minutesLeft}:${secondsLeft < 10 ? 0 : ''}${secondsLeft}`;
+        }, Math.max(Math.floor((end - start) / (360 * 10)), 5)),
+      };
+
+      document.getElementById('wordSprint').classList.add('pie');
+
+      document.getElementById('wordSprint').innerHTML = '<span class="pie"><span class="segment"></span></span>'
+      document.getElementById('wordSprint__modal').dataset.mode = 'running';
+    },
     suggestWords: (w) => {
       return dictionary.suggest(w);
-    },
-    renameItem: (e) => {
-      e.removeAttribute('contenteditable');
-
-      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
-
-      if (e.innerText.length <= 0 || e.innerText === file.name) {
-        e.innerText = file.name;
-        return;
-      }
-
-      file.name = e.innerText;
-
-      api.saveProject();
     },
     startRename: (e) => {
       const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
@@ -555,6 +686,20 @@ let api = {};
         e.addEventListener('blur', api.renameItem.bind(this, e));
       }, 300);
     },
+    renameItem: (e) => {
+      e.removeAttribute('contenteditable');
+
+      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
+
+      if (e.innerText.length <= 0 || e.innerText === file.name) {
+        e.innerText = file.name;
+        return;
+      }
+
+      file.name = e.innerText;
+
+      api.saveProject();
+    },
     restoreOpenFolders: () => {
       const toOpen = project.openFolders;
       for (const folder of toOpen) {
@@ -572,28 +717,60 @@ let api = {};
       content = div.innerText;
       let stats = {};
 
-      stats.words = content
-        .split(/ |\n/)
-        .filter(w => w.length);
+      stats.words = api.wordCount(content);
 
-      stats.words = stats.words.length + ' words'
+      api.flatten(project.index).find(i => i.path === currentFile.path).words = stats.words;
+
+      // If in the future the current word count should be saved as it updates, create a debounced function for it.
+      // Currently, the word count is updated on init(), so the editor doesn't need to update the file.
+
+      stats.words = stats.words.toLocaleString() + ' words';
 
       stats.lines = content.split('\n').filter(l => l.length).length + ' lines';
 
-      //Update stats element
+      // Update stats element
       document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
+
+      // Update novel stats
+      document.getElementById('novelStats__open').innerText = currentFile.name;
+      let totalWords = api.wordCountTotal();
+
+      document.getElementById('novelStats__words').innerText = totalWords.toLocaleString() +
+        ` (${(totalWords < startingWords ? '' : '+') + (totalWords - startingWords).toLocaleString()})`;
     },
     updateDetails: (toUpdate) => {
+      if (readOnly) return alert('You cannot update novel details while in Read Only mode.');
       for (var key of Object.keys(toUpdate)) {
         if (project.metadata[key] !== undefined) project.metadata[key] = toUpdate[key];
       }
       api.saveProject();
     },
-    openProject: () => {
-      ipcRenderer.send('openProject');
+    wordCount: (t) => {
+      let value = t;
+
+      if (typeof t === 'undefined') {
+        let content = marked(editor.value());
+        var div = document.createElement("div");
+        div.innerHTML = content;
+        value = div.innerText;
+      }
+
+      return value
+        .split(/ |\n/)
+        .filter(w => w.length)
+        .length;
     },
-    newProject: () => {
-      ipcRenderer.send('newProject');
+    wordCountTotal: () => {
+      let totalWords = api
+        .flatten(api.getProject().index)
+        .filter(i => i.words);
+      if (!totalWords.length) totalWords = 0;
+      else if (totalWords.length === 1) totalWords = totalWords[0].words;
+      else {
+        totalWords = totalWords.reduce((a, b) => (a.words ? a.words : a) + b.words);
+      }
+
+      return totalWords;
     },
   };
 
@@ -606,7 +783,8 @@ let api = {};
     index: [
       {
         name: 'New File',
-        path: './content/' + api.fileName()
+        path: './content/' + api.fileName(),
+        words: 0
       }
     ],
     openFolders: []

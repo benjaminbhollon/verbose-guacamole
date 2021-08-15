@@ -2,11 +2,12 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://kit.fontawesome.com">
     <title>Verbose Guacamole</title>
     <link rel="stylesheet" href="./assets/css/simplemde.css">
     <link rel="stylesheet" href="./assets/css/global.css">
     <link rel="stylesheet" href="./assets/css/editor.css">
+    <script src="https://kit.fontawesome.com/e41c010fae.js" crossorigin="anonymous"></script>
   </head>
   <body>
     <div id="loading">
@@ -31,7 +32,7 @@
 
         setTimeout(() => {
           document.getElementById('loading').style.display = 'none';
-        }, 000);
+        }, 4000);
       </script>
     </div>
     <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, getDraggingIndex(), false)" ondragover="event.preventDefault()">
@@ -40,10 +41,10 @@
           <a href="#" title="Create file or folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
         </div>
         <div class="right">
-          <a href="#" title="Search files and folders" class="fa fa-search" onclick="toggleSearch()"></a>
+          <a href="#" title="Search files and folders" class="fa fa-search" onclick="toggleSearch('click', event)"></a>
         </div>
       </div>
-      <input onblur="if (!this.value.length) toggleSearch()" oninput="search(this.value)" id="fileTree__search" class="hidden" placeholder="Search files...">
+      <input onblur="toggleSearch('blur', event)" oninput="search(this.value)" id="fileTree__search" class="hidden" placeholder="Search files...">
       <div id="fileTree__list">
 
       </div>
@@ -61,16 +62,33 @@
       <button onclick='api.commit()' id="git__commitButton">Commit</button>
       <p><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
     </section>
-    <div id="contextMenu">
-      <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
-      <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
-      <hr>
-      <span onclick="api.createItem('file')">Create File</span>
-      <span onclick="api.createItem('folder')">Create Folder</span>
+    <section id="novelStats">
+      <div class="left">
+        <span>Editing <span id="novelStats__open">New File</span></span>
+      </div>
+      <div class="right">
+        <input id="wordSprint__checkbox" type="checkbox" class="--hidden">
+        <label onclick="document.getElementById('wordSprint__modal').classList.toggle('visible')" title="Word Sprints" for="wordSprint__checkbox" id="wordSprint">
+          <i class="fas fa-running"></i>
+        </label>
+        <span>Total words: <span id="novelStats__words">0</span></span>
+      </div>
+    </section>
+    <div id="wordSprint__modal" data-mode="set">
+      <h2>Word Sprints</h2>
+      <div class="set">
+        <p>Start a new word sprint:</p>
+        <input type="text" id="wordSprint__timeInput" placeholder="Try 15:00 (15 mins) or 1:00:00 (1 hr)">
+        <input type="submit" value="Start Sprint" onclick="startSprint()">
+      </div>
+      <div class="running">
+        <p id="wordSprint__timeLeft"></p>
+        <p id="wordSprint__status"></p>
+      </div>
+      <div class="finished">
+        <input type="submit" value="Sprint Again" onclick="resetSprint()">
+      </div>
     </div>
-    <div id="spellcheckMenu">
-    </div>
-    <script src="./assets/js/editor.js" defer></script>
     <div id="projectDetails" class="modal">
       <h3>Update Project Details</h3>
       <form>
@@ -89,5 +107,15 @@
       </form>
       <a href="#" onclick="this.parentNode.classList.remove('visible');updateProjectDetails()" class="button">Save and Close</a>
     </div>
+    <div id="contextMenu">
+      <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
+      <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
+      <hr>
+      <span onclick="api.createItem('file')">Create File</span>
+      <span onclick="api.createItem('folder')">Create Folder</span>
+    </div>
+    <div id="spellcheckMenu">
+    </div>
+    <script src="./assets/js/editor.js" defer></script>
   </body>
 </html>

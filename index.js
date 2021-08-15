@@ -6,13 +6,17 @@ const url = require('url');
 const path = require('path');
 const fs = require('fs');
 
+// Manage electron-squirrel-startup
+if (require('electron-squirrel-startup')) return app.quit();
+
 let win = null;
 
 function createWindow () {
   win = new BrowserWindow({
     webPreferences: {
       spellcheck: false,
-      preload: path.join(app.getAppPath(), 'preload.js')
+      preload: path.join(app.getAppPath(), 'preload.js'),
+      icon: './icons/icon.png'
     }
   });
   win.hide();
@@ -189,7 +193,6 @@ ipcMain.on('openProject', (event) => {
 });
 ipcMain.on('newProject', (event) => {
   newProject();
-  console.log('time to create a project!');
 });
 
 // Make appData directory
