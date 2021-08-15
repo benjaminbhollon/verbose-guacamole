@@ -325,7 +325,7 @@ let api = {};
         });
       } else {
         if ((await git.branch()).current !== 'master') {
-          await git.checkout('master', true);
+          await api.checkout('master', true);
         }
 
         api.populateGitHistory();
