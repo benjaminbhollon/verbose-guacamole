@@ -3,6 +3,7 @@ const params = location.search.slice(1);
 
 // Quick version of document.querySelector
 const q = s => document.querySelector(s);
+const qA = s => document.querySelectorAll(s);
 
 /* Mouse Move */
 let cursorX = 0;
@@ -144,7 +145,12 @@ document.getElementById('editor').addEventListener('contextmenu', (event) => {
 function spellCheckReplace(word) {
   spellChecking.innerText = word;
 
-  api.editorValue(document.querySelector('.CodeMirror-scroll').innerText);
+  // IMPORTANT NOTE: the first item in the .replace() is a zero-width space. Yes, there _is_ something there.
+  // The zero-width space needs to be removed since it is added by CodeMirror, not the user.
+  const lines = [...qA('.CodeMirror-line')]
+    .map(l => l.innerText.replace('​', ''));
+
+  api.editorValue(lines.join('\n'));
 
   return;
 }
