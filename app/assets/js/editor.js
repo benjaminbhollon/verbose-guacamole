@@ -1,7 +1,7 @@
 // Get path parameters
 const params = location.search.slice(1);
 
-// Quick version of document.querySelector
+// Quick versions of document.querySelector and document.querySelectorAll
 const q = s => document.querySelector(s);
 const qA = s => document.querySelectorAll(s);
 
@@ -51,7 +51,7 @@ function search(value) {
   if (value.length) {
     document.getElementById('fileTree__list').classList.add('searching');
 
-    for (result of document.querySelectorAll('#fileTree__list summary, #fileTree__list span')) {
+    for (result of qA('#fileTree__list summary, #fileTree__list span')) {
       if (result.innerText.toUpperCase().indexOf(value.toUpperCase()) === -1) {
         result.classList.remove('result');
       } else {
@@ -157,7 +157,7 @@ function spellCheckReplace(word) {
 
 /* Word Sprints */
 function startSprint() {
-  let time = document.querySelector('#wordSprint__timeInput').value.split(':').reverse();
+  let time = q('#wordSprint__timeInput').value.split(':').reverse();
 
   const seconds = (time[0] ? time[0]/1 : 0);
   const minutes = (time[1] ? time[1]/1 : 0);

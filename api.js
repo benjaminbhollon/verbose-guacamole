@@ -46,8 +46,12 @@ let api = {};
 
   let customDictionary = [];
 
+  // Quick versions of document.querySelector and document.querySelectorAll
+  const q = s => document.querySelector(s);
+  const qA = s => document.querySelectorAll(s);
+
   // Define what separates a word
-	var rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
+	const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
 
   // Respond to main process
   ipcRenderer.on('updateProjectDetails', () => {
@@ -86,7 +90,7 @@ let api = {};
       setTimeout(populateGitHistory, 250);
     },
     createItem: (type) => {
-      let folder = document.querySelector('#fileTree .active');
+      let folder = q('#fileTree .active');
       let parent = null;
       if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
         folder = folder.parentNode;
@@ -144,7 +148,7 @@ let api = {};
       }
     },
     deleteItem: () => {
-      let item = document.querySelector('#fileTree .active');
+      let item = q('#fileTree .active');
       if (!confirm(`Do you really want to delete this ${item.tagName === 'SPAN' ? 'file' : 'folder and everything in it'}? There is no undo.`)) return;
 
       let file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (item.tagName === 'SPAN' ? item.id : item.parentNode.id));
@@ -201,8 +205,8 @@ let api = {};
         document.getElementById(id).querySelector('summary');
       if (element.contentEditable === 'true') return;
       if (element.classList.contains('active') && event.type !== 'contextmenu') return api.startRename(element);
-      if (document.querySelector('#fileTree .active'))
-        document.querySelector('#fileTree .active').classList.toggle('active');
+      if (q('#fileTree .active'))
+        q('#fileTree .active').classList.toggle('active');
       element.classList.toggle('active');
     },
     getProject: () => {
@@ -520,7 +524,7 @@ let api = {};
       fs.writeFileSync(path.resolve(projectPath), JSON.stringify(project));
     },
     setOpenFolders: () => {
-      let folders = [...document.querySelectorAll('#fileTree__list details')];
+      let folders = [...qA('#fileTree__list details')];
 
       folders = folders.map(folder => {
         return {
@@ -556,7 +560,7 @@ let api = {};
       const start = Date.now();
       const end = start + (1000 * s) + (1000 * 60 * m) + (1000 * 60 * 60 * h);
 
-      document.querySelector('#wordSprint').click();
+      q('#wordSprint').click();
 
       sprint = {
         start,
@@ -566,27 +570,27 @@ let api = {};
         interval: setInterval(() => {
           const currentWords = api.wordCountTotal();
           const written = currentWords - startingWords;
-          document.querySelector('#wordSprint__status').innerText =
+          q('#wordSprint__status').innerText =
             `You've written ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Keep up the good work!`;
 
           let timeLeft = sprint.end - Date.now();
 
           let percent = 1 - (timeLeft / sprint.total);
 
-          document.querySelector('#wordSprint').style = `--percent:${percent};`;
-          if (percent > 0.5) document.querySelector('#wordSprint').classList.add('more');
+          q('#wordSprint').style = `--percent:${percent};`;
+          if (percent > 0.5) q('#wordSprint').classList.add('more');
 
           if (timeLeft < 0) {
-            document.querySelector('#wordSprint__status').innerText =
+            q('#wordSprint__status').innerText =
               `You wrote ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Impressive!`;
 
-            document.querySelector('#wordSprint').style = '';
-            document.querySelector('#wordSprint').classList.remove('more');
-            document.querySelector('#wordSprint__modal').dataset.mode = 'finished';
-            document.querySelector('#wordSprint').innerHTML = '<i class="fas fa-running"></i>';
+            q('#wordSprint').style = '';
+            q('#wordSprint').classList.remove('more');
+            q('#wordSprint__modal').dataset.mode = 'finished';
+            q('#wordSprint').innerHTML = '<i class="fas fa-running"></i>';
 
-            if (!document.querySelector('#wordSprint__checkbox').checked)
-              document.querySelector('#wordSprint').click();
+            if (!q('#wordSprint__checkbox').checked)
+              q('#wordSprint').click();
 
             endSprintSound.play();
 
