@@ -41,6 +41,7 @@ let api = {};
   let sprint = {}
   let params = {};
   let projectPath = {};
+  const endSprintSound = new Audio(path.resolve('./app/assets/audio/sprintDone.mp3'));
   const dictionary = new Typo('en_US');
 
   let customDictionary = [];
@@ -587,6 +588,8 @@ let api = {};
 
             if (!document.querySelector('#wordSprint__checkbox').checked)
               document.querySelector('#wordSprint').click();
+
+            endSprintSound.play();
 
             clearInterval(sprint.interval);
             sprint = {};

@@ -26,6 +26,10 @@ a {
 
 /* Editor */
 
+#editor {
+  z-index: 3;
+}
+
 #editor textarea {
   opacity: 0;
 }
