@@ -5,6 +5,19 @@ const params = location.search.slice(1);
 const q = s => document.querySelector(s);
 const qA = s => document.querySelectorAll(s);
 
+// Restore panel state
+let panelState = localStorage.panelState ? JSON.parse(localStorage.panelState) : {
+  git: true,
+  fileTree: true,
+};
+for (var panel of Object.keys(panelState)) {
+  if (panelState[panel] === false) {
+    q('body').classList.add(panel + '-closed');
+    q('#' + panel).classList.add('closed');
+    q('#' + panel + '__tab').dataset.mode = 'open'
+  }
+}
+
 /* Mouse Move */
 let cursorX = 0;
 let cursorY = 0;
@@ -191,12 +204,18 @@ function togglePanel(panelId, tabId) {
     q('#' + panelId).classList.remove('closed');
     q('body').classList.remove(panelId + '-closed');
     q('#' + tabId).dataset.mode = 'close';
+
+    panelState[panelId] = true;
   } else {
     // Close
     q('#' + panelId).classList.add('closed');
     q('body').classList.add(panelId + '-closed');
     q('#' + tabId).dataset.mode = 'open';
+
+    panelState[panelId] = false;
   }
+
+  localStorage.panelState = JSON.stringify(panelState);
 }
 
 api.init(params);

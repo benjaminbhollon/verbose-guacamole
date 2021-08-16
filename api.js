@@ -29,7 +29,8 @@ let api = {};
     'There was no possibility of taking a walk that day. (Jane Eyre)',
     'First the colors. Then the humans. (The Book Thief)',
     '“Where’s Papa going with that ax?” (Charlotte\'s Web)',
-    'The thousand injuries of Fortunato I had borne as I best could, but when he ventured upon insult I vowed revenge. (The Cask of Amontillado)'
+    'The thousand injuries of Fortunato I had borne as I best could, but when he ventured upon insult I vowed revenge. (The Cask of Amontillado)',
+    'Happy families are all alike; every unhappy family is unhappy in its own way. (Anna Karenina)',
   ];
   let editor = null;
   let currentFile = null;
