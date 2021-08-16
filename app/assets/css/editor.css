@@ -91,7 +91,8 @@ a {
   color: #fff;
 }
 
-#fileTree #fileTree__list span[contenteditable], #fileTree #fileTree__list details summary[contenteditable] {
+#fileTree #fileTree__list span[contenteditable="true"],
+#fileTree #fileTree__list details summary[contenteditable="true"] {
   text-overflow: inherit;
   background-color: #fff;
   color: #000;

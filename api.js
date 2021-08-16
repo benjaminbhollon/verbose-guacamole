@@ -718,7 +718,6 @@ let api = {};
         if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
         e.contentEditable = true;
         e.focus();
-        document.execCommand('selectAll', false, null);
         e.addEventListener('keydown', (event) => {
           if (event.key === ' ' && e.tagName === 'SUMMARY') {
             event.preventDefault();
@@ -735,11 +734,11 @@ let api = {};
           }
         });
         e.addEventListener('blur', api.renameItem.bind(this, e));
-        e.addEventListener('focus', api.renameItem.bind(this, e));
+        e.addEventListener('focus', document.execCommand('selectAll', false, null));
       }, 300);
     },
     renameItem: (e) => {
-      e.removeAttribute('contenteditable');
+      e.contentEditable = false;
 
       const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
 
