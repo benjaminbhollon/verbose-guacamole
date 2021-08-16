@@ -223,7 +223,14 @@ let api = {};
       project.index = project.index.filter(i => !i.delete);
 
       (item.tagName === 'SPAN' ? item : item.parentNode).remove();
+
       setTimeout(() => {
+        const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
+        if (typeof foundCurrent === 'undefined') {
+          currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
+          document.getElementById(api.idFromPath(currentFile.path)).click();
+          api.openFile(currentFile.path, currentFile.name, true);
+        }
         api.saveProject();
       }, 0);
     },
