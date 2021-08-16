@@ -5,6 +5,19 @@ const params = location.search.slice(1);
 const q = s => document.querySelector(s);
 const qA = s => document.querySelectorAll(s);
 
+// Restore panel state
+let panelState = localStorage.panelState ? JSON.parse(localStorage.panelState) : {
+  git: true,
+  fileTree: true,
+};
+for (var panel of Object.keys(panelState)) {
+  if (panelState[panel] === false) {
+    q('body').classList.add(panel + '-closed');
+    q('#' + panel).classList.add('closed');
+    q('#' + panel + '__tab').dataset.mode = 'open'
+  }
+}
+
 /* Mouse Move */
 let cursorX = 0;
 let cursorY = 0;
@@ -13,6 +26,18 @@ let cursorY = 0;
 function updatePageXY(event) {
   cursorX = event.clientX;
   cursorY = event.clientY;
+
+  if (cursorX < 15) {
+    if (!q('.tab.left').classList.contains('show')) q('.tab.left').classList.add('show');
+  } else if (q('.tab.left').classList.contains('show')) {
+    q('.tab.left').classList.remove('show');
+  }
+
+  if (document.documentElement.clientWidth - cursorX < 15) {
+    q('.tab.right').classList.add('show');
+  } else if (q('.tab.right').classList.contains('show')) {
+    q('.tab.right').classList.remove('show');
+  }
 }
 document.onmousemove = updatePageXY;
 
@@ -170,6 +195,27 @@ function resetSprint() {
   q('#wordSprint__timeLeft').innerText = '';
   q('#wordSprint__status').innerText = '';
   q('#wordSprint__modal').dataset.mode = 'set';
+}
+
+/* Tabs */
+function togglePanel(panelId, tabId) {
+  if (q('#' + panelId).classList.contains('closed')) {
+    // Open
+    q('#' + panelId).classList.remove('closed');
+    q('body').classList.remove(panelId + '-closed');
+    q('#' + tabId).dataset.mode = 'close';
+
+    panelState[panelId] = true;
+  } else {
+    // Close
+    q('#' + panelId).classList.add('closed');
+    q('body').classList.add(panelId + '-closed');
+    q('#' + tabId).dataset.mode = 'open';
+
+    panelState[panelId] = false;
+  }
+
+  localStorage.panelState = JSON.stringify(panelState);
 }
 
 api.init(params);

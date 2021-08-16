@@ -29,7 +29,8 @@ let api = {};
     'There was no possibility of taking a walk that day. (Jane Eyre)',
     'First the colors. Then the humans. (The Book Thief)',
     '“Where’s Papa going with that ax?” (Charlotte\'s Web)',
-    'The thousand injuries of Fortunato I had borne as I best could, but when he ventured upon insult I vowed revenge. (The Cask of Amontillado)'
+    'The thousand injuries of Fortunato I had borne as I best could, but when he ventured upon insult I vowed revenge. (The Cask of Amontillado)',
+    'Happy families are all alike; every unhappy family is unhappy in its own way. (Anna Karenina)',
   ];
   let editor = null;
   let currentFile = null;
@@ -68,8 +69,8 @@ let api = {};
 
       return true;
     },
-    checkout: async (what, editable) => {
-      if (!(what === 'master' && editable)) {
+    checkout: async (what, editable, stash = true) => {
+      if (!(what === 'master' && editable) && stash) {
         await git.stash();
       }
       const result = await git.checkout(what);
@@ -77,12 +78,13 @@ let api = {};
       if (!editable) {
         readOnly = true;
         q('body').dataset.readonly = 'true';
+        q('#git__revertButton').dataset.hash = what;
       } else {
         readOnly = false;
         q('body').dataset.readonly = 'false';
       }
 
-      if (what === 'master' && editable) {
+      if (what === 'master' && editable && stash) {
         await git.stash(['apply']);
       }
 
@@ -105,8 +107,8 @@ let api = {};
         true :
         api.suggestWords(w);
     },
-    commit: async () => {
-      const message = document.getElementById('git__commitText').value;
+    commit: async (m) => {
+      const message = m ? m : document.getElementById('git__commitText').value;
       document.getElementById('git__commitButton').innerText = 'Working...';
 
       try {
@@ -117,7 +119,7 @@ let api = {};
         window.alert(err);
       }
 
-      setTimeout(populateGitHistory, 250);
+      setTimeout(api.populateGitHistory, 500);
     },
     createItem: (type) => {
       let folder = q('#fileTree .active');
@@ -336,12 +338,14 @@ let api = {};
         currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
 
         // Calculate word counts
-        api.flatten(project.index).filter(i => typeof i.children === 'undefined').forEach(file => {
-          file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
-            encoding:'utf8',
-            flag:'r'
-          }));
-        });
+        api.flatten(project.index)
+          .filter(i => typeof i.children === 'undefined')
+          .forEach(file => {
+            file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
+              encoding:'utf8',
+              flag:'r'
+            }));
+          });
         startingWords = api.wordCountTotal();
 
         // For compatibility with v0.1.0
@@ -356,8 +360,8 @@ let api = {};
           project.metadata.title = project.metadata.title.final;
       }
 
-      api.openFile(currentFile.path, currentFile.name, true);
       api.populateFiletree();
+      api.openFile(currentFile.path, currentFile.name, true);
 
       setTimeout(() => {
         document.getElementById(api.idFromPath(currentFile.path)).click();
@@ -484,8 +488,14 @@ let api = {};
     },
     populateGitHistory: async () => {
       try {
-        let html = (await git.log()).all.map(h => `<span id='commit-${h.hash}'>${h.message}</span>`).reverse().join('');
-        document.getElementById('git__commits').innerHTML = html;
+        const log = await git.log();
+        let html = log.all.map(h => {
+          const preview = `<span class="preview" onclick="api.checkout('${h.hash}', false)"><i class="fa fa-eye"></i>`;
+          return `<span id='commit-${h.hash}'>${h.message}${h.hash !== log.all[0].hash ? preview : ''}</span></span>`;
+        }).reverse().join('');
+        q('#git__commits').innerHTML = html;
+
+        q('#git').scrollTop = q('#git').scrollHeight;
       } catch (err) {
         console.error(err);
       }
@@ -524,6 +534,7 @@ let api = {};
         if (!clearing) api.saveFile();
       }, 500);
       editor.codemirror.on("change", () => {
+        if (clearing) return;
         api.updateStats();
         debouncedSaveFile();
       });
@@ -556,6 +567,7 @@ let api = {};
       if (readOnly && !editor.isPreviewActive()) setTimeout(() => {togglePreview(editor)}, 0);
     },
     saveFile: (v) => {
+      if (readOnly) return false;
       let p = currentFile.path;
       let value = null;
       if (!v) value = editor.value();
@@ -564,6 +576,7 @@ let api = {};
       fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
     },
     saveProject: () => {
+      if (readOnly) return false;
       fs.writeFileSync(path.resolve(projectPath), JSON.stringify(project));
     },
     setOpenFolders: () => {
@@ -710,6 +723,21 @@ let api = {};
         }
       }
     },
+    revertTo: async (where, name) => {
+      const range = `${where}..HEAD`;
+
+      await git.reset({'--hard': null});
+
+      await api.checkout('master', false, false);
+
+      await git.stash();
+
+      await git.revert(range, {'--no-commit': null});
+
+      await api.commit(`Revert to "${q(`#commit-${where}`).innerText}"`);
+
+      await api.checkout('master', true, false);
+    },
     updateStats: () => {
       let content = marked(editor.value());
       var div = document.createElement("div");
@@ -746,14 +774,12 @@ let api = {};
       api.saveProject();
     },
     wordCount: (t) => {
-      let value = t;
+      let value = typeof t === 'undefined' ? editor.value() : t;
 
-      if (typeof t === 'undefined') {
-        let content = marked(editor.value());
-        var div = document.createElement("div");
-        div.innerHTML = content;
-        value = div.innerText;
-      }
+      let content = marked(value);
+      var div = document.createElement("div");
+      div.innerHTML = content;
+      value = div.innerText;
 
       return value
         .split(/ |\n/)
