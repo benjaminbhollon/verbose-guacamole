@@ -17,7 +17,7 @@ Starting in v0.2.2, words sprints are built in. Pressing the icon of a runner in
 A pie chart representing the time left will replace the running icon during a sprint.
 
 ### Filesystem
-VerbGuac projects are split into files, which can be separated into folders. >=v0.1.1 supports file and folder creating, renaming, moving, editing, and deleting. Open folders are also maintained between open sessions.
+VerbGuac projects are split into files, which can be separated into folders. >=v0.1.1 supports file and folder creating, renaming, moving, editing, and deleting. Open folders and files are also maintained between open sessions.
 
 ### The Future
 VerbGuac is still under development. Future features include:
