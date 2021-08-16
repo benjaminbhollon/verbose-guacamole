@@ -63,11 +63,48 @@ let api = {};
 
 
   api = {
+    addGoal: (type, words) => {
+      const allowedTypes = [
+        'session'
+      ];
+      if (allowedTypes.indexOf(type) === -1) return false;
+      if (typeof words !== 'number' || words <= 0) return false;
+
+      let newGoal = {
+        type,
+        words,
+        date: (new Date()).toISOString(),
+        startingWords: api.wordCountTotal(),
+        archived: false
+      }
+
+      project.goals.push(newGoal);
+
+      q('#wordGoal__addForm').open = false;
+
+      api.updateGoals();
+      api.saveProject();
+      return true;
+    },
     addToDictionary: (w) => {
       customDictionary.push(w);
       fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), customDictionary.join('\n'));
 
       return true;
+    },
+    archiveGoals: () => {
+      project.goals = project.goals.map(g => {
+        let newGoal = g;
+        if (api.wordCountTotal() - g.startingWords >= g.words) {
+          newGoal.archived = true;
+        }
+
+        return newGoal;
+      });
+
+      api.updateGoals(false);
+
+      api.saveProject();
     },
     cancelSprint: () => {
       const currentWords = api.wordCountTotal();
@@ -400,6 +437,17 @@ let api = {};
         if (typeof project.goals === 'undefined') project.goals = [];
       }
 
+      // Clear out session goals
+      project.goals = project.goals.map(g => {
+        let goal = g;
+        if (goal.type === 'session') {
+          goal.archived = true;
+          goal.final = api.wordCountTotal();
+        }
+
+        return goal;
+      });
+
       api.populateFiletree();
       api.openFile(currentFile.path, currentFile.name, true);
 
@@ -573,7 +621,7 @@ let api = {};
         document.documentElement.requestFullscreen();
       });
       const debouncedSaveFile = api.debounce(api.saveFile, 500);
-      const throttledUpdateStats = api.throttle(api.updateStats, 1000);
+      const throttledUpdateStats = api.throttle(api.updateStats, 50);
       editor.codemirror.on("change", () => {
         if (clearing) return;
         throttledUpdateStats();
@@ -606,6 +654,48 @@ let api = {};
 
       togglePreview = editor.toolbar.find(t => t.name === 'preview').action;
       if (readOnly && !editor.isPreviewActive()) setTimeout(() => {togglePreview(editor)}, 0);
+    },
+    renameItem: (e) => {
+      e.contentEditable = false;
+
+      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
+
+      if (e.innerText.trim().length <= 0 || e.innerText.trim() === file.name) {
+        e.innerText = file.name;
+        return;
+      }
+
+      file.name = e.innerText.trim();
+      e.title = e.innerText.trim();
+
+      if (file.path === currentFile.path) api.updateStats();
+
+      api.saveProject();
+    },
+    restoreOpenFolders: () => {
+      const toOpen = project.openFolders;
+      for (const folder of toOpen) {
+        try {
+          document.getElementById(folder.id).open = folder.open;
+        } catch (err) {
+          setTimeout(api.restoreOpenFolders, 0);
+        }
+      }
+    },
+    revertTo: async (where, name) => {
+      const range = `${where}..HEAD`;
+
+      await git.reset({'--hard': null});
+
+      await api.checkout('master', false, false);
+
+      await git.stash();
+
+      await git.revert(range, {'--no-commit': null});
+
+      await api.commit(`Revert to "${q(`#commit-${where}`).innerText}"`);
+
+      await api.checkout('master', true, false);
     },
     saveFile: (v) => {
       if (readOnly) return false;
@@ -737,50 +827,8 @@ let api = {};
           }
         });
         e.addEventListener('blur', api.renameItem.bind(this, e));
-        e.addEventListener('focus', document.execCommand('selectAll', false, null));
+        document.execCommand('selectAll', false, null)
       }, 300);
-    },
-    renameItem: (e) => {
-      e.contentEditable = false;
-
-      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
-
-      if (e.innerText.trim().length <= 0 || e.innerText.trim() === file.name) {
-        e.innerText = file.name;
-        return;
-      }
-
-      file.name = e.innerText.trim();
-      e.title = e.innerText.trim();
-
-      if (file.path === currentFile.path) api.updateStats();
-
-      api.saveProject();
-    },
-    restoreOpenFolders: () => {
-      const toOpen = project.openFolders;
-      for (const folder of toOpen) {
-        try {
-          document.getElementById(folder.id).open = folder.open;
-        } catch (err) {
-          setTimeout(api.restoreOpenFolders, 0);
-        }
-      }
-    },
-    revertTo: async (where, name) => {
-      const range = `${where}..HEAD`;
-
-      await git.reset({'--hard': null});
-
-      await api.checkout('master', false, false);
-
-      await git.stash();
-
-      await git.revert(range, {'--no-commit': null});
-
-      await api.commit(`Revert to "${q(`#commit-${where}`).innerText}"`);
-
-      await api.checkout('master', true, false);
     },
     throttle: (f, delay) => {
       // Based on https://www.geeksforgeeks.org/javascript-throttling/
@@ -834,41 +882,39 @@ let api = {};
 
       api.updateGoals();
     },
-    updateGoals: async () => {
+    updateGoals: async (updateHTML = true) => {
       let goals = project.goals
         .filter(g => !g.archived)
         .map(g => {
           let newGoal = g;
-          newGoal.done = api.wordCountTotal() - g.startingWords;
+          newGoal.done = Math.min(api.wordCountTotal() - g.startingWords, g.words);
           newGoal.completed = newGoal.done >= g.words;
 
           return newGoal;
         })
-        .map(g => {
-          return `<div ${g.completed ? 'class="completed"' : ''} style="--percent:${g.done * 100 / g.words}%">${g.type} goal: ${g.done} / ${g.words} words</div>`
-        });
+        .sort((a, b) => {
+          return (a.words - a.done) - (b.words - b.done)
+        })
 
-      q('#wordGoal__list').innerHTML = goals.join('');
-    },
-    addGoal: (type, words) => {
-      const allowedTypes = [
-        'session'
-      ];
-      if (allowedTypes.indexOf(type) === -1) return false;
-      if (typeof words !== 'number' || words <= 0) return false;
+      if (goals.length) {
+        q('#wordGoal').style = `--percent:${100*goals[0].done / goals[0].words}%`;
+        if (goals[0].completed) q('#wordGoal').classList.add('flash');
+        else q('#wordGoal').classList.remove('flash');
+      } else {q('#wordGoal').style = `--percent:0%`;
 
-      let newGoal = {
-        type,
-        words,
-        date: (new Date()).toISOString(),
-        startingWords: api.wordCountTotal(),
-        archived: false
       }
 
-      project.goals.push(newGoal);
+      goals = goals
+        .map(g => {
+          return `<div ${g.completed ? 'class="completed"' : ''} style="--percent:${g.done * 100 / g.words}%">
+            ${g.type} goal: ${g.done} / ${g.words} words
+          </div>`
+        });
 
-      api.saveProject();
-      return true;
+      if (updateHTML) {
+        if (goals.length) q('#wordGoal__list').innerHTML = goals.join('');
+        else q('#wordGoal__list').innerText = "You haven't set any goals yet.";
+      }
     },
     updateDetails: (toUpdate) => {
       if (readOnly) return alert('You cannot update novel details while in Read Only mode.');

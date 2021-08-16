@@ -355,66 +355,6 @@ textarea {
   border: 2px solid;
 }
 
-
-/* Forms */
-form {
-  text-align: left;
-  display: inline-block;
-  width: 100%;
-  max-width: 700px;
-}
-
-input, textarea, label {
-  color: var(--color);
-  background-color: transparent;
-  margin: 0.5em 0;
-  width: 100%;
-  display: block;
-  box-sizing: border-box;
-  border: 2px solid;
-}
-
-input::placeholder, textarea::placeholder {
-  color: var(--light-color);
-}
-
-label {
-  font-weight: bold;
-  padding: initial;
-  border: 0;
-}
-
-input, textarea {
-  padding: 1em;
-}
-
-input[type="checkbox"] {
-  display: inline;
-  width: auto;
-}
-
-input[type="submit"] {
-  cursor: pointer;
-}
-
-input[type="submit"]:hover, input[type="submit"]:focus {
-  background-color: #8883;
-}
-
-input[type="submit"]:active {
-  background-color: #8886;
-}
-
-.success, .failure {
-  background-color:green;
-  padding:1em;
-  color:white;
-}
-
-.failure {
-  background-color:red;
-}
-
 /* Novel Stats */
 #novelStats {
   position: fixed;
@@ -522,14 +462,42 @@ input[type="submit"]:active {
 }
 
 /* Word Goals */
+#wordGoal {
+  --fill: hsla(118, 72%, 90%, 0.5);
+}
+
+#wordGoal.flash:not(:hover) {
+  --fill: transparent;
+  --flash-color: #0f0;
+  background-color: var(--fill);
+  animation: flash-background 1500ms infinite;
+  transition: color 0;
+}
+
+@keyframes flash-background {
+  from {
+    --fill: transparent;
+  }
+  to {
+    --fill: var(--flash-color);
+    color: #440;
+  }
+}
+
 #wordGoal__list > div {
   --fill: #0f02;
   padding: 0.5em;
   border: 0.1em solid #080;
 }
 
-#wordGoal__list > div {
+#wordGoal__list > div,
+#wordGoal:not(.flash) {
     background: linear-gradient(to right, var(--fill) var(--percent), transparent 0);
+}
+
+#wordGoal__list > div.completed {
+  background: #0f0;
+  color: #440;
 }
 
 /* Pie charts */
