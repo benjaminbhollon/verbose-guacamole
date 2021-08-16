@@ -49,6 +49,7 @@
 
       </div>
     </section>
+    <div id="fileTree__tab" onclick="togglePanel('fileTree', this.id)" class="tab left" data-mode="close"></div>
     <section id="editor">
       <textarea id="editorTextarea" autocorrect='on'></textarea>
       <footer id="editor__stats">0 words.</footer>
@@ -71,6 +72,7 @@
         <p class="help"><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
       </div>
     </section>
+    <div id="git__tab" onclick="togglePanel('git', this.id)" class="tab right" data-mode="close"></div>
     <section id="novelStats">
       <div class="left">
         <span>Editing <span id="novelStats__open">New File</span></span>

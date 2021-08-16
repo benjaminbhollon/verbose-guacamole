@@ -13,6 +13,18 @@ let cursorY = 0;
 function updatePageXY(event) {
   cursorX = event.clientX;
   cursorY = event.clientY;
+
+  if (cursorX < 15) {
+    if (!q('.tab.left').classList.contains('show')) q('.tab.left').classList.add('show');
+  } else if (q('.tab.left').classList.contains('show')) {
+    q('.tab.left').classList.remove('show');
+  }
+
+  if (document.documentElement.clientWidth - cursorX < 15) {
+    q('.tab.right').classList.add('show');
+  } else if (q('.tab.right').classList.contains('show')) {
+    q('.tab.right').classList.remove('show');
+  }
 }
 document.onmousemove = updatePageXY;
 
@@ -170,6 +182,21 @@ function resetSprint() {
   q('#wordSprint__timeLeft').innerText = '';
   q('#wordSprint__status').innerText = '';
   q('#wordSprint__modal').dataset.mode = 'set';
+}
+
+/* Tabs */
+function togglePanel(panelId, tabId) {
+  if (q('#' + panelId).classList.contains('closed')) {
+    // Open
+    q('#' + panelId).classList.remove('closed');
+    q('body').classList.remove(panelId + '-closed');
+    q('#' + tabId).dataset.mode = 'close';
+  } else {
+    // Close
+    q('#' + panelId).classList.add('closed');
+    q('body').classList.add(panelId + '-closed');
+    q('#' + tabId).dataset.mode = 'open';
+  }
 }
 
 api.init(params);
