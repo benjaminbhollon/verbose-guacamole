@@ -477,6 +477,7 @@ let api = {};
                 draggable="true"
                 ondragstart="startMoveItem(event)"
                 ondragend="stopMoveItem(event)"
+                title="${item.name}"
                 onclick='event.preventDefault();api.focusItem(this.parentNode.id);'
                 ondblclick='this.parentNode.toggleAttribute("open");api.setOpenFolders();'
                 oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
@@ -490,6 +491,7 @@ let api = {};
           } else {
             html += `
             <span
+              title="${item.name}"
               onclick='event.preventDefault();api.focusItem(this.id)'
               ondblclick='api.openItem(this.id)'
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.id);"
@@ -734,6 +736,7 @@ let api = {};
       }
 
       file.name = e.innerText.trim();
+      e.title = e.innerText.trim();
 
       if (file.path === currentFile.path) api.updateStats();
 
