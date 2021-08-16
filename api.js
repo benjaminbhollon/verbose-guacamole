@@ -706,7 +706,7 @@ let api = {};
         e.focus();
         document.execCommand('selectAll', false, null);
         e.addEventListener('keydown', (event) => {
-          if (event.key === ' ') {
+          if (event.key === ' ' && e.tagName === 'SUMMARY') {
             event.preventDefault();
             document.execCommand('insertText', false, ' ');
           }
@@ -728,12 +728,14 @@ let api = {};
 
       const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
 
-      if (e.innerText.length <= 0 || e.innerText === file.name) {
+      if (e.innerText.trim().length <= 0 || e.innerText.trim() === file.name) {
         e.innerText = file.name;
         return;
       }
 
-      file.name = e.innerText;
+      file.name = e.innerText.trim();
+
+      if (file.path === currentFile.path) api.updateStats();
 
       api.saveProject();
     },
