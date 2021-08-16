@@ -173,10 +173,10 @@ let api = {};
       }, 0);
     },
     debounce: (f, delay) => {
-      let interval = null;
-      return () => {
-        if (interval !== null) clearInterval(interval);
-        interval = setTimeout(f, delay);
+      let timeout = null;
+      return (...args) => {
+        if (timeout !== null) clearTimeout(timeout);
+        timeout = setTimeout(() => f(...args), delay);
       }
     },
     deleteItem: () => {
@@ -530,12 +530,11 @@ let api = {};
         document.exitFullscreen();
         document.documentElement.requestFullscreen();
       });
-      const debouncedSaveFile = api.debounce(async () => {
-        if (!clearing) api.saveFile();
-      }, 500);
+      const debouncedSaveFile = api.debounce(api.saveFile, 500);
+      const throttledUpdateStats = api.throttle(api.updateStats, 1000);
       editor.codemirror.on("change", () => {
         if (clearing) return;
-        api.updateStats();
+        throttledUpdateStats();
         debouncedSaveFile();
       });
       clearing = false;
@@ -738,7 +737,29 @@ let api = {};
 
       await api.checkout('master', true, false);
     },
-    updateStats: () => {
+    throttle: (f, delay) => {
+      // Based on https://www.geeksforgeeks.org/javascript-throttling/
+      let prev = 0;
+      let timeout = null;
+
+      return (...args) => {
+        let now = new Date().getTime();
+
+        if(now - prev > delay){
+          if (timeout !== null) clearTimeout(timeout);
+          prev = now;
+
+          return f(...args);
+        } else {
+          if (timeout !== null) clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            prev = now;
+            return f(...args);
+          }, delay);
+        }
+      }
+    },
+    updateStats: async () => {
       let content = marked(editor.value());
       var div = document.createElement("div");
       div.innerHTML = content;
