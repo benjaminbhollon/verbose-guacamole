@@ -195,6 +195,7 @@ function resetSprint() {
   q('#wordSprint__timeLeft').innerText = '';
   q('#wordSprint__status').innerText = '';
   q('#wordSprint__modal').dataset.mode = 'set';
+  q('#wordSprint__cancel').style.display = 'block';
 }
 
 /* Tabs */

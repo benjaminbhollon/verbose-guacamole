@@ -69,6 +69,25 @@ let api = {};
 
       return true;
     },
+    cancelSprint: () => {
+      const currentWords = api.wordCountTotal();
+      const written = currentWords - startingWords;
+
+      q('#wordSprint__status').innerText =
+        `You wrote ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Impressive!`;
+
+      q('#wordSprint').style = '';
+      q('#wordSprint__cancel').style.display = 'none';
+      q('#wordSprint').classList.remove('more');
+      q('#wordSprint__modal').dataset.mode = 'finished';
+      q('#wordSprint').innerHTML = '<i class="fas fa-running"></i>';
+
+      if (!q('#wordSprint__checkbox').checked)
+        q('#wordSprint').click();
+
+      clearInterval(sprint.interval);
+      sprint = {};
+    },
     checkout: async (what, editable, stash = true) => {
       if (!(what === 'master' && editable) && stash) {
         await git.stash();
@@ -272,7 +291,6 @@ let api = {};
       git = simpleGit({
         baseDir: (params.new ? projectPath : path.dirname(projectPath))
       });
-
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
         console.info('Initializing git repository...');
@@ -351,7 +369,9 @@ let api = {};
 
         // For compatibility with <v0.1.2
         if (typeof project.openFile === 'undefined') project.openFile = api.idFromPath(currentFile.path);
-        else currentFile = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
+
+        const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
+        if (typeof foundCurrent !== 'undefined') currentFile = foundCurrent;
 
         // For compatibility with <v0.2.1
         if (typeof project.metadata.title !== 'string')
