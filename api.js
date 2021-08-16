@@ -138,10 +138,12 @@ let api = {};
 
       setTimeout(api.populateGitHistory, 500);
     },
-    createItem: (type) => {
+    createItem: (type, first = false) => {
       let folder = q('#fileTree .active');
       let parent = null;
-      if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
+      if (first) {
+        parent = project.index;
+      } else if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
         folder = folder.parentNode;
       } else if (folder === null || folder.tagName !== 'DETAILS') {
         parent = project.index;
@@ -164,14 +166,20 @@ let api = {};
           }
         );
 
-        parent.push({
-          name: 'New File',
+        const newItem = {
+          name: 'Untitled File',
           path: filePath,
           words: 0
-        });
+        };
+
+        if (first) {
+          parent.splice(0, 0, newItem);
+        } else {
+          parent.push(newItem);
+        }
       }
       else if (type === 'folder') parent.push({
-        name: 'New Folder',
+        name: 'Untitled Folder',
         path: filePath,
         children: []
       });
@@ -182,7 +190,7 @@ let api = {};
       setTimeout(() => {
         if (type === 'file') {
           api.openItem(api.idFromPath(filePath)).click();
-          api.startRename(document.getElementById(api.idFromPath(filePath)));
+          if (!first) api.startRename(document.getElementById(api.idFromPath(filePath)));
         } else {
           document.getElementById(api.idFromPath(filePath)).click();
           document.getElementById(api.idFromPath(filePath)).open = true;
@@ -227,9 +235,13 @@ let api = {};
       setTimeout(() => {
         const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
         if (typeof foundCurrent === 'undefined') {
-          currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
-          document.getElementById(api.idFromPath(currentFile.path)).click();
-          api.openFile(currentFile.path, currentFile.name, true);
+          if (api.flatten(project.index).filter(i => typeof i.children === 'undefined').length) {
+            currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
+            document.getElementById(api.idFromPath(currentFile.path)).click();
+            api.openFile(currentFile.path, currentFile.name, true);
+          } else {
+            api.createItem('file', true);
+          }
         }
         api.saveProject();
       }, 0);
@@ -723,6 +735,7 @@ let api = {};
           }
         });
         e.addEventListener('blur', api.renameItem.bind(this, e));
+        e.addEventListener('focus', api.renameItem.bind(this, e));
       }, 300);
     },
     renameItem: (e) => {
