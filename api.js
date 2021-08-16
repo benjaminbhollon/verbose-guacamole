@@ -337,12 +337,14 @@ let api = {};
         currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
 
         // Calculate word counts
-        api.flatten(project.index).filter(i => typeof i.children === 'undefined').forEach(file => {
-          file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
-            encoding:'utf8',
-            flag:'r'
-          }));
-        });
+        api.flatten(project.index)
+          .filter(i => typeof i.children === 'undefined')
+          .forEach(file => {
+            file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
+              encoding:'utf8',
+              flag:'r'
+            }));
+          });
         startingWords = api.wordCountTotal();
 
         // For compatibility with v0.1.0
@@ -357,8 +359,8 @@ let api = {};
           project.metadata.title = project.metadata.title.final;
       }
 
-      api.openFile(currentFile.path, currentFile.name, true);
       api.populateFiletree();
+      api.openFile(currentFile.path, currentFile.name, true);
 
       setTimeout(() => {
         document.getElementById(api.idFromPath(currentFile.path)).click();
@@ -531,6 +533,7 @@ let api = {};
         if (!clearing) api.saveFile();
       }, 500);
       editor.codemirror.on("change", () => {
+        if (clearing) return;
         api.updateStats();
         debouncedSaveFile();
       });
@@ -770,14 +773,12 @@ let api = {};
       api.saveProject();
     },
     wordCount: (t) => {
-      let value = t;
+      let value = typeof t === 'undefined' ? editor.value() : t;
 
-      if (typeof t === 'undefined') {
-        let content = marked(editor.value());
-        var div = document.createElement("div");
-        div.innerHTML = content;
-        value = div.innerText;
-      }
+      let content = marked(value);
+      var div = document.createElement("div");
+      div.innerHTML = content;
+      value = div.innerText;
 
       return value
         .split(/ |\n/)
