@@ -395,6 +395,9 @@ let api = {};
         // For compatibility with <v0.2.1
         if (typeof project.metadata.title !== 'string')
           project.metadata.title = project.metadata.title.final;
+
+        // For compatibility with <v0.3.2
+        if (typeof project.goals === 'undefined') project.goals = [];
       }
 
       api.populateFiletree();
@@ -704,7 +707,7 @@ let api = {};
         }, Math.max(Math.floor((end - start)) / 360, 25)),
       };
 
-      document.getElementById('wordSprint').classList.add('pie');
+      document.getElementById('wordSprint').classList.add('pie-chart');
 
       document.getElementById('wordSprint').innerHTML = '<span class="pie"><span class="segment"></span></span>'
       document.getElementById('wordSprint__modal').dataset.mode = 'running';
@@ -828,6 +831,44 @@ let api = {};
 
       document.getElementById('novelStats__words').innerText = totalWords.toLocaleString() +
         ` (${(totalWords < startingWords ? '' : '+') + (totalWords - startingWords).toLocaleString()})`;
+
+      api.updateGoals();
+    },
+    updateGoals: async () => {
+      let goals = project.goals
+        .filter(g => !g.archived)
+        .map(g => {
+          let newGoal = g;
+          newGoal.done = api.wordCountTotal() - g.startingWords;
+          newGoal.completed = newGoal.done >= g.words;
+
+          return newGoal;
+        })
+        .map(g => {
+          return `<div ${g.completed ? 'class="completed"' : ''} style="--percent:${g.done * 100 / g.words}%">${g.type} goal: ${g.done} / ${g.words} words</div>`
+        });
+
+      q('#wordGoal__list').innerHTML = goals.join('');
+    },
+    addGoal: (type, words) => {
+      const allowedTypes = [
+        'session'
+      ];
+      if (allowedTypes.indexOf(type) === -1) return false;
+      if (typeof words !== 'number' || words <= 0) return false;
+
+      let newGoal = {
+        type,
+        words,
+        date: (new Date()).toISOString(),
+        startingWords: api.wordCountTotal(),
+        archived: false
+      }
+
+      project.goals.push(newGoal);
+
+      api.saveProject();
+      return true;
     },
     updateDetails: (toUpdate) => {
       if (readOnly) return alert('You cannot update novel details while in Read Only mode.');
@@ -876,7 +917,8 @@ let api = {};
         words: 0
       }
     ],
-    openFolders: []
+    openFolders: [],
+    goals: []
   };
 
   let placeholderN = Date.now() % api.placeholders.length;

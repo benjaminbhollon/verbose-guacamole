@@ -72,7 +72,7 @@ a {
 }
 
 #fileTree span, #fileTree details summary {
-  font-size: 1rem;
+  font-size: 1.2rem;
   padding: 0 0.5em;
   height: 1.75em;
   line-height: 1.75em;
@@ -187,7 +187,7 @@ textarea {
 }
 
 #git__commits > span {
-  font-size: 1rem;
+  font-size: 1.2rem;
   padding: 0.25em 0.5em;
   display: block;
   border-top: 1px solid #777;
@@ -240,8 +240,9 @@ textarea {
 
 /* Context Menu */
 #contextMenu, #spellcheckMenu {
+  font-size: 1.2rem;
   border: 1px solid #aaa;
-  width: 200px;
+  width: 150px;
   position: fixed;
   left: 0;
   right: 0;
@@ -251,16 +252,14 @@ textarea {
 }
 
 #contextMenu span, #spellcheckMenu span {
+  width: inherit;
   display: block;
   cursor: default;
-  padding: 0.5em;
+  padding: 0.25em;
 }
 
 #contextMenu span:hover, #spellcheckMenu span:hover {
-  display: block;
-  cursor: default;
   background-color: #ccc;
-  padding: 0.5em;
 }
 
 #contextMenu.visible, #spellcheckMenu.visible {
@@ -448,8 +447,8 @@ input[type="submit"]:active {
   display: inline;
 }
 
-/* Word Sprint */
-#wordSprint {
+/* Novel Stats Buttons */
+#novelStats label {
   display: inline;
   text-align: center;
   cursor: pointer;
@@ -459,7 +458,7 @@ input[type="submit"]:active {
   padding: 0.31em 1em;
 }
 
-#wordSprint:hover {
+#novelStats label:hover {
   background-color: #fff3;
 }
 
@@ -471,24 +470,21 @@ input[type="submit"]:active {
   transform: translate(-50%, -50%);
 }
 
-#wordSprint__checkbox:checked ~ #wordSprint {
+#novelStats input:checked + label {
   background-color: var(--background-color);
   color: #440;
 }
 
-#wordSprint__checkbox:checked ~ #wordSprint.pie {
-  --empty: #440;
-  --fill: var(--background-color);
-}
-
-#wordSprint__modal {
+.novelStats__modal {
+  --right: 0;
   display: none;
   position: fixed;
   bottom: 1.5em;
-  right: 0em;
+  right: var(--right);
+  width: 95%;
   height: auto;
   max-width: 400px;
-  width: 95%;
+  max-height: calc(100vh - 1.5em);
   background-color: #fff;
   padding: 1em;
   z-index: 5;
@@ -497,11 +493,11 @@ input[type="submit"]:active {
   border-left: 3px solid var(--background-color);
 }
 
-#wordSprint__modal.visible {
+.novelStats__modal.visible {
   display: block;
 }
 
-#wordSprint__modal h2 {
+.novelStats__modal h2 {
   margin: 0.25em;
   color: #000;
   max-width: 12em;
@@ -509,6 +505,7 @@ input[type="submit"]:active {
   font-size: 1.3em;
 }
 
+/* Word Sprints */
 #wordSprint__modal .running,
 #wordSprint__modal .running,
 #wordSprint__modal .finished,
@@ -524,8 +521,24 @@ input[type="submit"]:active {
   display: block;
 }
 
-/* Wordsprint pie chart */
-#wordSprint.pie {
+/* Word Goals */
+#wordGoal__list > div {
+  --fill: #0f02;
+  padding: 0.5em;
+  border: 0.1em solid #080;
+}
+
+#wordGoal__list > div {
+    background: linear-gradient(to right, var(--fill) var(--percent), transparent 0);
+}
+
+/* Pie charts */
+#wordSprint__checkbox:checked ~ #wordSprint.pie-chart {
+  --empty: #440;
+  --fill: var(--background-color);
+}
+
+#wordSprint.pie-chart {
   --fill: #440;
   --empty: var(--background-color);
   --percent: 0;
@@ -533,7 +546,7 @@ input[type="submit"]:active {
   position: relative
 }
 
-#wordSprint .pie {
+.pie-chart .pie {
   background-color: var(--empty);
   background-image: linear-gradient(to right, transparent 50%, var(--fill) 0);
   display: inline-block;
@@ -548,7 +561,7 @@ input[type="submit"]:active {
   overflow: hidden;
 }
 
-#wordSprint .pie::before {
+.pie-chart .pie::before {
   content: '';
   display: block;
   margin-left: 50%;
@@ -559,7 +572,7 @@ input[type="submit"]:active {
   transform: rotate(calc(min(var(--percent), 0.5) * 360deg));
 }
 
-#wordSprint.more .pie::before {
+.pie-chart.more .pie::before {
   content: '';
   display: block;
   margin-left: 50%;
