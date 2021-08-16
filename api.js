@@ -69,6 +69,25 @@ let api = {};
 
       return true;
     },
+    cancelSprint: () => {
+      const currentWords = api.wordCountTotal();
+      const written = currentWords - startingWords;
+
+      q('#wordSprint__status').innerText =
+        `You wrote ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Impressive!`;
+
+      q('#wordSprint').style = '';
+      q('#wordSprint__cancel').style.display = 'none';
+      q('#wordSprint').classList.remove('more');
+      q('#wordSprint__modal').dataset.mode = 'finished';
+      q('#wordSprint').innerHTML = '<i class="fas fa-running"></i>';
+
+      if (!q('#wordSprint__checkbox').checked)
+        q('#wordSprint').click();
+
+      clearInterval(sprint.interval);
+      sprint = {};
+    },
     checkout: async (what, editable, stash = true) => {
       if (!(what === 'master' && editable) && stash) {
         await git.stash();
@@ -103,9 +122,7 @@ let api = {};
         customDictionary.indexOf(w) !== -1 ||
         !isNaN(w)
       ) return true;
-      return dictionary.check(w) ?
-        true :
-        api.suggestWords(w);
+      return dictionary.check(w);
     },
     commit: async (m) => {
       const message = m ? m : document.getElementById('git__commitText').value;
@@ -121,10 +138,12 @@ let api = {};
 
       setTimeout(api.populateGitHistory, 500);
     },
-    createItem: (type) => {
+    createItem: (type, first = false) => {
       let folder = q('#fileTree .active');
       let parent = null;
-      if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
+      if (first) {
+        parent = project.index;
+      } else if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
         folder = folder.parentNode;
       } else if (folder === null || folder.tagName !== 'DETAILS') {
         parent = project.index;
@@ -147,14 +166,20 @@ let api = {};
           }
         );
 
-        parent.push({
-          name: 'New File',
+        const newItem = {
+          name: 'Untitled File',
           path: filePath,
           words: 0
-        });
+        };
+
+        if (first) {
+          parent.splice(0, 0, newItem);
+        } else {
+          parent.push(newItem);
+        }
       }
       else if (type === 'folder') parent.push({
-        name: 'New Folder',
+        name: 'Untitled Folder',
         path: filePath,
         children: []
       });
@@ -165,7 +190,7 @@ let api = {};
       setTimeout(() => {
         if (type === 'file') {
           api.openItem(api.idFromPath(filePath)).click();
-          api.startRename(document.getElementById(api.idFromPath(filePath)));
+          if (!first) api.startRename(document.getElementById(api.idFromPath(filePath)));
         } else {
           document.getElementById(api.idFromPath(filePath)).click();
           document.getElementById(api.idFromPath(filePath)).open = true;
@@ -173,10 +198,10 @@ let api = {};
       }, 0);
     },
     debounce: (f, delay) => {
-      let interval = null;
-      return () => {
-        if (interval !== null) clearInterval(interval);
-        interval = setTimeout(f, delay);
+      let timeout = null;
+      return (...args) => {
+        if (timeout !== null) clearTimeout(timeout);
+        timeout = setTimeout(() => f(...args), delay);
       }
     },
     deleteItem: () => {
@@ -206,7 +231,18 @@ let api = {};
       project.index = project.index.filter(i => !i.delete);
 
       (item.tagName === 'SPAN' ? item : item.parentNode).remove();
+
       setTimeout(() => {
+        const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
+        if (typeof foundCurrent === 'undefined') {
+          if (api.flatten(project.index).filter(i => typeof i.children === 'undefined').length) {
+            currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
+            document.getElementById(api.idFromPath(currentFile.path)).click();
+            api.openFile(currentFile.path, currentFile.name, true);
+          } else {
+            api.createItem('file', true);
+          }
+        }
         api.saveProject();
       }, 0);
     },
@@ -274,7 +310,6 @@ let api = {};
       git = simpleGit({
         baseDir: (params.new ? projectPath : path.dirname(projectPath))
       });
-
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
         console.info('Initializing git repository...');
@@ -353,7 +388,9 @@ let api = {};
 
         // For compatibility with <v0.1.2
         if (typeof project.openFile === 'undefined') project.openFile = api.idFromPath(currentFile.path);
-        else currentFile = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
+
+        const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
+        if (typeof foundCurrent !== 'undefined') currentFile = foundCurrent;
 
         // For compatibility with <v0.2.1
         if (typeof project.metadata.title !== 'string')
@@ -452,6 +489,7 @@ let api = {};
                 draggable="true"
                 ondragstart="startMoveItem(event)"
                 ondragend="stopMoveItem(event)"
+                title="${item.name}"
                 onclick='event.preventDefault();api.focusItem(this.parentNode.id);'
                 ondblclick='this.parentNode.toggleAttribute("open");api.setOpenFolders();'
                 oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
@@ -465,6 +503,7 @@ let api = {};
           } else {
             html += `
             <span
+              title="${item.name}"
               onclick='event.preventDefault();api.focusItem(this.id)'
               ondblclick='api.openItem(this.id)'
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.id);"
@@ -530,12 +569,11 @@ let api = {};
         document.exitFullscreen();
         document.documentElement.requestFullscreen();
       });
-      const debouncedSaveFile = api.debounce(async () => {
-        if (!clearing) api.saveFile();
-      }, 500);
+      const debouncedSaveFile = api.debounce(api.saveFile, 500);
+      const throttledUpdateStats = api.throttle(api.updateStats, 1000);
       editor.codemirror.on("change", () => {
         if (clearing) return;
-        api.updateStats();
+        throttledUpdateStats();
         debouncedSaveFile();
       });
       clearing = false;
@@ -663,7 +701,7 @@ let api = {};
           const secondsLeft = Math.floor(timeLeft / (1000));
 
           document.getElementById('wordSprint__timeLeft').innerText = `${hoursLeft}:${minutesLeft < 10 ? 0 : ''}${minutesLeft}:${secondsLeft < 10 ? 0 : ''}${secondsLeft}`;
-        }, Math.max(Math.floor((end - start) / (360 * 10)), 5)),
+        }, Math.max(Math.floor((end - start)) / 360, 25)),
       };
 
       document.getElementById('wordSprint').classList.add('pie');
@@ -680,9 +718,8 @@ let api = {};
         if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
         e.contentEditable = true;
         e.focus();
-        document.execCommand('selectAll', false, null);
         e.addEventListener('keydown', (event) => {
-          if (event.key === ' ') {
+          if (event.key === ' ' && e.tagName === 'SUMMARY') {
             event.preventDefault();
             document.execCommand('insertText', false, ' ');
           }
@@ -697,19 +734,23 @@ let api = {};
           }
         });
         e.addEventListener('blur', api.renameItem.bind(this, e));
+        e.addEventListener('focus', document.execCommand('selectAll', false, null));
       }, 300);
     },
     renameItem: (e) => {
-      e.removeAttribute('contenteditable');
+      e.contentEditable = false;
 
       const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
 
-      if (e.innerText.length <= 0 || e.innerText === file.name) {
+      if (e.innerText.trim().length <= 0 || e.innerText.trim() === file.name) {
         e.innerText = file.name;
         return;
       }
 
-      file.name = e.innerText;
+      file.name = e.innerText.trim();
+      e.title = e.innerText.trim();
+
+      if (file.path === currentFile.path) api.updateStats();
 
       api.saveProject();
     },
@@ -738,7 +779,29 @@ let api = {};
 
       await api.checkout('master', true, false);
     },
-    updateStats: () => {
+    throttle: (f, delay) => {
+      // Based on https://www.geeksforgeeks.org/javascript-throttling/
+      let prev = 0;
+      let timeout = null;
+
+      return (...args) => {
+        let now = new Date().getTime();
+
+        if(now - prev > delay){
+          if (timeout !== null) clearTimeout(timeout);
+          prev = now;
+
+          return f(...args);
+        } else {
+          if (timeout !== null) clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            prev = now;
+            return f(...args);
+          }, delay);
+        }
+      }
+    },
+    updateStats: async () => {
       let content = marked(editor.value());
       var div = document.createElement("div");
       div.innerHTML = content;

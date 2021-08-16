@@ -71,7 +71,8 @@ a {
   grid-column: 1;
 }
 
-#fileTree span, #fileTree details summary, #fileTree button {
+#fileTree span, #fileTree details summary {
+  font-size: 1rem;
   padding: 0 0.5em;
   height: 1.75em;
   line-height: 1.75em;
@@ -91,7 +92,8 @@ a {
   color: #fff;
 }
 
-#fileTree #fileTree__list span[contenteditable], #fileTree #fileTree__list details summary[contenteditable] {
+#fileTree #fileTree__list span[contenteditable="true"],
+#fileTree #fileTree__list details summary[contenteditable="true"] {
   text-overflow: inherit;
   background-color: #fff;
   color: #000;
@@ -185,6 +187,7 @@ textarea {
 }
 
 #git__commits > span {
+  font-size: 1rem;
   padding: 0.25em 0.5em;
   display: block;
   border-top: 1px solid #777;
