@@ -103,9 +103,7 @@ let api = {};
         customDictionary.indexOf(w) !== -1 ||
         !isNaN(w)
       ) return true;
-      return dictionary.check(w) ?
-        true :
-        api.suggestWords(w);
+      return dictionary.check(w);
     },
     commit: async (m) => {
       const message = m ? m : document.getElementById('git__commitText').value;
