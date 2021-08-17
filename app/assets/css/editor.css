@@ -552,6 +552,9 @@ textarea {
 }
 
 /* Tabs */
+.focusMode .tab {
+  display: none;
+}
 
 .tab {
   position: absolute;
@@ -595,4 +598,14 @@ textarea {
 
 .tab.left[data-mode="open"]::after, .tab.right[data-mode="close"]::after {
   content: '>';
+}
+
+
+/* Editor Styles */
+.cm-comment {
+  font-family: monospace;
+}
+
+.cm-tab {
+  background-color: #ff04;
 }

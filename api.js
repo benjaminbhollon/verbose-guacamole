@@ -61,6 +61,26 @@ let api = {};
     api.showModal('projectDetails');
   });
 
+  // Fullscreen
+  _toggleFullScreen = SimpleMDE.toggleFullScreen;
+  toggleFullScreen = (e) => {
+    document.body.classList.toggle('focusMode');
+    function escapeFunction(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        document.exitFullscreen();
+        document.body.classList.remove('focusMode');
+        document.removeEventListener('keydown', escapeFunction);
+      }
+    }
+    if (!document.body.classList.contains('focusMode')) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+    document.body.addEventListener('keydown', escapeFunction);
+    _toggleFullScreen(e);
+  }
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'F11') toggleFullScreen(editor);
+  });
 
   api = {
     addGoal: (type, words) => {
@@ -602,24 +622,44 @@ let api = {};
       let options = {
         element: document.getElementById("editorTextarea"),
         spellChecker: false,
-        hideIcons: ['side-by-side', 'image'],
         status: false,
         placeholder: api.placeholders[placeholderN],
       	insertTexts: {
       		image: ["![](https://", ")"],
       	},
         autofocus: true,
-        autoDownloadFontAwesome: false
+        autoDownloadFontAwesome: false,
+        toolbar: [
+          'bold',
+          'italic',
+          'heading',
+          '|',
+          'quote',
+          'unordered-list',
+          'ordered-list',
+          'link',
+          '|',
+          'preview',
+          {
+            name: 'fullscreen',
+            action: toggleFullScreen,
+            className: 'fa fa-arrows-alt no-disable',
+            title: 'Focus Mode (F11)'
+          },
+          '|',
+          'guide'
+        ],
+        shortcuts: {
+          toggleFullScreen: null
+        }
       };
       if (readOnly) {
         options.hideIcons = ['side-by-side', 'image', 'preview'];
         options.placeholder = '';
       }
       editor = new SimpleMDE(options);
-      editor.toolbarElements.fullscreen.addEventListener('click', () => {
-        document.exitFullscreen();
-        document.documentElement.requestFullscreen();
-      });
+
+      // Fullscreen
       const debouncedSaveFile = api.debounce(api.saveFile, 500);
       const throttledUpdateStats = api.throttle(api.updateStats, 50);
       editor.codemirror.on("change", () => {
@@ -651,6 +691,7 @@ let api = {};
   				return null;
   			}
       });
+
 
       togglePreview = editor.toolbar.find(t => t.name === 'preview').action;
       if (readOnly && !editor.isPreviewActive()) setTimeout(() => {togglePreview(editor)}, 0);

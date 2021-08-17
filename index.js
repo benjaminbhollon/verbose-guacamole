@@ -114,15 +114,6 @@ const appMenu = Menu.buildFromTemplate([
     ]
   },
   {
-    label: 'Window',
-    submenu: [
-      {
-        label: 'Reload',
-        role: 'reload'
-      }
-    ]
-  },
-  {
     label: 'Tools',
     submenu: [
       {
@@ -166,6 +157,10 @@ const appMenu = Menu.buildFromTemplate([
       {
         label: 'Dev Tools',
         role: 'toggleDevTools'
+      },
+      {
+        label: 'Reload',
+        role: 'reload'
       },
       {
         label: 'Report Bug',

@@ -26,13 +26,14 @@
             'Padding word count',
             'Living happily ever after',
             'Procrastinating',
-            'Quoting the Raven'
+            'Quoting the Raven',
+            'Whiffling through the tulgey woods',
           ];
           document.querySelector('#loading p').innerText = wittyLoaders[Date.now() % wittyLoaders.length];
 
         setTimeout(() => {
           document.getElementById('loading').style.display = 'none';
-        }, 000);
+        }, 4000);
       </script>
     </div>
     <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, getDraggingIndex(), false)" ondragover="event.preventDefault()">
