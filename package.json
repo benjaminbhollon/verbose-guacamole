@@ -5,9 +5,10 @@
   "description": "A editor for writers (especially novelists) powered on the markdown and gittechnologies.",
   "main": "index.js",
   "scripts": {
-    "start": "electron-forge start",
-    "make": "electron-forge make",
-    "package": "electron-forge package"
+    "start": "electron .",
+    "postinstall": "electron-builder install-app-deps",
+    "build": "electron-builder --mac --windows --linux",
+    "release": "electron-builder --mac --windows --linux --publish always"
   },
   "repository": {
     "type": "git",
@@ -20,57 +21,32 @@
   },
   "homepage": "https://github.com/benjaminbhollon/verbose-guacamole#readme",
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.59",
-    "@electron-forge/maker-deb": "^6.0.0-beta.59",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.59",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
-    "@electron-forge/maker-zip": "^6.0.0-beta.59",
-    "electron": "^13.1.7"
+    "electron": "^13.1.7",
+    "electron-builder": "^22.11.7"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
+    "electron-updater": "^4.3.9",
     "marked": "^2.1.3",
     "simple-git": "^2.44.0",
     "simplemde": "^1.11.2",
     "typo-js": "^1.2.0"
   },
   "build": {
-    "fileAssociations": [
-      {
-        "ext": "vgp",
-        "name": "Verbose Guacamole Project",
-        "role": "Editor",
-        "perMachine": true
-      }
-    ]
-  },
-  "config": {
-    "forge": {
-      "packagerConfig": {
-        "icon": "./icons/icon"
-      },
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "verbose_guacamole"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
+    "appId": "com.VerboseGuacamole.yourapp",
+    "productName": "Verbose Guacamole",
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "dmg": {
+      "icon": false
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office"
+    },
+    "copyright": "© 2021 Benjamin Hollon and other Verbose Guacamole contributors"
   }
 }
