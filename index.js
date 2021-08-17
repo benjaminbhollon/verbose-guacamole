@@ -5,7 +5,6 @@ const { app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('electro
 const url = require('url');
 const path = require('path');
 const fs = require('fs');
-const autoUpdater = require("electron-updater");
 
 // Manage electron-squirrel-startup
 if (require('electron-squirrel-startup')) return app.quit();
@@ -32,10 +31,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
-});
-
-app.on('ready', () => {
-	autoUpdater.checkForUpdatesAndNotify();
 });
 
 app.on('activate', () => {
