@@ -469,6 +469,8 @@ if (inEditor) {
         if (typeof project.history.wordCount === 'undefined') project.history.wordCount = {};
       }
 
+      fs.writeFileSync(path.resolve(path.dirname(projectPath), '.gitignore'), '.lock');
+
       // Update goals
       project.goals = project.goals.map(g => {
         let goal = g;
