@@ -509,6 +509,7 @@ body.locked #locked {
   --fill: #0f02;
   padding: 0.5em;
   border: 0.1em solid #080;
+  position: relative;
 }
 
 #wordGoal__list > div,
@@ -521,6 +522,30 @@ body.locked #locked {
 #wordGoal__archived > div.completed {
   background: #0f0;
   color: #440;
+}
+
+#wordGoal__list > div .archive {
+  color: red;
+  display: none;
+  background-color: #fff;
+  border: 2px solid red;
+  border-radius: 0.5em;
+  padding: 0.2em 0.25em;
+  transition: color 0.2s, background-color 0.2;
+  cursor: pointer;
+  position: absolute;
+  right: 0.25em;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#wordGoal__list > div:hover .archive {
+  display: inline-block;
+}
+
+#wordGoal__list > div .archive:hover {
+  color: #fff;
+  background-color: red;
 }
 
 /* Pie charts */

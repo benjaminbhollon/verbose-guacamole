@@ -70,6 +70,7 @@ if (inEditor) {
       if (typeof words !== 'number' || words <= 0) return false;
 
       let newGoal = {
+        id: api.idFromPath(api.fileName()),
         type,
         words,
         date: (new Date()).toISOString(),
@@ -95,7 +96,7 @@ if (inEditor) {
 
       return true;
     },
-    archiveGoals: (includeProject = false) => {
+    archiveCompleteGoals: (includeProject = false) => {
       project.goals = project.goals.map(g => {
         let newGoal = g;
         if (api.wordCountTotal() - g.startingWords >= g.words) {
@@ -107,6 +108,23 @@ if (inEditor) {
       });
 
       api.updateGoals(includeProject);
+
+      api.saveProject();
+    },
+    archiveGoal: (id) => {
+      const goal = project.goals.find(g => g.id === id);
+      if (typeof goal === 'undefined') return false;
+
+      if (goal.type === 'daily') {
+        goal.history.push({
+          date: goal.date,
+          progress: api.wordCountTotal() - goal.startingWords
+        });
+      }
+
+      goal.archived = true;
+
+      api.updateGoals();
 
       api.saveProject();
     },
@@ -452,6 +470,7 @@ if (inEditor) {
       // Update goals
       project.goals = project.goals.map(g => {
         let goal = g;
+        if (!g.id) goal.id = api.idFromPath(api.fileName());
         if (goal.type === 'session') {
           goal.archived = true;
           goal.final = api.wordCountTotal();
@@ -929,35 +948,12 @@ if (inEditor) {
       }
       return true;
     },
-    updateStats: async () => {
-      let content = marked(editor.value());
-      var div = document.createElement("div");
-      div.innerHTML = content;
-      content = div.innerText;
-      let stats = {};
-
-      stats.words = api.wordCount(content);
-
-      api.flatten(project.index).find(i => i.path === currentFile.path).words = stats.words;
-
-      // If in the future the current word count should be saved as it updates, create a debounced function for it.
-      // Currently, the word count is updated on init(), so the editor doesn't need to update the file.
-
-      stats.words = stats.words.toLocaleString() + ' words';
-
-      stats.lines = content.split('\n').filter(l => l.length).length + ' lines';
-
-      // Update stats element
-      document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
-
-      // Update novel stats
-      document.getElementById('novelStats__open').innerText = currentFile.name;
-      let totalWords = api.wordCountTotal();
-
-      document.getElementById('novelStats__words').innerText = totalWords.toLocaleString() +
-        ` (${(totalWords < startingWords ? '' : '+') + (totalWords - startingWords).toLocaleString()})`;
-
-      api.updateGoals();
+    updateDetails: (toUpdate) => {
+      if (readOnly) return alert('You cannot update novel details while in Read Only mode.');
+      for (var key of Object.keys(toUpdate)) {
+        if (project.metadata[key] !== undefined) project.metadata[key] = toUpdate[key];
+      }
+      api.saveProject();
     },
     updateGoals: async (updateHTML = true) => {
       let goals = project.goals
@@ -994,6 +990,7 @@ if (inEditor) {
         .map(g => {
           return `<div ${g.completed ? 'class="completed"' : ''} style="--percent:${g.done * 100 / g.words}%">
             ${g.type} goal: ${g.done} / ${g.words} words
+            <span title="Archive Goal" class="archive" onclick="api.archiveGoal('${g.id}')"><i class="far fa-trash-alt"></i></span>
           </div>`
         });
 
@@ -1016,6 +1013,7 @@ if (inEditor) {
           .map(g => {
             return `<div ${g.completed ? 'class="completed"' : ''} style="--percent:${g.done * 100 / g.words}%">
               ${g.type} goal: ${g.done} / ${g.words} words
+              <span title="Archive Goal" class="archive" onclick="api.archiveGoal('${g.id}')"><i class="far fa-trash-alt"></i></span>
             </div>`
           });
 
@@ -1047,12 +1045,35 @@ if (inEditor) {
           q('#wordGoal__archived').innerHTML = archived.join('');
       }
     },
-    updateDetails: (toUpdate) => {
-      if (readOnly) return alert('You cannot update novel details while in Read Only mode.');
-      for (var key of Object.keys(toUpdate)) {
-        if (project.metadata[key] !== undefined) project.metadata[key] = toUpdate[key];
-      }
-      api.saveProject();
+    updateStats: async () => {
+      let content = marked(editor.value());
+      var div = document.createElement("div");
+      div.innerHTML = content;
+      content = div.innerText;
+      let stats = {};
+
+      stats.words = api.wordCount(content);
+
+      api.flatten(project.index).find(i => i.path === currentFile.path).words = stats.words;
+
+      // If in the future the current word count should be saved as it updates, create a debounced function for it.
+      // Currently, the word count is updated on init(), so the editor doesn't need to update the file.
+
+      stats.words = stats.words.toLocaleString() + ' words';
+
+      stats.lines = content.split('\n').filter(l => l.length).length + ' lines';
+
+      // Update stats element
+      document.getElementById('editor__stats').innerText = Object.values(stats).join(', ') + '.';
+
+      // Update novel stats
+      document.getElementById('novelStats__open').innerText = currentFile.name;
+      let totalWords = api.wordCountTotal();
+
+      document.getElementById('novelStats__words').innerText = totalWords.toLocaleString() +
+        ` (${(totalWords < startingWords ? '' : '+') + (totalWords - startingWords).toLocaleString()})`;
+
+      api.updateGoals();
     },
     wordCount: (t) => {
       let value = typeof t === 'undefined' ? editor.value() : t;

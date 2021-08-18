@@ -19,6 +19,11 @@ A pie chart representing the time left will replace the running icon during a sp
 ### Filesystem
 VerbGuac projects are split into files, which can be separated into folders. >=v0.1.1 supports file and folder creating, renaming, moving, editing, and deleting. Open folders and files are also maintained between open sessions.
 
+### Whimsy
+We've done our best to fill VerbGuac with as much whimsy as possible, including witty loading comments and editor placeholders that are famous first lines from novels.
+
+If you have an idea for a way to make the VerbGuac experience fun, let us know!
+
 ### The Future
 VerbGuac is still under development. Future features include:
 

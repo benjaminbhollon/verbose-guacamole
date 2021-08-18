@@ -91,7 +91,7 @@
           <i class="fas fa-running"></i>
         </label>
         <input id="wordGoal__checkbox" type="checkbox" class="--hidden">
-        <label onclick="this.classList.remove('flash');document.getElementById('wordGoal__popup').classList.toggle('visible');api.archiveGoals()" id="wordGoal" for="wordGoal__checkbox">
+        <label onclick="this.classList.remove('flash');document.getElementById('wordGoal__popup').classList.toggle('visible');api.archiveCompleteGoals()" id="wordGoal" for="wordGoal__checkbox">
           Total words: <span id="novelStats__words">0</span>
         </label>
       </div>
@@ -123,6 +123,7 @@
         <select id="wordGoal__inputType">
           <option value="session">Session</option>
           <option value="daily">Daily</option>
+          <option value="project">Project</option>
         </select>
         <label for="wordGoal__inputWords">Target Words</label>
         <input type="number" id="wordGoal__inputWords" value="300" min="0">
@@ -154,7 +155,7 @@
     <div id="projectGoalComplete" class="modal">
       <h3>Congratulations!</h3>
       <p>You've completed your goal of <span id="projectGoalComplete__wordCount"></span> total words in just <span id="projectGoalComplete__days"></span> days!</p>
-      <a href="#" onclick="this.parentNode.classList.remove('visible');api.archiveGoals(true)" class="button">Keep writing!</a>
+      <a href="#" onclick="this.parentNode.classList.remove('visible');api.archiveCompleteGoals(true)" class="button">Keep writing!</a>
     </div>
     <div id="contextMenu">
       <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
