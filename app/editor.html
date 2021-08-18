@@ -140,6 +140,11 @@
       </form>
       <a href="#" onclick="this.parentNode.classList.remove('visible');updateProjectDetails()" class="button">Save and Close</a>
     </div>
+    <div id="projectGoalComplete" class="modal">
+      <h3>Congratulations!</h3>
+      <p>You've completed your goal of <span id="projectGoalComplete__wordCount"></span> total words in just <span id="projectGoalComplete__days"></span> days!</p>
+      <a href="#" onclick="this.parentNode.classList.remove('visible');api.archiveGoals(true)" class="button">Keep writing!</a>
+    </div>
     <div id="contextMenu">
       <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
       <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>

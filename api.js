@@ -86,7 +86,8 @@ let api = {};
     addGoal: (type, words) => {
       const allowedTypes = [
         'session',
-        'daily'
+        'daily',
+        'project'
       ];
       if (allowedTypes.indexOf(type) === -1) return false;
       if (typeof words !== 'number' || words <= 0) return false;
@@ -95,7 +96,7 @@ let api = {};
         type,
         words,
         date: (new Date()).toISOString(),
-        startingWords: api.wordCountTotal(),
+        startingWords: (type === 'project' ? 0 : api.wordCountTotal()),
         archived: false
       }
 
@@ -117,17 +118,18 @@ let api = {};
 
       return true;
     },
-    archiveGoals: () => {
+    archiveGoals: (includeProject = false) => {
       project.goals = project.goals.map(g => {
         let newGoal = g;
         if (api.wordCountTotal() - g.startingWords >= g.words) {
-          newGoal.archived = true;
+          if (g.type === 'session' || (g.type === 'project' && includeProject)) newGoal.archived = true;
+          if (g.type === 'daily') newGoal.acknowledged = true;
         }
 
         return newGoal;
       });
 
-      api.updateGoals(false);
+      api.updateGoals(includeProject);
 
       api.saveProject();
     },
@@ -785,16 +787,21 @@ let api = {};
       api.saveProject();
     },
     showModal: (name) => {
+      let modal = null;
       switch (name) {
         case 'projectDetails':
           if (readOnly) return alert('You cannot update novel details while in Read Only mode.');
-          const modal = document.getElementById('projectDetails');
+          modal = document.getElementById('projectDetails');
 
           // Restore values
           document.getElementById('projectDetails__title').value = project.metadata.title;
           document.getElementById('projectDetails__author').value = project.metadata.author;
           document.getElementById('projectDetails__synopsis').value = project.metadata.synopsis;
 
+          modal.classList.add('visible');
+          break;
+        case 'projectGoalComplete':
+          modal = document.getElementById('projectGoalComplete');
           modal.classList.add('visible');
           break;
         default:
@@ -944,7 +951,7 @@ let api = {};
     },
     updateGoals: async (updateHTML = true) => {
       let goals = project.goals
-        .filter(g => !g.archived)
+        .filter(g => !g.archived && !g.acknowledged)
         .map(g => {
           let newGoal = g;
           newGoal.done = Math.min(api.wordCountTotal() - g.startingWords, g.words);
@@ -956,13 +963,21 @@ let api = {};
           return (a.words - a.done) - (b.words - b.done)
         })
 
+      if (goals.length && goals[0].type === 'project' && goals[0].completed) {
+        q('#projectGoalComplete__wordCount').innerText = goals[0].words.toLocaleString();
+        q('#projectGoalComplete__days').innerText =
+          Math.floor(
+            (Date.now() - (new Date(goals[0].date))) / (1000 * 60 * 60 * 24)
+          ).toLocaleString();
+        setTimeout(api.showModal.bind(this, 'projectGoalComplete'), 1500);
+        return;
+      }
+
       if (goals.length) {
         q('#wordGoal').style = `--percent:${100*goals[0].done / goals[0].words}%`;
         if (goals[0].completed) q('#wordGoal').classList.add('flash');
         else q('#wordGoal').classList.remove('flash');
-      } else {q('#wordGoal').style = `--percent:0%`;
-
-      }
+      } else q('#wordGoal').style = `--percent:0%`;
 
       goals = goals
         .map(g => {
