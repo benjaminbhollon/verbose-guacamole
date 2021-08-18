@@ -117,16 +117,8 @@ const appMenu = Menu.buildFromTemplate([
     label: 'Tools',
     submenu: [
       {
-        label: 'Preferences',
-        accelerator: 'CommandOrControl+,',
-        click() {
-          dialog.showMessageBox({
-            message: 'Preferences coming soon to a VerbGuac outlet near you!'
-          });
-        }
-      },
-      {
         label: 'Focus Mode',
+        accelerator: 'F11',
         click() {
           win.webContents.send('toggleFullScreen');
         }

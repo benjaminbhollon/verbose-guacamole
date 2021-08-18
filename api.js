@@ -71,11 +71,8 @@ let api = {};
     if (!document.body.classList.contains('focusMode')) document.exitFullscreen();
     else document.documentElement.requestFullscreen();
     document.body.addEventListener('keydown', escapeFunction);
-    _toggleFullScreen(e);
+    if (e !== null) _toggleFullScreen(e);
   }
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'F11') toggleFullScreen(editor);
-  });
 
   // Respond to main process
   ipcRenderer.on('updateProjectDetails', () => {
