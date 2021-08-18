@@ -124,6 +124,12 @@ const appMenu = Menu.buildFromTemplate([
             message: 'Preferences coming soon to a VerbGuac outlet near you!'
           });
         }
+      },
+      {
+        label: 'Focus Mode',
+        click() {
+          win.webContents.send('toggleFullScreen');
+        }
       }
     ]
   },
@@ -146,6 +152,19 @@ const appMenu = Menu.buildFromTemplate([
 
               help.loadFile('./app/help/git/commits.html');
             }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    label: 'Preferences',
+    submenu: [
+      {
+        label: 'Themes',
+        submenu: [
+          {
+            label: 'Coming soon!'
           }
         ]
       }

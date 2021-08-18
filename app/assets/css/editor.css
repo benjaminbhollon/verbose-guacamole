@@ -395,7 +395,11 @@ textarea {
   position: relative;
   height: 1.875em;
   width: 1.875em;
-  padding: 0.31em 1em;
+  padding: 0.31em 0.5em;
+}
+
+#wordSprint {
+  padding: 0.31em 1em!important;
 }
 
 #novelStats label:hover {

@@ -56,11 +56,6 @@ let api = {};
   // Define what separates a word
 	const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
 
-  // Respond to main process
-  ipcRenderer.on('updateProjectDetails', () => {
-    api.showModal('projectDetails');
-  });
-
   // Fullscreen
   _toggleFullScreen = SimpleMDE.toggleFullScreen;
   toggleFullScreen = (e) => {
@@ -82,10 +77,19 @@ let api = {};
     if (event.key === 'F11') toggleFullScreen(editor);
   });
 
+  // Respond to main process
+  ipcRenderer.on('updateProjectDetails', () => {
+    api.showModal('projectDetails');
+  });
+  ipcRenderer.on('toggleFullScreen', () => {
+    toggleFullScreen(editor);
+  });
+
   api = {
     addGoal: (type, words) => {
       const allowedTypes = [
-        'session'
+        'session',
+        'daily'
       ];
       if (allowedTypes.indexOf(type) === -1) return false;
       if (typeof words !== 'number' || words <= 0) return false;
@@ -99,6 +103,10 @@ let api = {};
       }
 
       project.goals.push(newGoal);
+
+      if (type === 'daily') {
+        newGoal.history = [];
+      }
 
       q('#wordGoal__addForm').open = false;
 
@@ -457,12 +465,26 @@ let api = {};
         if (typeof project.goals === 'undefined') project.goals = [];
       }
 
-      // Clear out session goals
+      // Update goals
       project.goals = project.goals.map(g => {
         let goal = g;
         if (goal.type === 'session') {
           goal.archived = true;
           goal.final = api.wordCountTotal();
+        } else if (
+          goal.type === 'daily' &&
+          !goal.archived &&
+          (
+            !goal.history.length ||
+            goal.date.split('T')[0] < (new Date()).toISOString().split('T')[0]
+          )
+        ) {
+          goal.history.push({
+            date: g.date,
+            progress: api.wordCountTotal() - g.startingWords
+          });
+          goal.startingWords = api.wordCountTotal();
+          goal.date = (new Date()).toISOString();
         }
 
         return goal;
@@ -473,7 +495,7 @@ let api = {};
 
       setTimeout(() => {
         document.getElementById(api.idFromPath(currentFile.path)).click();
-      }, 3000);
+      }, 1000);
     },
     isReadOnly: () => readOnly,
     moveItem: (p, t, c, index, order, main = false) => {
