@@ -194,7 +194,7 @@ function startSprint() {
 function resetSprint() {
   q('#wordSprint__timeLeft').innerText = '';
   q('#wordSprint__status').innerText = '';
-  q('#wordSprint__modal').dataset.mode = 'set';
+  q('#wordSprint__popup').dataset.mode = 'set';
   q('#wordSprint__cancel').style.display = 'block';
 }
 
@@ -220,5 +220,3 @@ function togglePanel(panelId, tabId) {
 }
 
 api.init(params);
-
-console.log('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.');

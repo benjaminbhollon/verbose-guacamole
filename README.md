@@ -16,8 +16,16 @@ Starting in v0.2.2, words sprints are built in. Pressing the icon of a runner in
 
 A pie chart representing the time left will replace the running icon during a sprint.
 
+### Word Count Goals
+Starting in v0.3.2, users can set session, daily, and project goals. Session goals are over as soon as the editor is closed. Daily goals reset each day until archived. Project goals last until the user hits the total word count set.
+
 ### Filesystem
 VerbGuac projects are split into files, which can be separated into folders. >=v0.1.1 supports file and folder creating, renaming, moving, editing, and deleting. Open folders and files are also maintained between open sessions.
+
+### Whimsy
+We've done our best to fill VerbGuac with as much whimsy as possible, including witty loading comments and editor placeholders that are famous first lines from novels.
+
+If you have an idea for a way to make the VerbGuac experience fun, let us know!
 
 ### The Future
 VerbGuac is still under development. Future features include:

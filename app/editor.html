@@ -26,7 +26,8 @@
             'Padding word count',
             'Living happily ever after',
             'Procrastinating',
-            'Quoting the Raven'
+            'Quoting the Raven',
+            'Whiffling through the tulgey woods',
           ];
           document.querySelector('#loading p').innerText = wittyLoaders[Date.now() % wittyLoaders.length];
 
@@ -34,6 +35,13 @@
           document.getElementById('loading').style.display = 'none';
         }, 4000);
       </script>
+    </div>
+    <div id="locked">
+      <div>
+        <h2><i class="fas fa-lock"></i> Project is Locked</h2>
+        <p>Opening the same project in two VerbGuac windows at the same time can cause dangerous errors in your project. If you're sure all other windows are closed, you may unlock this project.</p>
+        <input type="submit" value="Unlock" onclick="api.ignoreLock();document.body.classList.remove('locked');">
+      </div>
     </div>
     <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, getDraggingIndex(), false)" ondragover="event.preventDefault()">
       <div id="fileTree__actions" ondrop="api.moveItem(event, getDraggingIndex(), true)">
@@ -78,14 +86,17 @@
         <span>Editing <span id="novelStats__open">New File</span></span>
       </div>
       <div class="right">
-        <input id="wordSprint__checkbox" type="checkbox" class="--hidden">
-        <label onclick="document.getElementById('wordSprint__modal').classList.toggle('visible')" title="Word Sprints" for="wordSprint__checkbox" id="wordSprint">
+        <input id="wordSprint__checkbox" type="checkbox" class="--hidden" class="novelStats__modal">
+        <label onclick="document.getElementById('wordSprint__popup').classList.toggle('visible')" title="Word Sprints" for="wordSprint__checkbox" id="wordSprint">
           <i class="fas fa-running"></i>
         </label>
-        <span>Total words: <span id="novelStats__words">0</span></span>
+        <input id="wordGoal__checkbox" type="checkbox" class="--hidden">
+        <label onclick="this.classList.remove('flash');document.getElementById('wordGoal__popup').classList.toggle('visible');api.archiveCompleteGoals()" id="wordGoal" for="wordGoal__checkbox">
+          Total words: <span id="novelStats__words">0</span>
+        </label>
       </div>
     </section>
-    <div id="wordSprint__modal" data-mode="set">
+    <div id="wordSprint__popup" class="novelStats__modal" data-mode="set">
       <h2>Word Sprints</h2>
       <div class="set">
         <p>Start a new word sprint:</p>
@@ -100,6 +111,28 @@
       <div class="finished">
         <input type="submit" value="Sprint Again" onclick="resetSprint()">
       </div>
+    </div>
+    <div id="wordGoal__popup" class="novelStats__modal">
+      <h2>Goals</h2>
+      <p>Your writing goals:</p>
+      <div id="wordGoal__list"></div>
+      <br>
+      <details id="wordGoal__addForm">
+        <summary>Add Goal</summary>
+        <label for="wordGoal__inputType">Goal Type</label>
+        <select id="wordGoal__inputType">
+          <option value="session">Session</option>
+          <option value="daily">Daily</option>
+          <option value="project">Project</option>
+        </select>
+        <label for="wordGoal__inputWords">Target Words</label>
+        <input type="number" id="wordGoal__inputWords" value="300" min="0">
+        <input onclick="api.addGoal(q('#wordGoal__inputType').value, parseInt(q('#wordGoal__inputWords').value))" type="submit" value="Create Goal">
+      </details>
+      <details>
+        <summary>Archived Goals</summary>
+        <div id="wordGoal__archived"></div>
+      </details>
     </div>
     <div id="projectDetails" class="modal">
       <h3>Update Project Details</h3>
@@ -118,6 +151,11 @@
         </label>
       </form>
       <a href="#" onclick="this.parentNode.classList.remove('visible');updateProjectDetails()" class="button">Save and Close</a>
+    </div>
+    <div id="projectGoalComplete" class="modal">
+      <h3>Congratulations!</h3>
+      <p>You've completed your goal of <span id="projectGoalComplete__wordCount"></span> total words in just <span id="projectGoalComplete__days"></span> days!</p>
+      <a href="#" onclick="this.parentNode.classList.remove('visible');api.archiveCompleteGoals(true)" class="button">Keep writing!</a>
     </div>
     <div id="contextMenu">
       <span onclick="api.deleteItem()" id="deleteButton">Delete</span>

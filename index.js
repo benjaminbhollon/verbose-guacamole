@@ -19,6 +19,14 @@ function createWindow () {
       icon: './icons/icon.png'
     }
   });
+
+  win.on('close', (e) => {
+    if (win) {
+      e.preventDefault();
+      win.webContents.send('app-close');
+    }
+  });
+
   win.hide();
   win.maximize();
 
@@ -79,113 +87,219 @@ function openProject() {
 }
 
 /* Application menu */
-const appMenu = Menu.buildFromTemplate([
-  {
-    label: 'File',
-    submenu: [
-      {
-        label: 'Open Project',
-        accelerator: 'CommandOrControl+O',
-        click() {
-          openProject();
-        }
-      },
-      {
-        label: 'New Project',
-        accelerator: 'CommandOrControl+Shift+N',
-        click() {
-          newProject();
-        }
-      },
-      {
-        type: 'separator'
-      }
-    ]
-  },
-  {
-    label: 'Edit',
-    submenu: [
-      {
-        label: 'Update Project Details',
-        click() {
-          win.webContents.send('updateProjectDetails');
-        }
-      }
-    ]
-  },
-  {
-    label: 'Window',
-    submenu: [
-      {
-        label: 'Reload',
-        role: 'reload'
-      }
-    ]
-  },
-  {
-    label: 'Tools',
-    submenu: [
-      {
-        label: 'Preferences',
-        accelerator: 'CommandOrControl+,',
-        click() {
-          dialog.showMessageBox({
-            message: 'Preferences coming soon to a VerbGuac outlet near you!'
-          });
-        }
-      }
-    ]
-  },
-  {
-    label: 'Help',
-    submenu: [
-      {
-        label: 'Git',
-        submenu: [
-          {
-            label: 'What are commits?',
-            click() {
-              const help = new BrowserWindow({
-                webPreferences: {
-                  nodeIntegration: false,
-                  enableRemoteModule: false,
-                  contextIsolation: true
-                }
-              });
-
-              help.loadFile('./app/help/git/commits.html');
-            }
+const menus = {
+  editor: Menu.buildFromTemplate([
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Open Project',
+          accelerator: 'CommandOrControl+O',
+          click() {
+            openProject();
           }
-        ]
-      }
-    ]
-  },
-  {
-    label: 'Debug',
-    submenu: [
-      {
-        label: 'Dev Tools',
-        role: 'toggleDevTools'
-      },
-      {
-        label: 'Report Bug',
-        click() {
-          const report = new BrowserWindow({
-            webPreferences: {
-              nodeIntegration: false,
-              enableRemoteModule: false,
-              contextIsolation: true
-            }
-          });
-
-          report.loadURL('https://github.com/benjaminbhollon/verbose-guacamole/issues/new');
+        },
+        {
+          label: 'New Project',
+          accelerator: 'CommandOrControl+Shift+N',
+          click() {
+            newProject();
+          }
         }
-      }
-    ]
-  }
-])
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        {
+          label: 'Update Project Details',
+          click() {
+            win.webContents.send('updateProjectDetails');
+          }
+        }
+      ]
+    },
+    {
+      label: 'Tools',
+      submenu: [
+        {
+          label: 'Focus Mode',
+          accelerator: 'F11',
+          click() {
+            win.webContents.send('toggleFullScreen');
+          }
+        }
+      ]
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'Git',
+          submenu: [
+            {
+              label: 'What are commits?',
+              click() {
+                const help = new BrowserWindow({
+                  webPreferences: {
+                    nodeIntegration: false,
+                    enableRemoteModule: false,
+                    contextIsolation: true
+                  }
+                });
 
-Menu.setApplicationMenu(appMenu);
+                help.loadFile('./app/help/git/commits.html');
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      label: 'Preferences',
+      submenu: [
+        {
+          label: 'Themes',
+          submenu: [
+            {
+              label: 'Coming soon!'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      label: 'Debug',
+      submenu: [
+        {
+          label: 'Dev Tools',
+          role: 'toggleDevTools'
+        },
+        {
+          label: 'Reload',
+          click() {
+            win.webContents.send('reload');
+          },
+          accelerator: 'CommandOrControl+R'
+        },
+        {
+          label: 'Report Bug',
+          click() {
+            const report = new BrowserWindow({
+              webPreferences: {
+                nodeIntegration: false,
+                enableRemoteModule: false,
+                contextIsolation: true
+              }
+            });
+
+            report.loadURL('https://github.com/benjaminbhollon/verbose-guacamole/issues/new');
+          }
+        }
+      ]
+    }
+  ]),
+  default: Menu.buildFromTemplate([
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Open Project',
+          accelerator: 'CommandOrControl+O',
+          click() {
+            openProject();
+          }
+        },
+        {
+          label: 'New Project',
+          accelerator: 'CommandOrControl+Shift+N',
+          click() {
+            newProject();
+          }
+        }
+      ]
+    },
+    {
+      label: 'Tools',
+      submenu: [
+        {
+          label: 'Focus Mode',
+          accelerator: 'F11',
+          click() {
+            win.webContents.send('toggleFullScreen');
+          }
+        }
+      ]
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'Git',
+          submenu: [
+            {
+              label: 'What are commits?',
+              click() {
+                const help = new BrowserWindow({
+                  webPreferences: {
+                    nodeIntegration: false,
+                    enableRemoteModule: false,
+                    contextIsolation: true
+                  }
+                });
+
+                help.loadFile('./app/help/git/commits.html');
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      label: 'Preferences',
+      submenu: [
+        {
+          label: 'Themes',
+          submenu: [
+            {
+              label: 'Coming soon!'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      label: 'Debug',
+      submenu: [
+        {
+          label: 'Dev Tools',
+          role: 'toggleDevTools'
+        },
+        {
+          label: 'Reload',
+          accelerator: 'CommandOrControl+R',
+          role: 'reload'
+        },
+        {
+          label: 'Report Bug',
+          click() {
+            const report = new BrowserWindow({
+              webPreferences: {
+                nodeIntegration: false,
+                enableRemoteModule: false,
+                contextIsolation: true
+              }
+            });
+
+            report.loadURL('https://github.com/benjaminbhollon/verbose-guacamole/issues/new');
+          }
+        }
+      ]
+    }
+  ])
+}
+
+Menu.setApplicationMenu(menus.default);
 
 /* Messages from renderer process */
 ipcMain.on('openProject', (event) => {
@@ -193,6 +307,18 @@ ipcMain.on('openProject', (event) => {
 });
 ipcMain.on('newProject', (event) => {
   newProject();
+});
+ipcMain.on('appMenuDefault', (event) => {
+  Menu.setApplicationMenu(menus.default);
+});
+ipcMain.on('appMenuEditor', (event) => {
+  Menu.setApplicationMenu(menus.editor);
+});
+ipcMain.on('closed', (event) => {
+  win = null;
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
 // Make appData directory
