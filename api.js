@@ -10,6 +10,8 @@ const SimpleMDE = require('simplemde');
 const { ipcRenderer } = require('electron');
 const Typo = require('typo-js');
 
+const inEditor = path.parse(location.href).name.split('?')[0] === 'editor.html';
+
 // Initialize variables
 let git = null;
 let placeholders = [
@@ -79,6 +81,29 @@ ipcRenderer.on('updateProjectDetails', () => {
 });
 ipcRenderer.on('toggleFullScreen', () => {
   toggleFullScreen(editor);
+});
+ipcRenderer.on('app-close', () => {
+  if (inEditor) {
+    // Save files
+    api.saveFile();
+    api.saveProject();
+
+    // Unlock project for other sessions
+    api.unlockProject();
+  }
+  ipcRenderer.send('closed');
+});
+ipcRenderer.on('reload', () => {
+  if (inEditor) {
+    // Save files
+    api.saveFile();
+    api.saveProject();
+
+    // Unlock project for other sessions
+    api.unlockProject();
+  }
+
+  location.reload();
 });
 
 api = {
@@ -346,6 +371,11 @@ api = {
   idFromPath: (p) => {
     return p.split('/').slice(-1)[0].split('.')[0];
   },
+  ignoreLock: () => {
+    readOnly = false;
+    q('body').dataset.readonly = 'false';
+    api.resetEditor();
+  },
   init: async (params) => {
     // Get app data directory
     await (new Promise((resolve, reject) => {
@@ -368,6 +398,9 @@ api = {
 
     params = querystring.parse(params);
     projectPath = params.f;
+
+    // Lock project
+    api.lockProject();
 
     // Initialize git in project directory
     git = simpleGit({
@@ -496,6 +529,21 @@ api = {
     }, 1000);
   },
   isReadOnly: () => readOnly,
+  lockProject: () => {
+    try {
+      if (fs.statSync(path.resolve(projectPath, '../.lock'))) {
+        readOnly = true;
+        document.body.classList.add('locked');
+      }
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        console.error(err);
+      }
+    }
+
+    fs.writeFileSync(path.resolve(projectPath, '../.lock'), '');
+    return true;
+  },
   moveItem: (p, t, c, index, order, main = false) => {
     const parent = p ? api.flatten(project.index).find(f => f.path === p) : {children: project.index};
     const target = t ? api.flatten(project.index).find(f => f.path === t) : {children: project.index};
@@ -918,6 +966,16 @@ api = {
       }
     }
   },
+  unlockProject: () => {
+    // Don't unlock if you've detected another window locked it
+    if (document.body.classList.contains('locked')) return false;
+    try {
+      fs.unlinkSync(path.resolve(projectPath, '../.lock'));
+    } catch (err) {
+      console.warn(err);
+    }
+    return true;
+  },
   updateStats: async () => {
     let content = marked(editor.value());
     var div = document.createElement("div");
@@ -1064,7 +1122,7 @@ let project = {
 
 let placeholderN = Date.now() % api.placeholders.length;
 
-if (path.parse(location.href).name.split('?')[0] === 'editor.html') {
+if (inEditor) {
   ipcRenderer.send('appMenuEditor');
   module.exports = api;
 }

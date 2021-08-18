@@ -277,7 +277,7 @@ textarea {
 
 /* Loading */
 
-#loading {
+#loading, #locked {
   position: fixed;
   top: 0;
   left: 0;
@@ -287,7 +287,7 @@ textarea {
   z-index: 1000;
 }
 
-#loading p {
+#loading p, #locked div {
   margin: 0;
   position: absolute;
   left: 50vw;
@@ -301,6 +301,22 @@ textarea {
   animation: dots 1.5s infinite;
   width: 0;
   display: inline-block;
+}
+
+#locked {
+  display: none;
+}
+
+#locked div {
+  font-size: 1em;
+}
+
+#locked h2 {
+  text-align: center;
+}
+
+body.locked #locked {
+  display: block;
 }
 
 @keyframes dots {

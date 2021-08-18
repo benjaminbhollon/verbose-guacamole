@@ -19,6 +19,14 @@ function createWindow () {
       icon: './icons/icon.png'
     }
   });
+
+  win.on('close', (e) => {
+    if (win) {
+      e.preventDefault();
+      win.webContents.send('app-close');
+    }
+  });
+
   win.hide();
   win.maximize();
 
@@ -169,7 +177,10 @@ const menus = {
         },
         {
           label: 'Reload',
-          role: 'reload'
+          click() {
+            win.webContents.send('reload');
+          },
+          accelerator: 'CommandOrControl+R'
         },
         {
           label: 'Report Bug',
@@ -266,6 +277,7 @@ const menus = {
         },
         {
           label: 'Reload',
+          accelerator: 'CommandOrControl+R',
           role: 'reload'
         },
         {
@@ -301,6 +313,12 @@ ipcMain.on('appMenuDefault', (event) => {
 });
 ipcMain.on('appMenuEditor', (event) => {
   Menu.setApplicationMenu(menus.editor);
+});
+ipcMain.on('closed', (event) => {
+  win = null;
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
 // Make appData directory

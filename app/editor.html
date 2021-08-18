@@ -36,6 +36,13 @@
         }, 4000);
       </script>
     </div>
+    <div id="locked">
+      <div>
+        <h2><i class="fas fa-lock"></i> Project is Locked</h2>
+        <p>Opening the same project in two VerbGuac windows at the same time can cause dangerous errors in your project. If you're sure all other windows are closed, you may unlock this project.</p>
+        <input type="submit" value="Unlock" onclick="api.ignoreLock();document.body.classList.remove('locked');">
+      </div>
+    </div>
     <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, getDraggingIndex(), false)" ondragover="event.preventDefault()">
       <div id="fileTree__actions" ondrop="api.moveItem(event, getDraggingIndex(), true)">
         <div class="left">
