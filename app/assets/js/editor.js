@@ -220,5 +220,3 @@ function togglePanel(panelId, tabId) {
 }
 
 api.init(params);
-
-console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.');
