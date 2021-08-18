@@ -450,18 +450,18 @@ textarea {
 }
 
 /* Word Sprints */
-#wordSprint__modal .running,
-#wordSprint__modal .running,
-#wordSprint__modal .finished,
-#wordSprint__modal .set,
-#wordSprint__modal[data-mode='finished'] #wordSprint__timeLeft {
+#wordSprint__popup .running,
+#wordSprint__popup .running,
+#wordSprint__popup .finished,
+#wordSprint__popup .set,
+#wordSprint__popup[data-mode='finished'] #wordSprint__timeLeft {
   display: none;
 }
 
-#wordSprint__modal[data-mode='running'] .running,
-#wordSprint__modal[data-mode='finished'] .running,
-#wordSprint__modal[data-mode='finished'] .finished,
-#wordSprint__modal[data-mode='set'] .set {
+#wordSprint__popup[data-mode='running'] .running,
+#wordSprint__popup[data-mode='finished'] .running,
+#wordSprint__popup[data-mode='finished'] .finished,
+#wordSprint__popup[data-mode='set'] .set {
   display: block;
 }
 

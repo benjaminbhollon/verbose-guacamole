@@ -143,7 +143,7 @@ let api = {};
       q('#wordSprint').style = '';
       q('#wordSprint__cancel').style.display = 'none';
       q('#wordSprint').classList.remove('more');
-      q('#wordSprint__modal').dataset.mode = 'finished';
+      q('#wordSprint__popup').dataset.mode = 'finished';
       q('#wordSprint').innerHTML = '<i class="fas fa-running"></i>';
 
       if (!q('#wordSprint__checkbox').checked)
@@ -841,7 +841,7 @@ let api = {};
 
             q('#wordSprint').style = '';
             q('#wordSprint').classList.remove('more');
-            q('#wordSprint__modal').dataset.mode = 'finished';
+            q('#wordSprint__popup').dataset.mode = 'finished';
             q('#wordSprint').innerHTML = '<i class="fas fa-running"></i>';
 
             if (!q('#wordSprint__checkbox').checked)
@@ -867,7 +867,7 @@ let api = {};
       document.getElementById('wordSprint').classList.add('pie-chart');
 
       document.getElementById('wordSprint').innerHTML = '<span class="pie"><span class="segment"></span></span>'
-      document.getElementById('wordSprint__modal').dataset.mode = 'running';
+      document.getElementById('wordSprint__popup').dataset.mode = 'running';
     },
     suggestWords: (w) => {
       return dictionary.suggest(w);
@@ -951,7 +951,7 @@ let api = {};
     },
     updateGoals: async (updateHTML = true) => {
       let goals = project.goals
-        .filter(g => !g.archived && !g.acknowledged)
+        .filter(g => !g.archived)
         .map(g => {
           let newGoal = g;
           newGoal.done = Math.min(api.wordCountTotal() - g.startingWords, g.words);
@@ -959,6 +959,7 @@ let api = {};
 
           return newGoal;
         })
+        .filter(g => !g.acknowledged)
         .sort((a, b) => {
           return (a.words - a.done) - (b.words - b.done)
         })
@@ -986,8 +987,28 @@ let api = {};
           </div>`
         });
 
+      /* Acknowledged goals */
+      let acknowledged = project.goals
+        .filter(g => !g.archived && g.acknowledged)
+        .map(g => {
+          let newGoal = g;
+          newGoal.done = Math.min(api.wordCountTotal() - g.startingWords, g.words);
+          newGoal.completed = newGoal.done >= g.words;
+          if (!newGoal.completed) newGoal.acknowledged = false;
+
+          return newGoal;
+        })
+        .sort((a, b) => {
+          return a.words - b.words
+        })
+        .map(g => {
+          return `<div ${g.completed ? 'class="completed"' : ''} style="--percent:${g.done * 100 / g.words}%">
+            ${g.type} goal: ${g.done} / ${g.words} words
+          </div>`
+        })
+
       if (updateHTML) {
-        if (goals.length) q('#wordGoal__list').innerHTML = goals.join('');
+        if (goals.length + acknowledged.length) q('#wordGoal__list').innerHTML = goals.join('') + acknowledged.join('');
         else q('#wordGoal__list').innerText = "You haven't set any goals yet.";
       }
     },

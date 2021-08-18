@@ -80,16 +80,16 @@
       </div>
       <div class="right">
         <input id="wordSprint__checkbox" type="checkbox" class="--hidden" class="novelStats__modal">
-        <label onclick="document.getElementById('wordSprint__modal').classList.toggle('visible')" title="Word Sprints" for="wordSprint__checkbox" id="wordSprint">
+        <label onclick="document.getElementById('wordSprint__popup').classList.toggle('visible')" title="Word Sprints" for="wordSprint__checkbox" id="wordSprint">
           <i class="fas fa-running"></i>
         </label>
         <input id="wordGoal__checkbox" type="checkbox" class="--hidden">
-        <label onclick="this.classList.remove('flash');document.getElementById('wordGoal__modal').classList.toggle('visible');api.archiveGoals()" id="wordGoal" for="wordGoal__checkbox">
+        <label onclick="this.classList.remove('flash');document.getElementById('wordGoal__popup').classList.toggle('visible');api.archiveGoals()" id="wordGoal" for="wordGoal__checkbox">
           Total words: <span id="novelStats__words">0</span>
         </label>
       </div>
     </section>
-    <div id="wordSprint__modal" class="novelStats__modal" data-mode="set">
+    <div id="wordSprint__popup" class="novelStats__modal" data-mode="set">
       <h2>Word Sprints</h2>
       <div class="set">
         <p>Start a new word sprint:</p>
@@ -105,7 +105,7 @@
         <input type="submit" value="Sprint Again" onclick="resetSprint()">
       </div>
     </div>
-    <div id="wordGoal__modal" class="novelStats__modal">
+    <div id="wordGoal__popup" class="novelStats__modal">
       <h2>Goals</h2>
       <p>Your writing goals:</p>
       <div id="wordGoal__list"></div>
