@@ -465,6 +465,8 @@ if (inEditor) {
 
         // For compatibility with <v0.3.2
         if (typeof project.goals === 'undefined') project.goals = [];
+        if (typeof project.history === 'undefined') project.history = {};
+        if (typeof project.history.wordCount === 'undefined') project.history.wordCount = {};
       }
 
       // Update goals
@@ -1069,6 +1071,7 @@ if (inEditor) {
       // Update novel stats
       document.getElementById('novelStats__open').innerText = currentFile.name;
       let totalWords = api.wordCountTotal();
+      project.history.wordCount[(new Date()).toISOString().split('T')[0]] = api.wordCountTotal();
 
       document.getElementById('novelStats__words').innerText = totalWords.toLocaleString() +
         ` (${(totalWords < startingWords ? '' : '+') + (totalWords - startingWords).toLocaleString()})`;
