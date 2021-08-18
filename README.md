@@ -4,7 +4,7 @@ A editor for writers (especially novelists) powered by markdown and git.
 ## Features
 
 ### Markdown editing
-All files are edited in Markdown, using [simplemde](https://simplemde.com/). The placeholder for an empty file is a random selection from a list of famous first sentences of novels.
+All files are edited in Markdown, using [EasyMDE](https://easy-markdown-editor.tk/). The placeholder for an empty file is a random selection from a list of famous first sentences of novels.
 
 ### Project History
 Because of VerbGuac's integration with Git, Version History is relatively easy to explore. As of v0.3.0, you can view past versions, revert to them, and even revert your reversions.

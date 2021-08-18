@@ -219,18 +219,11 @@ const menus = {
         }
       ]
     },
-    {
+    /*{
       label: 'Tools',
       submenu: [
-        {
-          label: 'Focus Mode',
-          accelerator: 'F11',
-          click() {
-            win.webContents.send('toggleFullScreen');
-          }
-        }
       ]
-    },
+    },*/
     {
       label: 'Help',
       submenu: [

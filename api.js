@@ -10,7 +10,7 @@ if (inEditor) {
   const simpleGit = require('simple-git');
   const querystring = require('querystring');
   const marked = require('marked');
-  const SimpleMDE = require('simplemde');
+  const EasyMDE = require('EasyMDE');
   const Typo = require('typo-js');
 
   // Initialize variables
@@ -57,7 +57,7 @@ if (inEditor) {
 
   // Define what separates a word
   const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
-  _toggleFullScreen = inEditor ? SimpleMDE.toggleFullScreen : () => null;
+  _toggleFullScreen = inEditor ? EasyMDE.toggleFullScreen : () => null;
 
   api = {
     addGoal: (type, words) => {
@@ -701,7 +701,7 @@ if (inEditor) {
         options.hideIcons = ['side-by-side', 'image', 'preview'];
         options.placeholder = '';
       }
-      editor = new SimpleMDE(options);
+      editor = new EasyMDE(options);
 
       // Fullscreen
       const debouncedSaveFile = api.debounce(api.saveFile, 500);
@@ -1129,6 +1129,13 @@ if (inEditor) {
     }
   };
   let placeholderN = Date.now() % api.placeholders.length;
+
+  ipcRenderer.on('updateProjectDetails', () => {
+    api.showModal('projectDetails');
+  });
+  ipcRenderer.on('toggleFullScreen', () => {
+    toggleFullScreen(editor);
+  });
 }
 
 // Fullscreen
@@ -1149,13 +1156,6 @@ toggleFullScreen = (e) => {
 }
 
 // Respond to main process
-ipcRenderer.on('updateProjectDetails', () => {
-  if (!isEditor) return;
-  api.showModal('projectDetails');
-});
-ipcRenderer.on('toggleFullScreen', () => {
-  toggleFullScreen(editor);
-});
 ipcRenderer.on('app-close', () => {
   if (inEditor) {
     // Save files
