@@ -504,18 +504,21 @@ body.locked #locked {
   }
 }
 
-#wordGoal__list > div {
+#wordGoal__list > div,
+#wordGoal__archived > div {
   --fill: #0f02;
   padding: 0.5em;
   border: 0.1em solid #080;
 }
 
 #wordGoal__list > div,
+#wordGoal__archived > div,
 #wordGoal:not(.flash) {
     background: linear-gradient(to right, var(--fill) var(--percent), transparent 0);
 }
 
-#wordGoal__list > div.completed {
+#wordGoal__list > div.completed,
+#wordGoal__archived > div.completed {
   background: #0f0;
   color: #440;
 }

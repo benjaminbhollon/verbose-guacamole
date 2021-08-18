@@ -128,6 +128,10 @@
         <input type="number" id="wordGoal__inputWords" value="300" min="0">
         <input onclick="api.addGoal(q('#wordGoal__inputType').value, parseInt(q('#wordGoal__inputWords').value))" type="submit" value="Create Goal">
       </details>
+      <details>
+        <summary>Archived Goals</summary>
+        <div id="wordGoal__archived"></div>
+      </details>
     </div>
     <div id="projectDetails" class="modal">
       <h3>Update Project Details</h3>

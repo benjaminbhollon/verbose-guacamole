@@ -1044,29 +1044,54 @@ api = {
         </div>`
       });
 
-    /* Acknowledged goals */
-    let acknowledged = project.goals
-      .filter(g => !g.archived && g.acknowledged)
-      .map(g => {
-        let newGoal = g;
-        newGoal.done = Math.min(api.wordCountTotal() - g.startingWords, g.words);
-        newGoal.completed = newGoal.done >= g.words;
-        if (!newGoal.completed) newGoal.acknowledged = false;
-
-        return newGoal;
-      })
-      .sort((a, b) => {
-        return a.words - b.words
-      })
-      .map(g => {
-        return `<div ${g.completed ? 'class="completed"' : ''} style="--percent:${g.done * 100 / g.words}%">
-          ${g.type} goal: ${g.done} / ${g.words} words
-        </div>`
-      })
-
     if (updateHTML) {
+
+      /* Acknowledged goals */
+      let acknowledged = project.goals
+        .filter(g => !g.archived && g.acknowledged)
+        .map(g => {
+          let newGoal = g;
+          newGoal.done = Math.min(api.wordCountTotal() - g.startingWords, g.words);
+          newGoal.completed = newGoal.done >= g.words;
+          if (!newGoal.completed) newGoal.acknowledged = false;
+
+          return newGoal;
+        })
+        .sort((a, b) => {
+          return a.words - b.words
+        })
+        .map(g => {
+          return `<div ${g.completed ? 'class="completed"' : ''} style="--percent:${g.done * 100 / g.words}%">
+            ${g.type} goal: ${g.done} / ${g.words} words
+          </div>`
+        });
+
       if (goals.length + acknowledged.length) q('#wordGoal__list').innerHTML = goals.join('') + acknowledged.join('');
       else q('#wordGoal__list').innerText = "You haven't set any goals yet.";
+
+      /* Archived goals */
+      let archived = project.goals
+        .filter(g => g.archived)
+        .map(g => {
+          let newGoal = g;
+          if (g.type === 'daily') {
+            newGoal.daysCompleted = 0;
+            g.history.forEach(h => {
+              if (h.progress >= g.words) newGoal.daysCompleted++;
+            });
+
+            newGoal = `<div ${newGoal.daysCompleted === newGoal.history.length ? 'class="completed"' : ''} style="--percent:${newGoal.daysCompleted * 100 / newGoal.history.length}%">
+              ${g.type} goal: completed ${newGoal.daysCompleted}/${newGoal.history.length} days
+            </div>`;
+          } else {
+            newGoal = `<div ${g.completed ? 'class="completed"' : ''} style="--percent:${g.done * 100 / g.words}%">
+              ${g.type} goal: ${g.done} / ${g.words} words
+            </div>`;
+          }
+          return newGoal;
+        });
+
+        q('#wordGoal__archived').innerHTML = archived.join('');
     }
   },
   updateDetails: (toUpdate) => {
