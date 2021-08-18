@@ -64,6 +64,15 @@ a {
 .EasyMDEContainer {
   height: calc(100% - 2em);
   overflow-y: auto;
+  position: relative;
+}
+
+.CodeMirror {
+  position: absolute;
+  top: 50px;
+  bottom: 0;
+  right: 0;
+  left: 0;
 }
 
 /* Files */
