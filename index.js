@@ -16,7 +16,7 @@ function createWindow () {
     webPreferences: {
       spellcheck: false,
       preload: path.join(app.getAppPath(), 'preload.js'),
-      icon: './icons/icon.png'
+      icon: path.join(app.getAppPath(), './icons/icon.png')
     }
   });
 

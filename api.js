@@ -2,7 +2,8 @@
 const path = require('path');
 const { ipcRenderer } = require('electron');
 
-const inEditor = path.parse(location.href).name.split('?')[0] === 'editor.html';
+const inEditor = path.parse(location.href.split('?')[0]).name === 'editor';
+
 let api = {};
 
 if (inEditor) {
@@ -10,7 +11,7 @@ if (inEditor) {
   const simpleGit = require('simple-git');
   const querystring = require('querystring');
   const marked = require('marked');
-  const EasyMDE = require('EasyMDE');
+  const EasyMDE = require('easymde');
   const Typo = require('typo-js');
 
   // Initialize variables
@@ -358,7 +359,7 @@ if (inEditor) {
       }));
 
       try {
-        customDictionary = fs.readFileSync(path.resolve(appPath, './customdictionary.txt'), {
+        customDictionary = fs.readFileSync(path.resolve(appPath, './customDictionary.txt'), {
           encoding:'utf8',
           flag:'r'
         }).split('\n').filter(l => l.length);
