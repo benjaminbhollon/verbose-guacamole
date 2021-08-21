@@ -47,7 +47,8 @@ if (inEditor) {
   let projectPath = {};
   let readOnly = false;
   let togglePreview = null;
-  const endSprintSound = new Audio(path.resolve('./app/assets/audio/sprintDone.mp3'));
+  let gitEnabled = true;
+  const endSprintSound = new Audio('./assets/audio/sprintDone.mp3');
   const dictionary = new Typo('en_US');
 
   let customDictionary = [];
@@ -149,6 +150,10 @@ if (inEditor) {
       sprint = {};
     },
     checkout: async (what, editable, stash = true) => {
+      if (!gitEnabled) {
+        console.warn('Git is disabled!');
+        return false;
+      }
       if (!(what === 'master' && editable) && stash) {
         await git.stash();
       }
@@ -185,6 +190,10 @@ if (inEditor) {
       return dictionary.check(w);
     },
     commit: async (m) => {
+      if (!gitEnabled) {
+        console.warn('Git is disabled!');
+        return false;
+      }
       const message = m ? m : document.getElementById('git__commitText').value;
       document.getElementById('git__commitButton').innerText = 'Working...';
 
@@ -378,10 +387,14 @@ if (inEditor) {
       git = simpleGit({
         baseDir: (params.new ? projectPath : path.dirname(projectPath))
       });
+      try {
+        await git.init();
+      } catch (err) {
+        console.warn('Git is not installed. Continuing without.');
+        gitEnabled = false;
+      }
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
-        console.info('Initializing git repository...');
-        await git.init();
         console.info('Creating project file...');
         projectPath = path.resolve(projectPath, 'project.vgp');
         await fs.writeFile(
@@ -419,21 +432,23 @@ if (inEditor) {
           }
         );
         currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
-        console.info('Creating initial commit...');
-        await git.add('./*');
-        await git.commit('Create project')
-        await api.populateGitHistory()
-        .then(() => {
-          console.info('Done! Changing URL to avoid refresh-slipups.');
-          history.replaceState(null, null, './editor.html?f=' + projectPath);
-          startingWords = 0;
-        });
-      } else {
-        if ((await git.branch()).current !== 'master') {
-          await api.checkout('master', true);
+        if (gitEnabled) {
+          console.info('Creating initial commit...');
+          await git.add('./*');
+          await git.commit('Create project')
+          await api.populateGitHistory()
         }
 
-        api.populateGitHistory();
+        console.info('Done! Changing URL to avoid refresh-slipups.');
+        history.replaceState(null, null, './editor.html?f=' + projectPath);
+        startingWords = 0;
+      } else {
+        if (gitEnabled) {
+          if ((await git.branch()).current !== 'master') await api.checkout('master', true);
+
+          api.populateGitHistory();
+        }
+
         project = JSON.parse(fs.readFileSync(projectPath, {
           encoding:'utf8',
           flag:'r'
@@ -505,6 +520,7 @@ if (inEditor) {
         document.getElementById(api.idFromPath(currentFile.path)).click();
       }, 1000);
     },
+    isGitEnabled: () => gitEnabled,
     isReadOnly: () => readOnly,
     lockProject: () => {
       try {
@@ -642,6 +658,10 @@ if (inEditor) {
       api.restoreOpenFolders();
     },
     populateGitHistory: async () => {
+      if (!gitEnabled) {
+        console.warn('Git is disabled!');
+        return false;
+      }
       try {
         const log = await git.log();
         let html = log.all.map(h => {
@@ -769,6 +789,11 @@ if (inEditor) {
       }
     },
     revertTo: async (where, name) => {
+      if (!gitEnabled) {
+        console.warn('Git is disabled!');
+        return false;
+      }
+
       const range = `${where}..HEAD`;
 
       await git.reset({'--hard': null});
