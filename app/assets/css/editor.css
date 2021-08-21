@@ -156,6 +156,10 @@ a {
   grid-column: 3;
 }
 
+#git.disabled #git__main, #git:not(.disabled) #git__disabled {
+  display: none;
+}
+
 #git h3, #git p {
   padding: 0 0.5em;
   text-align: center;

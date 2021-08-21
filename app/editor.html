@@ -63,21 +63,29 @@
       <footer id="editor__stats">0 words.</footer>
     </section>
     <section id="git">
-      <h3>Commits</h3>
-      <div id="git__commits">
+      <div id="git__main">
+        <h3>Commits</h3>
+        <div id="git__commits">
 
+        </div>
+        <div class="sticky-bottom">
+          <div id="git__addCommit">
+            <textarea id="git__commitText" placeholder="Commit message" spellcheck="false"></textarea>
+              <input type="submit" onclick='api.commit()' id="git__commitButton" value="Commit">
+          </div>
+          <div class="git__checkedOut">
+            <p>You are viewing a past commit.</p>
+            <input type="submit" value="Return to Current Version" onclick="api.checkout('master', true)">
+            <input onclick="api.revertTo(this.dataset.hash)" id="git__revertButton" type="submit" value="Revert to this Commit">
+          </div>
+          <p class="help"><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
+        </div>
       </div>
-      <div class="sticky-bottom">
-        <div id="git__addCommit">
-          <textarea id="git__commitText" placeholder="Commit message" spellcheck="false"></textarea>
-            <input type="submit" onclick='api.commit()' id="git__commitButton" value="Commit">
-        </div>
-        <div class="git__checkedOut">
-          <p>You are viewing a past commit.</p>
-          <input type="submit" value="Return to Current Version" onclick="api.checkout('master', true)">
-          <input onclick="api.revertTo(this.dataset.hash)" id="git__revertButton" type="submit" value="Revert to this Commit">
-        </div>
-        <p class="help"><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
+      <div>
+        <h3>Version History Disabled</h3>
+        <p>To use Version history, you must have Git installed on your device.</p>
+        <input type="submit" onclick="api.openURI('https://git-scm.com/downloads')" value="Install Git">
+        <input type="submit" onclick="togglePanel('git', 'git__tab')" value="Ignore">
       </div>
     </section>
     <div id="git__tab" onclick="togglePanel('git', this.id)" class="tab right" data-mode="close"></div>

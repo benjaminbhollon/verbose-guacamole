@@ -1,6 +1,6 @@
 // Include packages
 const path = require('path');
-const { ipcRenderer } = require('electron');
+const { shell, ipcRenderer } = require('electron');
 
 const inEditor = path.parse(location.href.split('?')[0]).name === 'editor';
 
@@ -386,13 +386,17 @@ if (inEditor) {
       // Initialize git in project directory
       git = simpleGit({
         baseDir: (params.new ? projectPath : path.dirname(projectPath))
-      });
+      })
+      	.addConfig('user.name', 'Verbose Guacamole User')
+      	.addConfig('user.email', 'git@seewitheyesclosed.com');
       try {
         await git.init();
       } catch (err) {
         console.warn('Git is not installed. Continuing without.');
         gitEnabled = false;
+        q('#git').classList.add('disabled');
       }
+      
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
         console.info('Creating project file...');
@@ -435,8 +439,8 @@ if (inEditor) {
         if (gitEnabled) {
           console.info('Creating initial commit...');
           await git.add('./*');
-          await git.commit('Create project')
-          await api.populateGitHistory()
+          await git.commit('Create project');
+          await api.populateGitHistory();
         }
 
         console.info('Done! Changing URL to avoid refresh-slipups.');
@@ -444,6 +448,11 @@ if (inEditor) {
         startingWords = 0;
       } else {
         if (gitEnabled) {
+      	  if ((await git.branch()).all.length <= 0) { // Project started without git
+	    console.info('Creating initial commit...');
+	    await git.add('./*');
+	    await git.commit('Create project');
+      	  }
           if ((await git.branch()).current !== 'master') await api.checkout('master', true);
 
           api.populateGitHistory();
@@ -601,6 +610,9 @@ if (inEditor) {
     },
     openProject: () => {
       ipcRenderer.send('openProject');
+    },
+    openURI: (uri) => {
+      shell.openExternal(uri);
     },
     placeholders,
     populateFiletree: () => {
