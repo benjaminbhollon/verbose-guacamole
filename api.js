@@ -340,8 +340,9 @@ if (inEditor) {
       const element = document.getElementById(id).tagName === 'SPAN' ?
         document.getElementById(id) :
         document.getElementById(id).querySelector('summary');
-      if (element.contentEditable === 'true') return;
-      if (element.classList.contains('active') && event.type !== 'contextmenu') return api.startRename(element);
+      if (element.contentEditable === 'true' || element.classList.contains('editing')) return;
+      if (element.classList.contains('active') && event.type !== 'contextmenu')
+        return api.startRename(element.tagName === 'SPAN' ? element.querySelector('.filename') : element);
       if (q('#fileTree .active'))
         q('#fileTree .active').classList.toggle('active');
       element.classList.toggle('active');
@@ -396,7 +397,7 @@ if (inEditor) {
         gitEnabled = false;
         q('#git').classList.add('disabled');
       }
-      
+
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
         console.info('Creating project file...');
@@ -630,6 +631,7 @@ if (inEditor) {
               ondrop='moveItem(event, getDraggingIndex())'
             >
               <summary
+                class="folder"
                 draggable="true"
                 ondragstart="startMoveItem(event)"
                 ondragend="stopMoveItem(event)"
@@ -647,18 +649,25 @@ if (inEditor) {
           } else {
             html += `
             <span
-              title="${item.name}"
-              onclick='event.preventDefault();api.focusItem(this.id)'
-              ondblclick='api.openItem(this.id)'
-              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.id);"
+              class="file"
+              id=${JSON.stringify(api.idFromPath(item.path))}
               draggable="true"
               ondragstart="startMoveItem(event)"
               ondragend="stopMoveItem(event)"
               ondragover="setHovering(this)"
               ondrag="updatePageXY(event)"
-              id=${JSON.stringify(api.idFromPath(item.path))}
             >
-              ${item.name}
+              <span
+                id="${JSON.stringify(api.idFromPath(item.path))}__filename"
+                class="filename"
+                title="${item.name}"
+                onclick='event.preventDefault();api.focusItem(this.parentNode.id)'
+                ondblclick='api.openItem(this.parentNode.id)'
+                oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
+              >
+                ${item.name}
+              </span>
+              <span onclick="this.classList.toggle('dropdown')" class="label" data-label="${typeof item.label === 'undefined' ? 'blank' : item.label}"></span>
             </span>`;
           }
         }
@@ -775,8 +784,9 @@ if (inEditor) {
     },
     renameItem: (e) => {
       e.contentEditable = false;
+      if (e.tagName === 'SPAN') e.parentNode.classList.remove('editing');
 
-      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
+      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === e.parentNode.id);
 
       if (e.innerText.trim().length <= 0 || e.innerText.trim() === file.name) {
         e.innerText = file.name;
@@ -938,6 +948,7 @@ if (inEditor) {
       setTimeout(() => {
         if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
         e.contentEditable = true;
+        if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
         e.focus();
         e.addEventListener('keydown', (event) => {
           if (event.key === ' ' && e.tagName === 'SUMMARY') {

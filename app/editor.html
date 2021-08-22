@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="./assets/css/global.css">
     <link rel="stylesheet" href="./assets/css/editor.css">
     <script src="https://kit.fontawesome.com/e41c010fae.js" crossorigin="anonymous"></script>
+    <style id="style__labelColors">
+
+    </style>
   </head>
   <body>
     <div id="loading">
@@ -33,7 +36,7 @@
 
         setTimeout(() => {
           document.getElementById('loading').style.display = 'none';
-        }, 4000);
+        }, 000);
       </script>
     </div>
     <div id="locked">
@@ -43,8 +46,8 @@
         <input type="submit" value="Unlock" onclick="api.ignoreLock();document.body.classList.remove('locked');">
       </div>
     </div>
-    <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, getDraggingIndex(), false)" ondragover="event.preventDefault()">
-      <div id="fileTree__actions" ondrop="api.moveItem(event, getDraggingIndex(), true)">
+    <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, 0, false)" ondragover="event.preventDefault()">
+      <div id="fileTree__actions" ondrop="moveItem(event, 0, true)">
         <div class="left">
           <a href="#" title="Create file or folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
         </div>
@@ -81,7 +84,7 @@
           <p class="help"><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
         </div>
       </div>
-      <div>
+      <div id="git__disabled">
         <h3>Version History Disabled</h3>
         <p>To use Version history, you must have Git installed on your device.</p>
         <input type="submit" onclick="api.openURI('https://git-scm.com/downloads')" value="Install Git">

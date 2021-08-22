@@ -81,20 +81,44 @@ a {
   grid-column: 1;
 }
 
-#fileTree span, #fileTree details summary {
+#fileTree .file, #fileTree .folder {
   font-size: 1.2rem;
   padding: 0 0.5em;
   height: 1.75em;
   line-height: 1.75em;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
   cursor: default;
   user-select: none;
 }
 
-#fileTree__list span {
+#fileTree__list .file {
   display: block;
+  position: relative;
+}
+
+#fileTree__list .filename {
+  display: inline-block;
+  width: calc(100% - 1.3em);
+}
+
+#fileTree__list .filename, #fileTree__list .folder {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#fileTree__list .label {
+  position: absolute;
+  right: 0.25em;
+  top: 50%;
+  width: 1em;
+  height: 1em;
+  border: 1px solid;
+  border-radius: 100%;
+  transform: translateY(-50%);
+}
+
+.label[data-label="blank"] {
+  background-color: #eee;
 }
 
 #fileTree__list:not(.searching) .active {
@@ -102,9 +126,10 @@ a {
   color: #fff;
 }
 
-#fileTree #fileTree__list span[contenteditable="true"],
-#fileTree #fileTree__list details summary[contenteditable="true"] {
-  text-overflow: inherit;
+#fileTree #fileTree__list .file.editing,
+#fileTree #fileTree__list [contenteditable="true"],
+#fileTree #fileTree__list [contenteditable="true"] {
+  text-overflow: initial;
   background-color: #fff;
   color: #000;
   outline: 3px solid orange;
@@ -113,7 +138,7 @@ a {
   padding: 0;
 }
 
-#fileTree details span, #fileTree details details {
+#fileTree details > span, #fileTree details > details {
   margin-left: 1.5em;
 }
 

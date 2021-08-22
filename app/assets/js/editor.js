@@ -145,6 +145,7 @@ window.addEventListener("click", e => {
     document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'none';
   };
   document.getElementById('spellcheckMenu').classList.remove('visible');
+  [...qA('.label.dropdown')].forEach(l => l.classList.remove('dropdown'));
 });
 
 // Spellcheck

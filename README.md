@@ -37,7 +37,7 @@ VerbGuac is still under development. Future features include:
 - Support for custom Javascript extensions and CSS themes, possibly with an official database of endorsed extensions and themes.
 
 ## Screenshots
-![v0.2.2 Editor](./screenshots/v0.2.2-editor.png)
+![v0.3.2 Editor](./screenshots/v0.3.2-editor.png)
 
 ## License
 Verbose Guacamole is released under the [GPL-3.0](./LICENSE) license.
