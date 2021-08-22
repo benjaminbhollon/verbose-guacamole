@@ -146,6 +146,8 @@ window.addEventListener("click", e => {
   };
   document.getElementById('spellcheckMenu').classList.remove('visible');
   [...qA('.label.dropdown')].forEach(l => l.classList.remove('dropdown'));
+
+  if (event.path[0].classList.contains('label')) event.path[0].classList.add('dropdown');
 });
 
 // Spellcheck
@@ -197,6 +199,11 @@ function resetSprint() {
   q('#wordSprint__status').innerText = '';
   q('#wordSprint__popup').dataset.mode = 'set';
   q('#wordSprint__cancel').style.display = 'block';
+}
+
+/* Labels */
+function createLabel() {
+  return api.createLabel(q('#createLabel__name').value, q('#createLabel__color').value, q('#createLabel__description').value);
 }
 
 /* Tabs */

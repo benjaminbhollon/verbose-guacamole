@@ -47,7 +47,7 @@
       </div>
     </div>
     <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, 0, false)" ondragover="event.preventDefault()">
-      <div id="fileTree__actions" ondrop="moveItem(event, 0, true)">
+      <div id="fileTree__actions" ondrop=".moveItem(event, 0, true)">
         <div class="left">
           <a href="#" title="Create file or folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
         </div>
@@ -163,19 +163,39 @@
       </form>
       <a href="#" onclick="this.parentNode.classList.remove('visible');updateProjectDetails()" class="button">Save and Close</a>
     </div>
+    <div id="createLabel" class="modal">
+      <h3>Create Label</h3>
+      <form>
+        <label>
+          Name
+          <input placeholder="Something short but memorable..." type="text" id="createLabel__name" required>
+        </label>
+        <label>
+          Description (optional)
+          <textarea id="createLabel__description" placeholder="What this label means to you..."></textarea>
+        </label>
+        <label>
+          Color
+          <input type="color" id="createLabel__color" value="#ff0000"></textarea>
+        </label>
+      </form>
+      <a href="#" onclick="this.parentNode.classList.remove('visible');createLabel()" class="button">Save and Close</a>
+      <a href="#" onclick="this.parentNode.classList.remove('visible');" class="button">Cancel</a>
+    </div>
     <div id="projectGoalComplete" class="modal">
       <h3>Congratulations!</h3>
       <p>You've completed your goal of <span id="projectGoalComplete__wordCount"></span> total words in just <span id="projectGoalComplete__days"></span> days!</p>
       <a href="#" onclick="this.parentNode.classList.remove('visible');api.archiveCompleteGoals(true)" class="button">Keep writing!</a>
     </div>
-    <div id="contextMenu">
+    <div id="contextMenu" class="contextMenu">
       <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
       <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
       <hr>
       <span onclick="api.createItem('file')">Create File</span>
       <span onclick="api.createItem('folder')">Create Folder</span>
     </div>
-    <div id="spellcheckMenu">
+    <div id="spellcheckMenu" class="contextMenu">
+    </div>
     </div>
     <script src="./assets/js/editor.js" defer></script>
   </body>

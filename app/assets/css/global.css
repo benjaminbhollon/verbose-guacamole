@@ -74,7 +74,7 @@ label {
   border: 0;
 }
 
-input, textarea, select {
+input:not([type="color"]), textarea, select {
   padding: 1em;
 }
 
@@ -84,6 +84,13 @@ input[type="checkbox"] {
 }
 
 input[type="submit"] {
+  cursor: pointer;
+}
+
+input[type="color"] {
+  display: block;
+  height: 3em;
+  padding: 0.25em;
   cursor: pointer;
 }
 

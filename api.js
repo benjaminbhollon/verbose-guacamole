@@ -61,6 +61,39 @@ if (inEditor) {
   const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
   _toggleFullScreen = inEditor ? EasyMDE.toggleFullScreen : () => null;
 
+  // Random int from min to max
+  function rand(min, max) {
+    return Math.floor((Math.random() * (max - min + 1)) + min);
+  }
+
+  // hex to hsl based on https://gist.github.com/xenozauros/f6e185c8de2a04cdfecf
+  function hexToHSL(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      r = parseInt(result[1], 16);
+      g = parseInt(result[2], 16);
+      b = parseInt(result[3], 16);
+      r /= 255, g /= 255, b /= 255;
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var h, s, l = (max + min) / 2;
+      if(max == min){
+        h = s = 0; // achromatic
+      }else{
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max){
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+    var HSL = new Object();
+    HSL['hue']=Math.round(h*360);
+    HSL['saturation']=Math.round(s*100);
+    HSL['lightness']=Math.round(l*100);
+    return HSL;
+  }
+
   api = {
     addGoal: (type, words) => {
       const allowedTypes = [
@@ -266,6 +299,20 @@ if (inEditor) {
         }
       }, 0);
     },
+    createLabel: (name, color, description = '') => {
+      const label = {
+        id: api.idFromPath(api.fileName()),
+        name: name,
+        description: '',
+        color: hexToHSL(color)
+      };
+
+      project.labels.push(label);
+
+      api.saveProject();
+      api.populateFiletree();
+      api.updateLabelCSS();
+    },
     debounce: (f, delay) => {
       let timeout = null;
       return (...args) => {
@@ -346,6 +393,9 @@ if (inEditor) {
       if (q('#fileTree .active'))
         q('#fileTree .active').classList.toggle('active');
       element.classList.toggle('active');
+    },
+    getLabel: (id) => {
+      return project.labels.find(l => l.id === id);
     },
     getProject: () => {
       return {...project}
@@ -476,23 +526,28 @@ if (inEditor) {
           });
         startingWords = api.wordCountTotal();
 
-        // For compatibility with v0.1.0
+        /* Compatibility */
+
+        // with v0.1.0
         if (typeof project.openFolders === 'undefined') project.openFolders = [];
 
-        // For compatibility with <v0.1.2
+        // with <v0.1.2
         if (typeof project.openFile === 'undefined') project.openFile = api.idFromPath(currentFile.path);
 
         const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
         if (typeof foundCurrent !== 'undefined') currentFile = foundCurrent;
 
-        // For compatibility with <v0.2.1
+        // with <v0.2.1
         if (typeof project.metadata.title !== 'string')
           project.metadata.title = project.metadata.title.final;
 
-        // For compatibility with <v0.3.2
+        // with <v0.3.2
         if (typeof project.goals === 'undefined') project.goals = [];
         if (typeof project.history === 'undefined') project.history = {};
         if (typeof project.history.wordCount === 'undefined') project.history.wordCount = {};
+
+        // with <v0.3.3
+        if (typeof project.labels === 'undefined') project.labels = [];
       }
 
       fs.writeFileSync(path.resolve(path.dirname(projectPath), '.gitignore'), '.lock');
@@ -525,6 +580,7 @@ if (inEditor) {
 
       api.populateFiletree();
       api.openFile(currentFile.path, currentFile.name, true);
+      api.updateLabelCSS();
 
       setTimeout(() => {
         document.getElementById(api.idFromPath(currentFile.path)).click();
@@ -532,6 +588,15 @@ if (inEditor) {
     },
     isGitEnabled: () => gitEnabled,
     isReadOnly: () => readOnly,
+    labelFile: (fileId, labelId) => {
+      const file = api.flatten(project.index)
+        .find(f => api.idFromPath(f.path) === fileId);
+
+      if (api.getLabel(labelId) !== undefined || labelId === undefined) {
+        file.label = labelId;
+        api.populateFiletree();
+      }
+    },
     lockProject: () => {
       try {
         if (fs.statSync(path.resolve(projectPath, '../.lock'))) {
@@ -667,7 +732,26 @@ if (inEditor) {
               >
                 ${item.name}
               </span>
-              <span onclick="this.classList.toggle('dropdown')" class="label" data-label="${typeof item.label === 'undefined' ? 'blank' : item.label}"></span>
+              <span
+                class="label"
+                data-label="${typeof item.label === 'undefined' ? 'blank' : item.label}"
+                title="${typeof item.label === 'undefined' ? 'Click to add label.' : 'Labeled "' + api.getLabel(item.label).name + '". Click to edit.'}"
+              >
+                <div class="contextMenu">
+                  ${(project.labels.length) ?
+                    project.labels.map(l =>
+                      `<span
+                        onclick="api.labelFile('${api.idFromPath(item.path)}', '${l.id}')"
+                        data-label="${l.id}"
+                      >${l.name}</span>`
+                    ).join('') :
+                    `<span class="--no-click">No labels.</span>`
+                  }
+                  ${typeof item.label === 'undefined' ? '' : `<span onclick="api.labelFile('${api.idFromPath(item.path)}', undefined)">Remove Label</span>`}
+                  <hr>
+                  <span onclick="api.showModal('createLabel')">Create Label</span>
+                </div>
+              </span>
             </span>`;
           }
         }
@@ -873,6 +957,10 @@ if (inEditor) {
           break;
         case 'projectGoalComplete':
           modal = document.getElementById('projectGoalComplete');
+          modal.classList.add('visible');
+          break;
+        case 'createLabel':
+          modal = document.getElementById('createLabel');
           modal.classList.add('visible');
           break;
         default:
@@ -1098,6 +1186,20 @@ if (inEditor) {
           q('#wordGoal__archived').innerHTML = archived.join('');
       }
     },
+    updateLabelCSS: () => {
+      const css = project.labels
+        .map(l => `
+            [data-label="${l.id}"] {
+              --hue: ${l.color.hue}deg;
+              --saturation: ${l.color.saturation}%;
+              --lightness: ${l.color.lightness}%;
+            }
+          `)
+        .join('')
+        .replace(/\s/g, '');
+
+      q('#style__labelColors').innerText = css;
+    },
     updateStats: async () => {
       let content = marked(editor.value());
       var div = document.createElement("div");
@@ -1175,7 +1277,8 @@ if (inEditor) {
       wordCount: {
 
       }
-    }
+    },
+    labels: []
   };
   let placeholderN = Date.now() % api.placeholders.length;
 
