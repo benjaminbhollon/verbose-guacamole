@@ -5,17 +5,37 @@
     <title>Verbose Guacamole</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     <link rel="stylesheet" href="./assets/css/global.css">
+    <link rel="stylesheet" href="./assets/css/index.css">
   </head>
   <body>
     <header>
       <h1>Verbose Guacamole</h1>
       <p>A Markdown- and Git- powered writing environment.</p>
-      <button onclick="api.newProject()">New Project</button>
-      <button onclick="api.openProject()">Open Project</button>
     </header>
+    <div id="content">
+      <div id="news">
+        <h2>News</h2>
+        <p>Coming soon! News should start with v1.0.0, expected to release in October.</p>
+      </div>
+      <div id="manageProjects">
+        <h2>Manage Projects</h2>
+        <input type="submit" onclick="api.openProject()" value="Open Project">
+        <br>
+        <input type="submit" onclick="api.newProject()" value="New Project">
+      </div>
+      <div id="releases">
+        <h2>Releases</h2>
+        <div id="releases__list">Loading...</div>
+      </div>
+    </div>
     <footer>
+      <p>
+        <a href="javascript:api.openURI('https://github.com/benjaminbhollon/verbose-guacamole')">Code</a> |
+        <a href="javascript:api.openURI('https://github.com/benjaminbhollon/verbose-guacamole/blob/main/LICENSE')">License</a> |
+        <a href="javascript:api.openURI('https://github.com/benjaminbhollon/verbose-guacamole/issues/new')">Report a Bug</a>
+      </p>
       <p class="codewithlove">
-        <a href="https://seewitheyesclosed.com/" target="_blank">&lt;/&gt; with &lt;3 from Benjamin Hollon</a>
+        <a href="javascript:api.openURI('https://seewitheyesclosed.com/')">&lt;/&gt; with &lt;3 from Benjamin Hollon</a>
       </p>
     </footer>
   </body>

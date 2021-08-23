@@ -2,7 +2,8 @@
 const path = require('path');
 const { shell, ipcRenderer } = require('electron');
 
-const inEditor = path.parse(location.href.split('?')[0]).name === 'editor';
+const page = path.parse(location.href.split('?')[0]).name
+const inEditor = page === 'editor';
 
 let api = {};
 
@@ -1288,6 +1289,36 @@ if (inEditor) {
   ipcRenderer.on('toggleFullScreen', () => {
     toggleFullScreen(editor);
   });
+} else if (page === 'index') {
+  const Parser = require('rss-parser');
+  const parser = new Parser();
+  (async () => {
+    try {
+      const feed = await parser.parseURL('https://github.com/benjaminbhollon/verbose-guacamole/releases.atom');
+      const currentVersion = require('./package.json').version;
+      document.getElementById('releases__list').innerHTML = feed.items.map(item => {
+        const version = item.link.split('/').slice(-1)[0].slice(1);
+        return `
+        <div ${version === currentVersion ? 'class="current"' : ''}>
+          <h3>${item.title}</h3>
+          <details>
+            <summary>Release Notes</summary>
+            ${item.content.split('<hr>')[0]}
+          </details>
+          <p>${
+            version === currentVersion ?
+            `This is your current version.` :
+            `<a href="javascript:api.openURI('${item.link}')">Download</a>`
+          }</p>
+        </div>
+        `
+      }).join('<br>');
+    } catch (err) {
+      setTimeout(() => {
+        document.getElementById('releases__list').innerHTML = '<p>Can\'t get releases right now.</p>';
+      }, 15);
+    }
+  })();
 }
 
 // Fullscreen
@@ -1331,6 +1362,17 @@ ipcRenderer.on('reload', () => {
 
   location.reload();
 });
+ipcRenderer.on('relocate', (event, to) => {
+  if (inEditor) {
+    // Save files
+    api.saveFile();
+    api.saveProject();
+
+    // Unlock project for other sessions
+    api.unlockProject();
+  }
+  location.href = to;
+})
 
 if (inEditor) {
   ipcRenderer.send('appMenuEditor');
@@ -1341,6 +1383,9 @@ else {
   module.exports = {
     openProject: () => {
       ipcRenderer.send('openProject');
+    },
+    openURI: (uri) => {
+      shell.openExternal(uri);
     },
     newProject: () => {
       ipcRenderer.send('newProject');
