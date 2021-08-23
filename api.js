@@ -432,9 +432,6 @@ if (inEditor) {
       params = querystring.parse(params);
       projectPath = params.f;
 
-      // Lock project
-      api.lockProject();
-
       // Initialize git in project directory
       git = simpleGit({
         baseDir: (params.new ? projectPath : path.dirname(projectPath))
@@ -498,6 +495,8 @@ if (inEditor) {
         console.info('Done! Changing URL to avoid refresh-slipups.');
         history.replaceState(null, null, './editor.html?f=' + projectPath);
         startingWords = 0;
+
+        fs.writeFileSync(path.resolve(path.dirname(projectPath), '.gitignore'), '.lock');
       } else {
         if (gitEnabled) {
       	  if ((await git.branch()).all.length <= 0) { // Project started without git
@@ -551,7 +550,8 @@ if (inEditor) {
         if (typeof project.labels === 'undefined') project.labels = [];
       }
 
-      fs.writeFileSync(path.resolve(path.dirname(projectPath), '.gitignore'), '.lock');
+      // Lock project
+      api.lockProject();
 
       // Update goals
       project.goals = project.goals.map(g => {
