@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://kit.fontawesome.com">
     <title>Verbose Guacamole</title>
-    <link rel="stylesheet" href="./assets/css/simplemde.css">
+    <link rel="stylesheet" href="./assets/css/easymde.css">
     <link rel="stylesheet" href="./assets/css/global.css">
     <link rel="stylesheet" href="./assets/css/editor.css">
     <script src="https://kit.fontawesome.com/e41c010fae.js" crossorigin="anonymous"></script>
+    <style id="style__labelColors"></style>
   </head>
   <body>
     <div id="loading">
@@ -43,8 +44,8 @@
         <input type="submit" value="Unlock" onclick="api.ignoreLock();document.body.classList.remove('locked');">
       </div>
     </div>
-    <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, getDraggingIndex(), false)" ondragover="event.preventDefault()">
-      <div id="fileTree__actions" ondrop="api.moveItem(event, getDraggingIndex(), true)">
+    <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, 0, false)" ondragover="event.preventDefault()">
+      <div id="fileTree__actions" ondrop=".moveItem(event, 0, true)">
         <div class="left">
           <a href="#" title="Create file or folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
         </div>
@@ -63,21 +64,29 @@
       <footer id="editor__stats">0 words.</footer>
     </section>
     <section id="git">
-      <h3>Commits</h3>
-      <div id="git__commits">
+      <div id="git__main">
+        <h3>Commits</h3>
+        <div id="git__commits">
 
+        </div>
+        <div class="sticky-bottom">
+          <div id="git__addCommit">
+            <textarea id="git__commitText" placeholder="Commit message" spellcheck="false"></textarea>
+              <input type="submit" onclick='api.commit()' id="git__commitButton" value="Commit">
+          </div>
+          <div class="git__checkedOut">
+            <p>You are viewing a past commit.</p>
+            <input type="submit" value="Return to Current Version" onclick="api.checkout('master', true)">
+            <input onclick="api.revertTo(this.dataset.hash)" id="git__revertButton" type="submit" value="Revert to this Commit">
+          </div>
+          <p class="help"><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
+        </div>
       </div>
-      <div class="sticky-bottom">
-        <div id="git__addCommit">
-          <textarea id="git__commitText" placeholder="Commit message" spellcheck="false"></textarea>
-            <input type="submit" onclick='api.commit()' id="git__commitButton" value="Commit">
-        </div>
-        <div class="git__checkedOut">
-          <p>You are viewing a past commit.</p>
-          <input type="submit" value="Return to Current Version" onclick="api.checkout('master', true)">
-          <input onclick="api.revertTo(this.dataset.hash)" id="git__revertButton" type="submit" value="Revert to this Commit">
-        </div>
-        <p class="help"><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>
+      <div id="git__disabled">
+        <h3>Version History Disabled</h3>
+        <p>To use Version history, you must have Git installed on your device.</p>
+        <input type="submit" onclick="api.openURI('https://git-scm.com/downloads')" value="Install Git">
+        <input type="submit" onclick="togglePanel('git', 'git__tab')" value="Ignore">
       </div>
     </section>
     <div id="git__tab" onclick="togglePanel('git', this.id)" class="tab right" data-mode="close"></div>
@@ -152,19 +161,39 @@
       </form>
       <a href="#" onclick="this.parentNode.classList.remove('visible');updateProjectDetails()" class="button">Save and Close</a>
     </div>
+    <div id="createLabel" class="modal">
+      <h3>Create Label</h3>
+      <form>
+        <label>
+          Name
+          <input placeholder="Something short but memorable..." type="text" id="createLabel__name" required>
+        </label>
+        <label>
+          Description (optional)
+          <textarea id="createLabel__description" placeholder="What this label means to you..."></textarea>
+        </label>
+        <label>
+          Color
+          <input type="color" id="createLabel__color" value="#ff0000"></textarea>
+        </label>
+      </form>
+      <a href="#" onclick="this.parentNode.classList.remove('visible');createLabel()" class="button">Save and Close</a>
+      <a href="#" onclick="this.parentNode.classList.remove('visible');" class="button">Cancel</a>
+    </div>
     <div id="projectGoalComplete" class="modal">
       <h3>Congratulations!</h3>
       <p>You've completed your goal of <span id="projectGoalComplete__wordCount"></span> total words in just <span id="projectGoalComplete__days"></span> days!</p>
       <a href="#" onclick="this.parentNode.classList.remove('visible');api.archiveCompleteGoals(true)" class="button">Keep writing!</a>
     </div>
-    <div id="contextMenu">
+    <div id="contextMenu" class="contextMenu">
       <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
       <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
       <hr>
       <span onclick="api.createItem('file')">Create File</span>
       <span onclick="api.createItem('folder')">Create Folder</span>
     </div>
-    <div id="spellcheckMenu">
+    <div id="spellcheckMenu" class="contextMenu">
+    </div>
     </div>
     <script src="./assets/js/editor.js" defer></script>
   </body>

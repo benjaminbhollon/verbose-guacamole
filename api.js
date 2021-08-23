@@ -1,8 +1,10 @@
 // Include packages
 const path = require('path');
-const { ipcRenderer } = require('electron');
+const { shell, ipcRenderer } = require('electron');
 
-const inEditor = path.parse(location.href).name.split('?')[0] === 'editor.html';
+const page = path.parse(location.href.split('?')[0]).name
+const inEditor = page === 'editor';
+
 let api = {};
 
 if (inEditor) {
@@ -10,7 +12,7 @@ if (inEditor) {
   const simpleGit = require('simple-git');
   const querystring = require('querystring');
   const marked = require('marked');
-  const SimpleMDE = require('simplemde');
+  const EasyMDE = require('easymde');
   const Typo = require('typo-js');
 
   // Initialize variables
@@ -46,7 +48,8 @@ if (inEditor) {
   let projectPath = {};
   let readOnly = false;
   let togglePreview = null;
-  const endSprintSound = new Audio(path.resolve('./app/assets/audio/sprintDone.mp3'));
+  let gitEnabled = true;
+  const endSprintSound = new Audio('./assets/audio/sprintDone.mp3');
   const dictionary = new Typo('en_US');
 
   let customDictionary = [];
@@ -57,7 +60,40 @@ if (inEditor) {
 
   // Define what separates a word
   const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
-  _toggleFullScreen = inEditor ? SimpleMDE.toggleFullScreen : () => null;
+  _toggleFullScreen = inEditor ? EasyMDE.toggleFullScreen : () => null;
+
+  // Random int from min to max
+  function rand(min, max) {
+    return Math.floor((Math.random() * (max - min + 1)) + min);
+  }
+
+  // hex to hsl based on https://gist.github.com/xenozauros/f6e185c8de2a04cdfecf
+  function hexToHSL(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      r = parseInt(result[1], 16);
+      g = parseInt(result[2], 16);
+      b = parseInt(result[3], 16);
+      r /= 255, g /= 255, b /= 255;
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var h, s, l = (max + min) / 2;
+      if(max == min){
+        h = s = 0; // achromatic
+      }else{
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max){
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+    var HSL = new Object();
+    HSL['hue']=Math.round(h*360);
+    HSL['saturation']=Math.round(s*100);
+    HSL['lightness']=Math.round(l*100);
+    return HSL;
+  }
 
   api = {
     addGoal: (type, words) => {
@@ -148,6 +184,10 @@ if (inEditor) {
       sprint = {};
     },
     checkout: async (what, editable, stash = true) => {
+      if (!gitEnabled) {
+        console.warn('Git is disabled!');
+        return false;
+      }
       if (!(what === 'master' && editable) && stash) {
         await git.stash();
       }
@@ -184,6 +224,10 @@ if (inEditor) {
       return dictionary.check(w);
     },
     commit: async (m) => {
+      if (!gitEnabled) {
+        console.warn('Git is disabled!');
+        return false;
+      }
       const message = m ? m : document.getElementById('git__commitText').value;
       document.getElementById('git__commitButton').innerText = 'Working...';
 
@@ -249,12 +293,26 @@ if (inEditor) {
       setTimeout(() => {
         if (type === 'file') {
           api.openItem(api.idFromPath(filePath)).click();
-          if (!first) api.startRename(document.getElementById(api.idFromPath(filePath)));
+          if (!first) api.startRename(document.getElementById(api.idFromPath(filePath) + '__filename'));
         } else {
           document.getElementById(api.idFromPath(filePath)).click();
           document.getElementById(api.idFromPath(filePath)).open = true;
         }
       }, 0);
+    },
+    createLabel: (name, color, description = '') => {
+      const label = {
+        id: api.idFromPath(api.fileName()),
+        name: name,
+        description: '',
+        color: hexToHSL(color)
+      };
+
+      project.labels.push(label);
+
+      api.saveProject();
+      api.populateFiletree();
+      api.updateLabelCSS();
     },
     debounce: (f, delay) => {
       let timeout = null;
@@ -330,11 +388,15 @@ if (inEditor) {
       const element = document.getElementById(id).tagName === 'SPAN' ?
         document.getElementById(id) :
         document.getElementById(id).querySelector('summary');
-      if (element.contentEditable === 'true') return;
-      if (element.classList.contains('active') && event.type !== 'contextmenu') return api.startRename(element);
+      if (element.contentEditable === 'true' || element.classList.contains('editing')) return;
+      if (element.classList.contains('active') && event.type !== 'contextmenu')
+        return api.startRename(element.tagName === 'SPAN' ? element.querySelector('.filename') : element);
       if (q('#fileTree .active'))
         q('#fileTree .active').classList.toggle('active');
       element.classList.toggle('active');
+    },
+    getLabel: (id) => {
+      return project.labels.find(l => l.id === id);
     },
     getProject: () => {
       return {...project}
@@ -358,7 +420,7 @@ if (inEditor) {
       }));
 
       try {
-        customDictionary = fs.readFileSync(path.resolve(appPath, './customdictionary.txt'), {
+        customDictionary = fs.readFileSync(path.resolve(appPath, './customDictionary.txt'), {
           encoding:'utf8',
           flag:'r'
         }).split('\n').filter(l => l.length);
@@ -370,17 +432,20 @@ if (inEditor) {
       params = querystring.parse(params);
       projectPath = params.f;
 
-      // Lock project
-      api.lockProject();
-
       // Initialize git in project directory
       git = simpleGit({
         baseDir: (params.new ? projectPath : path.dirname(projectPath))
       });
+      try {
+        await git.init();
+      } catch (err) {
+        console.warn('Git is not installed. Continuing without.');
+        gitEnabled = false;
+        q('#git').classList.add('disabled');
+      }
+
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
-        console.info('Initializing git repository...');
-        await git.init();
         console.info('Creating project file...');
         projectPath = path.resolve(projectPath, 'project.vgp');
         await fs.writeFile(
@@ -418,21 +483,30 @@ if (inEditor) {
           }
         );
         currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
-        console.info('Creating initial commit...');
-        await git.add('./*');
-        await git.commit('Create project')
-        await api.populateGitHistory()
-        .then(() => {
-          console.info('Done! Changing URL to avoid refresh-slipups.');
-          history.replaceState(null, null, './editor.html?f=' + projectPath);
-          startingWords = 0;
-        });
-      } else {
-        if ((await git.branch()).current !== 'master') {
-          await api.checkout('master', true);
+        if (gitEnabled) {
+          console.info('Creating initial commit...');
+          await git.add('./*');
+          await git.commit('Create project');
+          await api.populateGitHistory();
         }
 
-        api.populateGitHistory();
+        console.info('Done! Changing URL to avoid refresh-slipups.');
+        history.replaceState(null, null, './editor.html?f=' + projectPath);
+        startingWords = 0;
+
+        fs.writeFileSync(path.resolve(path.dirname(projectPath), '.gitignore'), '.lock');
+      } else {
+        if (gitEnabled) {
+      	  if ((await git.branch()).all.length <= 0) { // Project started without git
+	    console.info('Creating initial commit...');
+	    await git.add('./*');
+	    await git.commit('Create project');
+      	  }
+          if ((await git.branch()).current !== 'master') await api.checkout('master', true);
+
+          api.populateGitHistory();
+        }
+
         project = JSON.parse(fs.readFileSync(projectPath, {
           encoding:'utf8',
           flag:'r'
@@ -450,26 +524,32 @@ if (inEditor) {
           });
         startingWords = api.wordCountTotal();
 
-        // For compatibility with v0.1.0
+        /* Compatibility */
+
+        // with v0.1.0
         if (typeof project.openFolders === 'undefined') project.openFolders = [];
 
-        // For compatibility with <v0.1.2
+        // with <v0.1.2
         if (typeof project.openFile === 'undefined') project.openFile = api.idFromPath(currentFile.path);
 
         const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
         if (typeof foundCurrent !== 'undefined') currentFile = foundCurrent;
 
-        // For compatibility with <v0.2.1
+        // with <v0.2.1
         if (typeof project.metadata.title !== 'string')
           project.metadata.title = project.metadata.title.final;
 
-        // For compatibility with <v0.3.2
+        // with <v0.3.2
         if (typeof project.goals === 'undefined') project.goals = [];
         if (typeof project.history === 'undefined') project.history = {};
         if (typeof project.history.wordCount === 'undefined') project.history.wordCount = {};
+
+        // with <v0.3.3
+        if (typeof project.labels === 'undefined') project.labels = [];
       }
 
-      fs.writeFileSync(path.resolve(path.dirname(projectPath), '.gitignore'), '.lock');
+      // Lock project
+      api.lockProject();
 
       // Update goals
       project.goals = project.goals.map(g => {
@@ -499,12 +579,23 @@ if (inEditor) {
 
       api.populateFiletree();
       api.openFile(currentFile.path, currentFile.name, true);
+      api.updateLabelCSS();
 
       setTimeout(() => {
         document.getElementById(api.idFromPath(currentFile.path)).click();
       }, 1000);
     },
+    isGitEnabled: () => gitEnabled,
     isReadOnly: () => readOnly,
+    labelFile: (fileId, labelId) => {
+      const file = api.flatten(project.index)
+        .find(f => api.idFromPath(f.path) === fileId);
+
+      if (api.getLabel(labelId) !== undefined || labelId === undefined) {
+        file.label = labelId;
+        api.populateFiletree();
+      }
+    },
     lockProject: () => {
       try {
         if (fs.statSync(path.resolve(projectPath, '../.lock'))) {
@@ -585,6 +676,9 @@ if (inEditor) {
     openProject: () => {
       ipcRenderer.send('openProject');
     },
+    openURI: (uri) => {
+      shell.openExternal(uri);
+    },
     placeholders,
     populateFiletree: () => {
       document.getElementById('fileTree__list').innerHTML = '';
@@ -596,11 +690,12 @@ if (inEditor) {
           if (typeof item.children !== 'undefined') {
             html += `
             <details
-              id=${JSON.stringify(api.idFromPath(item.path))}
+              id="${api.idFromPath(item.path)}"
               ondragover='event.preventDefault()'
               ondrop='moveItem(event, getDraggingIndex())'
             >
               <summary
+                class="folder"
                 draggable="true"
                 ondragstart="startMoveItem(event)"
                 ondragend="stopMoveItem(event)"
@@ -618,18 +713,44 @@ if (inEditor) {
           } else {
             html += `
             <span
-              title="${item.name}"
-              onclick='event.preventDefault();api.focusItem(this.id)'
-              ondblclick='api.openItem(this.id)'
-              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.id);"
+              class="file"
+              id="${api.idFromPath(item.path)}"
               draggable="true"
               ondragstart="startMoveItem(event)"
               ondragend="stopMoveItem(event)"
               ondragover="setHovering(this)"
               ondrag="updatePageXY(event)"
-              id=${JSON.stringify(api.idFromPath(item.path))}
             >
-              ${item.name}
+              <span
+                id="${api.idFromPath(item.path)}__filename"
+                class="filename"
+                title="${item.name}"
+                onclick='event.preventDefault();api.focusItem(this.parentNode.id)'
+                ondblclick='api.openItem(this.parentNode.id)'
+                oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
+              >
+                ${item.name}
+              </span>
+              <span
+                class="label"
+                data-label="${typeof item.label === 'undefined' ? 'blank' : item.label}"
+                title="${typeof item.label === 'undefined' ? 'Click to add label.' : 'Labeled "' + api.getLabel(item.label).name + '". Click to edit.'}"
+              >
+                <div class="contextMenu">
+                  ${(project.labels.length) ?
+                    project.labels.map(l =>
+                      `<span
+                        onclick="api.labelFile('${api.idFromPath(item.path)}', '${l.id}')"
+                        data-label="${l.id}"
+                      >${l.name}</span>`
+                    ).join('') :
+                    `<span class="--no-click">No labels.</span>`
+                  }
+                  ${typeof item.label === 'undefined' ? '' : `<span onclick="api.labelFile('${api.idFromPath(item.path)}', undefined)">Remove Label</span>`}
+                  <hr>
+                  <span onclick="api.showModal('createLabel')">Create Label</span>
+                </div>
+              </span>
             </span>`;
           }
         }
@@ -641,6 +762,10 @@ if (inEditor) {
       api.restoreOpenFolders();
     },
     populateGitHistory: async () => {
+      if (!gitEnabled) {
+        console.warn('Git is disabled!');
+        return false;
+      }
       try {
         const log = await git.log();
         let html = log.all.map(h => {
@@ -701,7 +826,7 @@ if (inEditor) {
         options.hideIcons = ['side-by-side', 'image', 'preview'];
         options.placeholder = '';
       }
-      editor = new SimpleMDE(options);
+      editor = new EasyMDE(options);
 
       // Fullscreen
       const debouncedSaveFile = api.debounce(api.saveFile, 500);
@@ -742,8 +867,9 @@ if (inEditor) {
     },
     renameItem: (e) => {
       e.contentEditable = false;
+      if (e.tagName === 'SPAN') e.parentNode.classList.remove('editing');
 
-      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.tagName === 'SUMMARY' ? e.parentNode.id : e.id));
+      const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === e.parentNode.id);
 
       if (e.innerText.trim().length <= 0 || e.innerText.trim() === file.name) {
         e.innerText = file.name;
@@ -768,6 +894,11 @@ if (inEditor) {
       }
     },
     revertTo: async (where, name) => {
+      if (!gitEnabled) {
+        console.warn('Git is disabled!');
+        return false;
+      }
+
       const range = `${where}..HEAD`;
 
       await git.reset({'--hard': null});
@@ -825,6 +956,10 @@ if (inEditor) {
           break;
         case 'projectGoalComplete':
           modal = document.getElementById('projectGoalComplete');
+          modal.classList.add('visible');
+          break;
+        case 'createLabel':
+          modal = document.getElementById('createLabel');
           modal.classList.add('visible');
           break;
         default:
@@ -900,6 +1035,7 @@ if (inEditor) {
       setTimeout(() => {
         if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
         e.contentEditable = true;
+        if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
         e.focus();
         e.addEventListener('keydown', (event) => {
           if (event.key === ' ' && e.tagName === 'SUMMARY') {
@@ -1049,6 +1185,20 @@ if (inEditor) {
           q('#wordGoal__archived').innerHTML = archived.join('');
       }
     },
+    updateLabelCSS: () => {
+      const css = project.labels
+        .map(l => `
+            [data-label="${l.id}"] {
+              --hue: ${l.color.hue}deg;
+              --saturation: ${l.color.saturation}%;
+              --lightness: ${l.color.lightness}%;
+            }
+          `)
+        .join('')
+        .replace(/\s/g, '');
+
+      q('#style__labelColors').innerText = css;
+    },
     updateStats: async () => {
       let content = marked(editor.value());
       var div = document.createElement("div");
@@ -1126,9 +1276,47 @@ if (inEditor) {
       wordCount: {
 
       }
-    }
+    },
+    labels: []
   };
   let placeholderN = Date.now() % api.placeholders.length;
+
+  ipcRenderer.on('updateProjectDetails', () => {
+    api.showModal('projectDetails');
+  });
+  ipcRenderer.on('toggleFullScreen', () => {
+    toggleFullScreen(editor);
+  });
+} else if (page === 'index') {
+  const Parser = require('rss-parser');
+  const parser = new Parser();
+  (async () => {
+    try {
+      const feed = await parser.parseURL('https://github.com/benjaminbhollon/verbose-guacamole/releases.atom');
+      const currentVersion = require('./package.json').version;
+      document.getElementById('releases__list').innerHTML = feed.items.map(item => {
+        const version = item.link.split('/').slice(-1)[0].slice(1);
+        return `
+        <div ${version === currentVersion ? 'class="current"' : ''}>
+          <h3>${item.title}</h3>
+          <details>
+            <summary>Release Notes</summary>
+            ${item.content.split('<hr>')[0]}
+          </details>
+          <p>${
+            version === currentVersion ?
+            `This is your current version.` :
+            `<a href="javascript:api.openURI('${item.link}')">Download</a>`
+          }</p>
+        </div>
+        `
+      }).join('<br>');
+    } catch (err) {
+      setTimeout(() => {
+        document.getElementById('releases__list').innerHTML = '<p>Can\'t get releases right now.</p>';
+      }, 15);
+    }
+  })();
 }
 
 // Fullscreen
@@ -1149,13 +1337,6 @@ toggleFullScreen = (e) => {
 }
 
 // Respond to main process
-ipcRenderer.on('updateProjectDetails', () => {
-  if (!isEditor) return;
-  api.showModal('projectDetails');
-});
-ipcRenderer.on('toggleFullScreen', () => {
-  toggleFullScreen(editor);
-});
 ipcRenderer.on('app-close', () => {
   if (inEditor) {
     // Save files
@@ -1179,6 +1360,17 @@ ipcRenderer.on('reload', () => {
 
   location.reload();
 });
+ipcRenderer.on('relocate', (event, to) => {
+  if (inEditor) {
+    // Save files
+    api.saveFile();
+    api.saveProject();
+
+    // Unlock project for other sessions
+    api.unlockProject();
+  }
+  location.href = to;
+})
 
 if (inEditor) {
   ipcRenderer.send('appMenuEditor');
@@ -1190,10 +1382,13 @@ else {
     openProject: () => {
       ipcRenderer.send('openProject');
     },
+    openURI: (uri) => {
+      shell.openExternal(uri);
+    },
     newProject: () => {
       ipcRenderer.send('newProject');
     },
   };
 }
 
-console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.');
+setTimeout(() => console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.'), 1500);

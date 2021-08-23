@@ -1,7 +1,7 @@
 "use strict";
 
 // Import modules
-const { app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('electron');
+const { shell, app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('electron');
 const url = require('url');
 const path = require('path');
 const fs = require('fs');
@@ -16,7 +16,7 @@ function createWindow () {
     webPreferences: {
       spellcheck: false,
       preload: path.join(app.getAppPath(), 'preload.js'),
-      icon: './icons/icon.png'
+      icon: path.join(app.getAppPath(), './icons/icon.png')
     }
   });
 
@@ -63,6 +63,11 @@ function newProject() {
           slashes: 'true',
           pathname: path.join(__dirname, `./app/editor.html`)
         }) + `?f=${encodeURIComponent(result.filePaths[0])}&new=true`);
+        win.webContents.send('relocate', url.format({
+          protocol: 'file',
+          slashes: 'true',
+          pathname: path.join(__dirname, `./app/editor.html`)
+        }) + `?f=${encodeURIComponent(result.filePaths[0])}&new=true`);
       }
     });
   });
@@ -77,7 +82,7 @@ function openProject() {
     ]
   }).then(result => {
     if (result.canceled !== true) {
-      win.loadURL(url.format({
+      win.webContents.send('relocate', url.format({
         protocol: 'file',
         slashes: 'true',
         pathname: path.join(__dirname, `./app/editor.html`)
@@ -104,6 +109,15 @@ const menus = {
           accelerator: 'CommandOrControl+Shift+N',
           click() {
             newProject();
+          }
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Back to Homepage',
+          click() {
+            win.webContents.send('relocate', './index.html');
           }
         }
       ]
@@ -183,17 +197,9 @@ const menus = {
           accelerator: 'CommandOrControl+R'
         },
         {
-          label: 'Report Bug',
+          label: 'Report a Bug',
           click() {
-            const report = new BrowserWindow({
-              webPreferences: {
-                nodeIntegration: false,
-                enableRemoteModule: false,
-                contextIsolation: true
-              }
-            });
-
-            report.loadURL('https://github.com/benjaminbhollon/verbose-guacamole/issues/new');
+            shell.openExternal('https://github.com/benjaminbhollon/verbose-guacamole/issues/new')
           }
         }
       ]
@@ -219,18 +225,11 @@ const menus = {
         }
       ]
     },
-    {
+    /*{
       label: 'Tools',
       submenu: [
-        {
-          label: 'Focus Mode',
-          accelerator: 'F11',
-          click() {
-            win.webContents.send('toggleFullScreen');
-          }
-        }
       ]
-    },
+    },*/
     {
       label: 'Help',
       submenu: [
@@ -281,17 +280,9 @@ const menus = {
           role: 'reload'
         },
         {
-          label: 'Report Bug',
+          label: 'Report a Bug',
           click() {
-            const report = new BrowserWindow({
-              webPreferences: {
-                nodeIntegration: false,
-                enableRemoteModule: false,
-                contextIsolation: true
-              }
-            });
-
-            report.loadURL('https://github.com/benjaminbhollon/verbose-guacamole/issues/new');
+            shell.openExternal('https://github.com/benjaminbhollon/verbose-guacamole/issues/new')
           }
         }
       ]

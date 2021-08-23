@@ -1,7 +1,3 @@
-body, body * {
-  box-sizing: border-box;
-}
-
 body {
   --left-width: 20%;
   --right-width: 20%;
@@ -30,7 +26,6 @@ a {
   height: 100%;
   max-height: calc(100vh - 1.5em);
   overflow-y: auto;
-  overflow-x: hidden;
   border-right: 1px solid #ccc;
   z-index: 2;
 }
@@ -61,8 +56,18 @@ a {
   background-color: var(--background-color);
 }
 
-#editor .CodeMirror {
-  height: calc(100% - 50px - 2em);
+.EasyMDEContainer {
+  height: calc(100% - 2em);
+  overflow-y: auto;
+  position: relative;
+}
+
+.CodeMirror {
+  position: absolute;
+  top: 50px;
+  bottom: 0;
+  right: 0;
+  left: 0;
 }
 
 /* Files */
@@ -71,20 +76,52 @@ a {
   grid-column: 1;
 }
 
-#fileTree span, #fileTree details summary {
+#fileTree .file, #fileTree .folder {
   font-size: 1.2rem;
   padding: 0 0.5em;
   height: 1.75em;
   line-height: 1.75em;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
   cursor: default;
   user-select: none;
 }
 
-#fileTree__list span {
+#fileTree__list .file {
   display: block;
+  position: relative;
+}
+
+#fileTree__list .filename {
+  display: inline-block;
+  width: calc(100% - 1.3em);
+}
+
+#fileTree__list .filename, #fileTree__list .folder {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#fileTree__list .label {
+  position: absolute;
+  right: 0.25em;
+  top: 50%;
+  width: 1em;
+  height: 1em;
+  border: 1px solid;
+  border-radius: 100%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+[data-label] {
+  --alpha: 1;
+  background-color: hsla(var(--hue), var(--saturation), var(--lightness), var(--alpha));
+}
+
+.label[data-label="blank"] {
+  --hue: 0;
+  --saturation: 0%;
+  --lightness: 95%;
 }
 
 #fileTree__list:not(.searching) .active {
@@ -92,9 +129,10 @@ a {
   color: #fff;
 }
 
-#fileTree #fileTree__list span[contenteditable="true"],
-#fileTree #fileTree__list details summary[contenteditable="true"] {
-  text-overflow: inherit;
+#fileTree #fileTree__list .file.editing,
+#fileTree #fileTree__list [contenteditable="true"],
+#fileTree #fileTree__list [contenteditable="true"] {
+  text-overflow: initial;
   background-color: #fff;
   color: #000;
   outline: 3px solid orange;
@@ -103,7 +141,7 @@ a {
   padding: 0;
 }
 
-#fileTree details span, #fileTree details details {
+#fileTree details > span, #fileTree details > details {
   margin-left: 1.5em;
 }
 
@@ -144,6 +182,10 @@ a {
   overflow-x: hidden;
   overflow-y: visible;
   grid-column: 3;
+}
+
+#git.disabled #git__main, #git:not(.disabled) #git__disabled {
+  display: none;
 }
 
 #git h3, #git p {
@@ -239,7 +281,7 @@ textarea {
 }
 
 /* Context Menu */
-#contextMenu, #spellcheckMenu {
+.contextMenu {
   font-size: 1.2rem;
   border: 1px solid #aaa;
   width: 150px;
@@ -251,29 +293,52 @@ textarea {
   display: none;
 }
 
-#contextMenu span, #spellcheckMenu span {
+.contextMenu span {
   width: inherit;
   display: block;
   cursor: default;
   padding: 0.25em;
 }
 
-#contextMenu span:hover, #spellcheckMenu span:hover {
+.contextMenu span:not(.--no-click, [data-label]):hover {
   background-color: #ccc;
 }
 
-#contextMenu.visible, #spellcheckMenu.visible {
+.contextMenu.visible, .dropdown .contextMenu {
   display: block;
+}
+
+.dropdown {
+  z-index: 3;
+}
+
+.dropdown .contextMenu {
+  top: 50%;
+  left: 50%;
+  transform: translateX(-100%);
+  z-index: 3;
+  position: absolute;
+}
+
+.dropdown .contextMenu span {
+  z-index: 3;
 }
 
 #contextMenu #deleteButton, #contextMenu #renameButton {
   display: none;
 }
 
-#contextMenu hr, #spellcheckMenu hr {
+.contextMenu hr {
   margin: 0;
 }
 
+.contextMenu [data-label] {
+  --alpha: 0.3;
+}
+
+.contextMenu [data-label]:hover {
+  --alpha: 0.5;
+}
 
 /* Loading */
 
@@ -369,6 +434,7 @@ body.locked #locked {
   text-decoration: none;
   padding: 0.5em;
   border: 2px solid;
+  margin: 0.15em 0;
 }
 
 /* Novel Stats */
