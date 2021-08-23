@@ -110,6 +110,15 @@ const menus = {
           click() {
             newProject();
           }
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Back to Homepage',
+          click() {
+            win.webContents.send('relocate', './index.html');
+          }
         }
       ]
     },
