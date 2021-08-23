@@ -293,7 +293,7 @@ if (inEditor) {
       setTimeout(() => {
         if (type === 'file') {
           api.openItem(api.idFromPath(filePath)).click();
-          if (!first) api.startRename(document.getElementById(api.idFromPath(filePath)));
+          if (!first) api.startRename(document.getElementById(api.idFromPath(filePath) + '__filename'));
         } else {
           document.getElementById(api.idFromPath(filePath)).click();
           document.getElementById(api.idFromPath(filePath)).open = true;
@@ -435,9 +435,7 @@ if (inEditor) {
       // Initialize git in project directory
       git = simpleGit({
         baseDir: (params.new ? projectPath : path.dirname(projectPath))
-      })
-      	.addConfig('user.name', 'Verbose Guacamole User')
-      	.addConfig('user.email', 'git@seewitheyesclosed.com');
+      });
       try {
         await git.init();
       } catch (err) {
@@ -692,7 +690,7 @@ if (inEditor) {
           if (typeof item.children !== 'undefined') {
             html += `
             <details
-              id=${JSON.stringify(api.idFromPath(item.path))}
+              id="${api.idFromPath(item.path)}"
               ondragover='event.preventDefault()'
               ondrop='moveItem(event, getDraggingIndex())'
             >
@@ -716,7 +714,7 @@ if (inEditor) {
             html += `
             <span
               class="file"
-              id=${JSON.stringify(api.idFromPath(item.path))}
+              id="${api.idFromPath(item.path)}"
               draggable="true"
               ondragstart="startMoveItem(event)"
               ondragend="stopMoveItem(event)"
@@ -724,7 +722,7 @@ if (inEditor) {
               ondrag="updatePageXY(event)"
             >
               <span
-                id="${JSON.stringify(api.idFromPath(item.path))}__filename"
+                id="${api.idFromPath(item.path)}__filename"
                 class="filename"
                 title="${item.name}"
                 onclick='event.preventDefault();api.focusItem(this.parentNode.id)'
@@ -1393,4 +1391,4 @@ else {
   };
 }
 
-console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.');
+setTimeout(() => console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.'), 1500);
