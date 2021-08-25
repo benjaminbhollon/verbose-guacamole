@@ -1,14 +1,53 @@
 // Include packages
 const path = require('path');
+const fs = require('fs');
 const { shell, ipcRenderer } = require('electron');
+
+let paths = {};
+(async () => {
+  // Get app data directory
+  await (new Promise((resolve, reject) => {
+    ipcRenderer.send('getDirs');
+    ipcRenderer.on('getDirs', (event, data, novels) => {
+      paths = {
+        data,
+        novels
+      };
+      resolve();
+    });
+  }));
+})();
 
 const page = path.parse(location.href.split('?')[0]).name
 const inEditor = page === 'editor';
 
-let api = {};
+// Quick versions of document.querySelector and document.querySelectorAll
+const q = s => document.querySelector(s);
+const qA = s => document.querySelectorAll(s);
+
+let api = {
+  openProject: () => {
+    ipcRenderer.send('openProject');
+  },
+  openURI: (uri) => {
+    shell.openExternal(uri);
+  },
+  newProject: () => {
+    document.getElementById('newProject').classList.add('visible');
+  },
+  updateNewProjectModal: () => {
+    q('#newProject__saveLocation').innerText = q('#newProject__folder').value =
+      path.resolve(
+        paths.novels,
+        q('#newProject__title').value.trim().length ?
+          q('#newProject__title').value.trim() :
+          'Untitled Novel'
+      );
+    localStorage.defaultAuthor = q('#newProject__author').value;
+  },
+};
 
 if (inEditor) {
-  const fs = require('fs');
   const simpleGit = require('simple-git');
   const querystring = require('querystring');
   const marked = require('marked');
@@ -41,7 +80,6 @@ if (inEditor) {
   let clearing = false;
   let currentlyDragging = null;
   let hoveringOver = null;
-  let appPath = null;
   let startingWords = 0;
   let sprint = {}
   let params = {};
@@ -53,10 +91,6 @@ if (inEditor) {
   const dictionary = new Typo('en_US');
 
   let customDictionary = [];
-
-  // Quick versions of document.querySelector and document.querySelectorAll
-  const q = s => document.querySelector(s);
-  const qA = s => document.querySelectorAll(s);
 
   // Define what separates a word
   const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
@@ -95,7 +129,7 @@ if (inEditor) {
     return HSL;
   }
 
-  api = {
+  const editorAPI = {
     addGoal: (type, words) => {
       const allowedTypes = [
         'session',
@@ -128,7 +162,7 @@ if (inEditor) {
     },
     addToDictionary: (w) => {
       customDictionary.push(w);
-      fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), customDictionary.join('\n'));
+      fs.writeFileSync(path.resolve(paths.data, './customDictionary.txt'), customDictionary.join('\n'));
 
       return true;
     },
@@ -410,27 +444,28 @@ if (inEditor) {
       api.resetEditor();
     },
     init: async (params) => {
-      // Get app data directory
-      await (new Promise((resolve, reject) => {
-        ipcRenderer.send('appDataDir');
-        ipcRenderer.on('appDataDir', (event, args) => {
-          appPath = args;
-          resolve();
-        });
-      }));
-
       try {
-        customDictionary = fs.readFileSync(path.resolve(appPath, './customDictionary.txt'), {
+        customDictionary = fs.readFileSync(path.resolve(paths.data, './customDictionary.txt'), {
           encoding:'utf8',
           flag:'r'
         }).split('\n').filter(l => l.length);
       } catch (err) {
         console.error(err);
-        fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), '');
+        fs.writeFileSync(path.resolve(paths.data, './customDictionary.txt'), '');
       }
 
       params = querystring.parse(params);
       projectPath = params.f;
+
+      // Create project directory if necessary
+      if (params.new) {
+        if (!fs.existsSync(projectPath)){
+          fs.mkdirSync(paths.novels);
+        }
+        if (!fs.existsSync(projectPath)){
+          fs.mkdirSync(projectPath);
+        }
+      }
 
       // Initialize git in project directory
       git = simpleGit({
@@ -446,6 +481,11 @@ if (inEditor) {
 
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
+        project.metadata = {
+          title: params['meta.title'],
+          author: params['meta.author'],
+          synopsis: params['meta.synopsis']
+        }
         console.info('Creating project file...');
         projectPath = path.resolve(projectPath, 'project.vgp');
         await fs.writeFile(
@@ -462,7 +502,7 @@ if (inEditor) {
             }
           }
         );
-        console.info('Creating initial file...');
+        console.info('Creating title page...');
         try {
           fs.mkdirSync(path.resolve(path.dirname(projectPath), './content'));
         } catch(err) {
@@ -470,7 +510,7 @@ if (inEditor) {
         }
         await fs.writeFile(
           path.resolve(path.dirname(projectPath), project.index[0].path),
-          '',
+          `# ${project.metadata.title}\nby ${project.metadata.author}`,
           {
             encoding: 'utf8',
             flag: 'w'
@@ -641,9 +681,6 @@ if (inEditor) {
       // Save
       api.saveProject();
     },
-    newProject: () => {
-      ipcRenderer.send('newProject');
-    },
     openFile: (p, n, first = false) => {
       if (currentFile === api.flatten(project.index).find(i => i.path === p) && !first) return;
       api.resetEditor();
@@ -672,12 +709,6 @@ if (inEditor) {
       project.openFile = id;
       api.saveProject();
       return document.getElementById(id);
-    },
-    openProject: () => {
-      ipcRenderer.send('openProject');
-    },
-    openURI: (uri) => {
-      shell.openExternal(uri);
     },
     placeholders,
     populateFiletree: () => {
@@ -784,6 +815,7 @@ if (inEditor) {
 
       // If the editor already exists, clear it
       if (editor) {
+        console.log(editor.value());
         editor.value('');
         editor.toTextArea();
       }
@@ -1257,6 +1289,8 @@ if (inEditor) {
     },
   };
 
+  api = {...editorAPI, ...api};
+
   let project = {
     metadata: {
       title: 'Untitled Novel',
@@ -1265,7 +1299,7 @@ if (inEditor) {
     },
     index: [
       {
-        name: 'New File',
+        name: 'Title Page',
         path: './content/' + api.fileName(),
         words: 0
       }
@@ -1371,24 +1405,33 @@ ipcRenderer.on('relocate', (event, to) => {
   }
   location.href = to;
 })
+ipcRenderer.on('newProject', (event, to) => {
+  if (inEditor) {
+    // Save files
+    api.saveFile();
+    api.saveProject();
+
+    // Unlock project for other sessions
+    api.unlockProject();
+  }
+  
+  api.newProject();
+})
 
 if (inEditor) {
   ipcRenderer.send('appMenuEditor');
-  module.exports = api;
 }
 else {
   ipcRenderer.send('appMenuDefault');
-  module.exports = {
-    openProject: () => {
-      ipcRenderer.send('openProject');
-    },
-    openURI: (uri) => {
-      shell.openExternal(uri);
-    },
-    newProject: () => {
-      ipcRenderer.send('newProject');
-    },
-  };
 }
 
-setTimeout(() => console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.'), 1500);
+module.exports = api;
+
+setTimeout(() => {
+  // Add "Create Project" modal
+  q('#modals').innerHTML += fs.readFileSync('./app/assets/html/newProjectModal.html');
+  q('#newProject__author').value = localStorage.defaultAuthor;
+  api.updateNewProjectModal();
+
+  console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.');
+}, 3000);

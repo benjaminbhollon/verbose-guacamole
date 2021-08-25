@@ -50,28 +50,9 @@ app.on('activate', () => {
 /* Projects */
 // Create project
 function newProject() {
-  dialog.showMessageBox(win, {
-    message: 'You will need to select an empty folder to place your files in.'
-  }).then(() => {
-    dialog.showOpenDialog(
-      {
-        "properties": [ 'openDirectory' ]
-      }).then(result => {
-      if (result.canceled !== true) {
-        win.loadURL(url.format({
-          protocol: 'file',
-          slashes: 'true',
-          pathname: path.join(__dirname, `./app/editor.html`)
-        }) + `?f=${encodeURIComponent(result.filePaths[0])}&new=true`);
-        win.webContents.send('relocate', url.format({
-          protocol: 'file',
-          slashes: 'true',
-          pathname: path.join(__dirname, `./app/editor.html`)
-        }) + `?f=${encodeURIComponent(result.filePaths[0])}&new=true`);
-      }
-    });
-  });
+  win.webContents.send('newProject');
 }
+// Open project
 function openProject() {
   dialog.showOpenDialog({
     "filters": [
@@ -317,6 +298,10 @@ try {
   fs.mkdirSync(path.resolve(app.getPath('appData'), './verbose-guacamole/'));
 } catch (err) {}
 
-ipcMain.on('appDataDir', (event) => {
-  event.reply('appDataDir', path.resolve(app.getPath('appData'), './verbose-guacamole/'));
+ipcMain.on('getDirs', (event) => {
+  event.reply(
+    'getDirs',
+    path.resolve(app.getPath('appData'), './verbose-guacamole/'),
+    path.resolve(app.getPath('documents'), './VerbGuac Projects/'),
+  );
 });

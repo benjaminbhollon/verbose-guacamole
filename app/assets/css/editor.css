@@ -14,10 +14,6 @@ body.git-closed {
   --right-width: 0%;
 }
 
-a {
-  color: inherit;
-}
-
 .--hidden {
   display: none!important;
 }
@@ -397,44 +393,6 @@ body.locked #locked {
   75% {
     content: '..'
   }
-}
-
-/* Modals */
-.modal {
-  --background-color: #444;
-  --color: #fff;
-  --light-color: #fff8;
-  width: 95vw;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow: auto;
-  position: fixed;
-  background-color: var(--background-color);
-  color: var(--color);
-  top: 50vh;
-  left: 50vw;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  padding: 1em;
-  border-radius: 0.5em;
-  display: none;
-}
-
-.modal.visible {
-  display: block;
-}
-
-.modal h3 {
-  text-align: center;
-}
-
-.modal a.button {
-  display: block;
-  text-align: center;
-  text-decoration: none;
-  padding: 0.5em;
-  border: 2px solid;
-  margin: 0.15em 0;
 }
 
 /* Novel Stats */
