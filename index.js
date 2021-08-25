@@ -5,6 +5,10 @@ const { shell, app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('
 const url = require('url');
 const path = require('path');
 const fs = require('fs');
+let projectsPath = path.resolve(app.getPath('documents'), './VerbGuac Projects/');
+if (!fs.existsSync(projectsPath)){
+  fs.mkdirSync(projectsPath);
+}
 
 // Manage electron-squirrel-startup
 if (require('electron-squirrel-startup')) return app.quit();
@@ -55,10 +59,11 @@ function newProject() {
 // Open project
 function openProject() {
   dialog.showOpenDialog({
-    "filters": [
+    defaultPath: projectsPath,
+    filters: [
       {
-        "name": "Verbose Guacamole Project",
-        "extensions": ["vgp"]
+        name: "Verbose Guacamole Project",
+        extensions: ["vgp"]
       }
     ]
   }).then(result => {
@@ -302,6 +307,6 @@ ipcMain.on('getDirs', (event) => {
   event.reply(
     'getDirs',
     path.resolve(app.getPath('appData'), './verbose-guacamole/'),
-    path.resolve(app.getPath('documents'), './VerbGuac Projects/'),
+    projectsPath,
   );
 });

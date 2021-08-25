@@ -459,7 +459,7 @@ if (inEditor) {
 
       // Create project directory if necessary
       if (params.new) {
-        if (!fs.existsSync(projectPath)){
+        if (!fs.existsSync(paths.novels)){
           fs.mkdirSync(paths.novels);
         }
         if (!fs.existsSync(projectPath)){
@@ -1414,7 +1414,7 @@ ipcRenderer.on('newProject', (event, to) => {
     // Unlock project for other sessions
     api.unlockProject();
   }
-  
+
   api.newProject();
 })
 
