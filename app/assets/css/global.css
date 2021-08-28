@@ -56,6 +56,17 @@ a.fa {
   text-decoration: none;
 }
 
+a {
+  color: inherit;
+}
+
+code {
+  background-color: silver;
+  color: #000;
+  padding: 0 0.15em;
+  border-radius: 0.15em;
+}
+
 /* Forms */
 form {
   text-align: left;
@@ -112,6 +123,13 @@ input[type="submit"]:active {
   background-color: #8886;
 }
 
+label.canChange:focus-within::after {
+  content: 'You can change this later.';
+  font-size: 0.8rem;
+  font-style: italic;
+  font-weight: normal;
+}
+
 .success, .failure {
   background-color:green;
   padding:1em;
@@ -120,6 +138,48 @@ input[type="submit"]:active {
 
 .failure {
   background-color:red;
+}
+
+/* Modals */
+#modals {
+  position: absolute;
+}
+
+.modal {
+  --background-color: #444;
+  --color: #fff;
+  --light-color: #fff8;
+  width: 95vw;
+  max-width: 600px;
+  max-height: 75vh;
+  overflow: auto;
+  position: fixed;
+  background-color: var(--background-color);
+  color: var(--color);
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  padding: 1em;
+  border-radius: 0.5em;
+  display: none;
+}
+
+.modal.visible {
+  display: block;
+}
+
+.modal h3 {
+  text-align: center;
+}
+
+.modal a.button {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  padding: 0.5em;
+  border: 2px solid;
+  margin: 0.15em 0;
 }
 
 .vr {

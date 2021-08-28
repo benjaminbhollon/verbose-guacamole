@@ -107,85 +107,88 @@
         </label>
       </div>
     </section>
-    <div id="wordSprint__popup" class="novelStats__modal" data-mode="set">
-      <h2>Word Sprints</h2>
-      <div class="set">
-        <p>Start a new word sprint:</p>
-        <input type="text" id="wordSprint__timeInput" placeholder="Try 15:00 (15 mins) or 1:00:00 (1 hr)">
-        <input type="submit" value="Start Sprint" onclick="startSprint()">
+    <div id="modals">
+      <div id="wordSprint__popup" class="novelStats__modal" data-mode="set">
+        <h2>Word Sprints</h2>
+        <div class="set">
+          <p>Start a new word sprint:</p>
+          <input type="text" id="wordSprint__timeInput" placeholder="Try 15:00 (15 mins) or 1:00:00 (1 hr)">
+          <input type="submit" value="Start Sprint" onclick="startSprint()">
+        </div>
+        <div class="running">
+          <p id="wordSprint__timeLeft"></p>
+          <p id="wordSprint__status"></p>
+          <input id="wordSprint__cancel" onclick="api.cancelSprint()" type="submit" value="Cancel Sprint">
+        </div>
+        <div class="finished">
+          <input type="submit" value="Sprint Again" onclick="resetSprint()">
+        </div>
       </div>
-      <div class="running">
-        <p id="wordSprint__timeLeft"></p>
-        <p id="wordSprint__status"></p>
-        <input id="wordSprint__cancel" onclick="api.cancelSprint()" type="submit" value="Cancel Sprint">
+      <div id="wordGoal__popup" class="novelStats__modal">
+        <h2>Goals</h2>
+        <p>Your writing goals:</p>
+        <div id="wordGoal__list"></div>
+        <br>
+        <details id="wordGoal__addForm">
+          <summary>Add Goal</summary>
+          <label for="wordGoal__inputType">Goal Type</label>
+          <select id="wordGoal__inputType">
+            <option value="session">Session</option>
+            <option value="daily">Daily</option>
+            <option value="project">Project</option>
+          </select>
+          <label for="wordGoal__inputWords">Target Words</label>
+          <input type="number" id="wordGoal__inputWords" value="300" min="0">
+          <input onclick="api.addGoal(q('#wordGoal__inputType').value, parseInt(q('#wordGoal__inputWords').value))" type="submit" value="Create Goal">
+        </details>
+        <details>
+          <summary>Archived Goals</summary>
+          <div id="wordGoal__archived"></div>
+        </details>
       </div>
-      <div class="finished">
-        <input type="submit" value="Sprint Again" onclick="resetSprint()">
-      </div>
-    </div>
-    <div id="wordGoal__popup" class="novelStats__modal">
-      <h2>Goals</h2>
-      <p>Your writing goals:</p>
-      <div id="wordGoal__list"></div>
-      <br>
-      <details id="wordGoal__addForm">
-        <summary>Add Goal</summary>
-        <label for="wordGoal__inputType">Goal Type</label>
-        <select id="wordGoal__inputType">
-          <option value="session">Session</option>
-          <option value="daily">Daily</option>
-          <option value="project">Project</option>
-        </select>
-        <label for="wordGoal__inputWords">Target Words</label>
-        <input type="number" id="wordGoal__inputWords" value="300" min="0">
-        <input onclick="api.addGoal(q('#wordGoal__inputType').value, parseInt(q('#wordGoal__inputWords').value))" type="submit" value="Create Goal">
-      </details>
-      <details>
-        <summary>Archived Goals</summary>
-        <div id="wordGoal__archived"></div>
-      </details>
-    </div>
-    <div id="projectDetails" class="modal">
-      <h3>Update Project Details</h3>
-      <form>
-        <label>
-          Title
-          <input placeholder="The Adventures of Sir Guacamole" type="text" id="projectDetails__title" required>
-        </label>
+      <div id="projectDetails" class="modal">
+        <h3>Update Project Details</h3>
+        <form>
           <label>
-            Author
-            <input placeholder="John Doe" type="text" id="projectDetails__author" required>
+            Title
+            <input placeholder="The Adventures of Sir Guacamole" type="text" id="projectDetails__title" required>
           </label>
-        <label>
-          Synopsis
-          <textarea id="projectDetails__synopsis" placeholder="Tell me all about it..."></textarea>
-        </label>
-      </form>
-      <a href="#" onclick="this.parentNode.classList.remove('visible');updateProjectDetails()" class="button">Save and Close</a>
-    </div>
-    <div id="createLabel" class="modal">
-      <h3>Create Label</h3>
-      <form>
-        <label>
-          Name
-          <input placeholder="Something short but memorable..." type="text" id="createLabel__name" required>
-        </label>
-        <label>
-          Description (optional)
-          <textarea id="createLabel__description" placeholder="What this label means to you..."></textarea>
-        </label>
-        <label>
-          Color
-          <input type="color" id="createLabel__color" value="#ff0000"></textarea>
-        </label>
-      </form>
-      <a href="#" onclick="this.parentNode.classList.remove('visible');createLabel()" class="button">Save and Close</a>
-      <a href="#" onclick="this.parentNode.classList.remove('visible');" class="button">Cancel</a>
-    </div>
-    <div id="projectGoalComplete" class="modal">
-      <h3>Congratulations!</h3>
-      <p>You've completed your goal of <span id="projectGoalComplete__wordCount"></span> total words in just <span id="projectGoalComplete__days"></span> days!</p>
-      <a href="#" onclick="this.parentNode.classList.remove('visible');api.archiveCompleteGoals(true)" class="button">Keep writing!</a>
+            <label>
+              Author
+              <input placeholder="John Doe" type="text" id="projectDetails__author" required>
+            </label>
+          <label>
+            Synopsis
+            <textarea id="projectDetails__synopsis" placeholder="Tell me all about it..."></textarea>
+          </label>
+        </form>
+        <p><em>Note: You will have to manually update your Title Page and any other references to this information in your novel's content.</em></p>
+        <a href="#" onclick="this.parentNode.classList.remove('visible');updateProjectDetails()" class="button">Save and Close</a>
+      </div>
+      <div id="createLabel" class="modal">
+        <h3>Create Label</h3>
+        <form>
+          <label>
+            Name
+            <input placeholder="Something short but memorable..." type="text" id="createLabel__name" required>
+          </label>
+          <label>
+            Description (optional)
+            <textarea id="createLabel__description" placeholder="What this label means to you..."></textarea>
+          </label>
+          <label>
+            Color
+            <input type="color" id="createLabel__color" value="#ff0000"></textarea>
+          </label>
+        </form>
+        <a href="#" onclick="this.parentNode.classList.remove('visible');createLabel()" class="button">Save and Close</a>
+        <a href="#" onclick="this.parentNode.classList.remove('visible');" class="button">Cancel</a>
+      </div>
+      <div id="projectGoalComplete" class="modal">
+        <h3>Congratulations!</h3>
+        <p>You've completed your goal of <span id="projectGoalComplete__wordCount"></span> total words in just <span id="projectGoalComplete__days"></span> days!</p>
+        <a href="#" onclick="this.parentNode.classList.remove('visible');api.archiveCompleteGoals(true)" class="button">Keep writing!</a>
+      </div>
     </div>
     <div id="contextMenu" class="contextMenu">
       <span onclick="api.deleteItem()" id="deleteButton">Delete</span>

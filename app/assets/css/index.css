@@ -34,7 +34,7 @@ footer a {
 #content {
   flex: 1 0 auto;
   display: grid;
-  grid-template-columns: max(30%, 300px) auto max(30%, 300px);
+  grid-template-columns: 33% 34% 33%;
 }
 
 #content > div {
