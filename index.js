@@ -9,6 +9,15 @@ let projectsPath = path.resolve(app.getPath('documents'), './VerbGuac Projects/'
 if (!fs.existsSync(projectsPath)){
   fs.mkdirSync(projectsPath);
 }
+let theme = 'guacamole';
+if (fs.existsSync(path.resolve(app.getPath('appData'), 'verbose-guacamole', 'currentTheme.txt'))) {
+  theme = fs.readFileSync(path.resolve(app.getPath('appData'), 'verbose-guacamole', 'currentTheme.txt'), {
+    encoding:'utf8',
+    flag:'r'
+  }).trim();
+} else {
+  fs.writeFileSync(path.resolve(app.getPath('appData'), 'verbose-guacamole', 'currentTheme.txt'), 'guacamole');
+}
 
 // Manage electron-squirrel-startup
 if (require('electron-squirrel-startup')) return app.quit();
@@ -78,204 +87,228 @@ function openProject() {
 }
 
 /* Application menu */
-const menus = {
-  editor: Menu.buildFromTemplate([
-    {
-      label: 'File',
-      submenu: [
-        {
-          label: 'Open Project',
-          accelerator: 'CommandOrControl+O',
-          click() {
-            openProject();
-          }
-        },
-        {
-          label: 'New Project',
-          accelerator: 'CommandOrControl+Shift+N',
-          click() {
-            newProject();
-          }
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Back to Homepage',
-          click() {
-            win.webContents.send('relocate', './index.html');
-          }
-        }
-      ]
-    },
-    {
-      label: 'Edit',
-      submenu: [
-        {
-          label: 'Update Project Details',
-          click() {
-            win.webContents.send('updateProjectDetails');
-          }
-        }
-      ]
-    },
-    {
-      label: 'Tools',
-      submenu: [
-        {
-          label: 'Focus Mode',
-          accelerator: 'F11',
-          click() {
-            win.webContents.send('toggleFullScreen');
-          }
-        }
-      ]
-    },
-    {
-      label: 'Help',
-      submenu: [
-        {
-          label: 'Git',
-          submenu: [
-            {
-              label: 'What are commits?',
-              click() {
-                const help = new BrowserWindow({
-                  webPreferences: {
-                    nodeIntegration: false,
-                    enableRemoteModule: false,
-                    contextIsolation: true
-                  }
-                });
-
-                help.loadFile('./app/help/git/commits.html');
-              }
+let menus = {};
+let themeNames = {
+  guacamole: 'Guacamole',
+};
+function setTheme(id) {
+  theme = id;
+  fs.writeFileSync(path.resolve(app.getPath('appData'), 'verbose-guacamole', 'currentTheme.txt'), id);
+  win.webContents.send('setTheme', id);
+  updateMenus();
+  console.info('Theme set to ' + themeNames[id]);
+}
+function updateMenus() {
+  menus = {
+    editor: Menu.buildFromTemplate([
+      {
+        label: 'File',
+        submenu: [
+          {
+            label: 'Open Project',
+            accelerator: 'CommandOrControl+O',
+            click() {
+              openProject();
             }
-          ]
-        }
-      ]
-    },
-    {
-      label: 'Preferences',
-      submenu: [
-        {
-          label: 'Themes',
-          submenu: [
-            {
-              label: 'Coming soon!'
-            }
-          ]
-        }
-      ]
-    },
-    {
-      label: 'Debug',
-      submenu: [
-        {
-          label: 'Dev Tools',
-          role: 'toggleDevTools'
-        },
-        {
-          label: 'Reload',
-          click() {
-            win.webContents.send('reload');
           },
-          accelerator: 'CommandOrControl+R'
-        },
-        {
-          label: 'Report a Bug',
-          click() {
-            shell.openExternal('https://github.com/benjaminbhollon/verbose-guacamole/issues/new')
+          {
+            label: 'New Project',
+            accelerator: 'CommandOrControl+Shift+N',
+            click() {
+              newProject();
+            }
+          },
+          {
+            type: 'separator'
+          },
+          {
+            label: 'Back to Homepage',
+            click() {
+              win.webContents.send('relocate', './index.html');
+            }
           }
-        }
-      ]
-    }
-  ]),
-  default: Menu.buildFromTemplate([
-    {
-      label: 'File',
-      submenu: [
-        {
-          label: 'Open Project',
-          accelerator: 'CommandOrControl+O',
-          click() {
-            openProject();
+        ]
+      },
+      {
+        label: 'Edit',
+        submenu: [
+          {
+            label: 'Update Project Details',
+            click() {
+              win.webContents.send('updateProjectDetails');
+            }
           }
-        },
-        {
-          label: 'New Project',
-          accelerator: 'CommandOrControl+Shift+N',
-          click() {
-            newProject();
+        ]
+      },
+      {
+        label: 'Tools',
+        submenu: [
+          {
+            label: 'Focus Mode',
+            accelerator: 'F11',
+            click() {
+              win.webContents.send('toggleFullScreen');
+            }
           }
-        }
-      ]
-    },
-    /*{
-      label: 'Tools',
-      submenu: [
-      ]
-    },*/
-    {
-      label: 'Help',
-      submenu: [
-        {
-          label: 'Git',
-          submenu: [
-            {
-              label: 'What are commits?',
-              click() {
-                const help = new BrowserWindow({
-                  webPreferences: {
-                    nodeIntegration: false,
-                    enableRemoteModule: false,
-                    contextIsolation: true
-                  }
-                });
+        ]
+      },
+      {
+        label: 'Help',
+        submenu: [
+          {
+            label: 'Git',
+            submenu: [
+              {
+                label: 'What are commits?',
+                click() {
+                  const help = new BrowserWindow({
+                    webPreferences: {
+                      nodeIntegration: false,
+                      enableRemoteModule: false,
+                      contextIsolation: true
+                    }
+                  });
 
-                help.loadFile('./app/help/git/commits.html');
+                  help.loadFile('./app/help/git/commits.html');
+                }
               }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      label: 'Preferences',
-      submenu: [
-        {
-          label: 'Themes',
-          submenu: [
-            {
-              label: 'Coming soon!'
-            }
-          ]
-        }
-      ]
-    },
-    {
-      label: 'Debug',
-      submenu: [
-        {
-          label: 'Dev Tools',
-          role: 'toggleDevTools'
-        },
-        {
-          label: 'Reload',
-          accelerator: 'CommandOrControl+R',
-          role: 'reload'
-        },
-        {
-          label: 'Report a Bug',
-          click() {
-            shell.openExternal('https://github.com/benjaminbhollon/verbose-guacamole/issues/new')
+            ]
           }
-        }
-      ]
-    }
-  ])
+        ]
+      },
+      {
+        label: 'Preferences',
+        submenu: [
+          {
+            label: 'Themes',
+            submenu: Object.keys(themeNames).map(id => {
+              return {
+                label: themeNames[id],
+                type: 'radio',
+                click() {
+                  setTheme(id);
+                },
+                checked: (id == theme)
+              }
+            }),
+          }
+        ]
+      },
+      {
+        label: 'Debug',
+        submenu: [
+          {
+            label: 'Dev Tools',
+            role: 'toggleDevTools'
+          },
+          {
+            label: 'Reload',
+            click() {
+              win.webContents.send('reload');
+            },
+            accelerator: 'CommandOrControl+R'
+          },
+          {
+            label: 'Report a Bug',
+            click() {
+              shell.openExternal('https://github.com/benjaminbhollon/verbose-guacamole/issues/new')
+            }
+          }
+        ]
+      }
+    ]),
+    default: Menu.buildFromTemplate([
+      {
+        label: 'File',
+        submenu: [
+          {
+            label: 'Open Project',
+            accelerator: 'CommandOrControl+O',
+            click() {
+              openProject();
+            }
+          },
+          {
+            label: 'New Project',
+            accelerator: 'CommandOrControl+Shift+N',
+            click() {
+              newProject();
+            }
+          }
+        ]
+      },
+      /*{
+        label: 'Tools',
+        submenu: [
+        ]
+      },*/
+      {
+        label: 'Help',
+        submenu: [
+          {
+            label: 'Git',
+            submenu: [
+              {
+                label: 'What are commits?',
+                click() {
+                  const help = new BrowserWindow({
+                    webPreferences: {
+                      nodeIntegration: false,
+                      enableRemoteModule: false,
+                      contextIsolation: true
+                    }
+                  });
+
+                  help.loadFile('./app/help/git/commits.html');
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        label: 'Preferences',
+        submenu: [
+          {
+            label: 'Themes',
+            submenu: Object.keys(themeNames).map(id => {
+              return {
+                label: themeNames[id],
+                type: 'radio',
+                click() {
+                  setTheme(id);
+                },
+                checked: (id == theme)
+              }
+            }),
+          }
+        ]
+      },
+      {
+        label: 'Debug',
+        submenu: [
+          {
+            label: 'Dev Tools',
+            role: 'toggleDevTools'
+          },
+          {
+            label: 'Reload',
+            accelerator: 'CommandOrControl+R',
+            role: 'reload'
+          },
+          {
+            label: 'Report a Bug',
+            click() {
+              shell.openExternal('https://github.com/benjaminbhollon/verbose-guacamole/issues/new')
+            }
+          }
+        ]
+      }
+    ])
+  };
 }
 
+updateMenus();
 Menu.setApplicationMenu(menus.default);
 
 /* Messages from renderer process */

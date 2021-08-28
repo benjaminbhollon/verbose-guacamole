@@ -4,7 +4,7 @@ const fs = require('fs');
 const { shell, ipcRenderer } = require('electron');
 
 // Themes
-let themeName = localStorage.theme ? localStorage.theme : 'guacamole';
+let themeId = localStorage.theme ? localStorage.theme : 'guacamole';
 let themeLocations = {
   guacamole: path.resolve('./app/assets/css/themes/guacamole.css'),
 }
@@ -53,7 +53,7 @@ let api = {
   },
   loadTheme: () => {
     let link = document.createElement( "link" );
-    link.href = themeLocations[themeName];
+    link.href = themeLocations[themeId];
     link.type = "text/css";
     link.rel = "stylesheet";
 
@@ -1430,6 +1430,19 @@ ipcRenderer.on('newProject', (event, to) => {
   }
 
   api.newProject();
+})
+ipcRenderer.on('setTheme', (event, id) => {
+  localStorage.theme = id;
+  if (inEditor) {
+    // Save files
+    api.saveFile();
+    api.saveProject();
+
+    // Unlock project for other sessions
+    api.unlockProject();
+  }
+
+  location.reload();
 })
 
 if (inEditor) {
