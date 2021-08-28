@@ -3,6 +3,12 @@ const path = require('path');
 const fs = require('fs');
 const { shell, ipcRenderer } = require('electron');
 
+// Themes
+let themeName = localStorage.theme ? localStorage.theme : 'guacamole';
+let themeLocations = {
+  guacamole: path.resolve('./app/assets/css/themes/guacamole.css'),
+}
+
 let paths = {};
 (async () => {
   // Get app data directory
@@ -44,6 +50,14 @@ let api = {
           'Untitled Novel'
       );
     localStorage.defaultAuthor = q('#newProject__author').value;
+  },
+  loadTheme: () => {
+    let link = document.createElement( "link" );
+    link.href = themeLocations[themeName];
+    link.type = "text/css";
+    link.rel = "stylesheet";
+
+    document.getElementsByTagName( "head" )[0].appendChild( link );
   },
 };
 

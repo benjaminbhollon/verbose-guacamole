@@ -8,18 +8,18 @@ body, html {
 }
 
 body {
-  --background-color: hsl(118, 72%, 90%);
-  font-family: 'Trebuchet MS', Calibri, sans-serif;
+  font-family: var(--font-family);
   margin: 0;
-  font-size: 1.3em;
+  font-size: var(--font-size);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--background-color);
+  color: var(--color);
 }
 
 header {
-  background-color: hsl(118, 72%, 79%);
+  background-color: var(--background-color);
   padding: 1em;
 }
 
@@ -51,8 +51,8 @@ a {
 }
 
 code {
-  background-color: silver;
-  color: #000;
+  background-color: var(--background-color);
+  color: var(--color);
   padding: 0 0.15em;
   border-radius: 0.15em;
 }
@@ -96,6 +96,7 @@ input[type="checkbox"] {
 
 input[type="submit"] {
   cursor: pointer;
+  background-color: var(--background-color);
 }
 
 input[type="color"] {
@@ -103,14 +104,6 @@ input[type="color"] {
   height: 3em;
   padding: 0.25em;
   cursor: pointer;
-}
-
-input[type="submit"]:hover, input[type="submit"]:focus {
-  background-color: #8883;
-}
-
-input[type="submit"]:active {
-  background-color: #8886;
 }
 
 label.canChange:focus-within::after {
@@ -121,13 +114,13 @@ label.canChange:focus-within::after {
 }
 
 .success, .failure {
-  background-color:green;
-  padding:1em;
-  color:white;
+  background-color: green;
+  padding: 1em;
+  color: white;
 }
 
 .failure {
-  background-color:red;
+  background-color: red;
 }
 
 /* Modals */
@@ -136,9 +129,6 @@ label.canChange:focus-within::after {
 }
 
 .modal {
-  --background-color: #444;
-  --color: #fff;
-  --light-color: #fff8;
   width: 95vw;
   max-width: 600px;
   max-height: 75vh;
