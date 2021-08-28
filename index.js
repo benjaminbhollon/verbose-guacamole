@@ -170,19 +170,6 @@ const menus = {
       ]
     },
     {
-      label: 'Preferences',
-      submenu: [
-        {
-          label: 'Themes',
-          submenu: [
-            {
-              label: 'Coming soon!'
-            }
-          ]
-        }
-      ]
-    },
-    {
       label: 'Debug',
       submenu: [
         {
@@ -258,12 +245,10 @@ const menus = {
       label: 'Preferences',
       submenu: [
         {
-          label: 'Themes',
-          submenu: [
-            {
-              label: 'Coming soon!'
-            }
-          ]
+          label: 'Toggle Theme',
+          click() {
+            win.webContents.executeJavaScript('changeWebsiteTheme()')
+          }
         }
       ]
     },

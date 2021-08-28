@@ -64,6 +64,16 @@ body.git-closed {
   bottom: 0;
   right: 0;
   left: 0;
+  border-left:none!important;
+  border-right:none!important;
+  border-bottom-left-radius: 0!important;
+  border-bottom-right-radius: 0!important;
+  background: var(--background-color);
+  color: var(--text-color);
+}
+
+.CodeMirror div.CodeMirror-cursor {
+  border-left-color: var(--text-color);
 }
 
 /* Files */
@@ -206,7 +216,6 @@ body.git-closed {
 }
 
 #git__commitText, #git input[type="submit"] {
-  background-color: var(--text-color);
   border-width: 1px;
   margin: 0;
 }
@@ -264,12 +273,13 @@ textarea {
   padding: 0.25em;
   border-radius: 0.5em;
   border: 1px solid #000;
-  background-color: #fff;
+  background-color: var(--text-color);
+  color: var(--background-color);
   cursor: pointer;
 }
 
 #git__commits > span .preview:hover {
-  background-color: #ddd;
+  background-color: rgba(255,255,255,0.5);
 }
 
 #git__commits > span:hover .preview {
@@ -285,7 +295,7 @@ textarea {
   left: 0;
   right: 0;
   z-index: 1000;
-  background-color: #fff;
+  background-color: var(--background-color);
   display: none;
 }
 
@@ -297,7 +307,8 @@ textarea {
 }
 
 .contextMenu span:not(.--no-click, [data-label]):hover {
-  background-color: #ccc;
+  background-color: rgba(255,255,255,0.1);
+  cursor: pointer;
 }
 
 .contextMenu.visible, .dropdown .contextMenu {
@@ -441,7 +452,7 @@ body.locked #locked {
   height: 1.5em;
   line-height: 1.5em;
   background-color: #440;
-  color: var(--background-color);
+  color: #fff;
   z-index: 1;
 }
 
@@ -452,7 +463,6 @@ body.locked #locked {
 
 #novelStats .left {
   float: left;
-  border-right: 1px solid;
 }
 
 #novelStats .right {
@@ -465,6 +475,17 @@ body.locked #locked {
   display: inline;
 }
 
+.editor-preview {
+  background: var(--background-color);
+}
+
+.editor-toolbar {
+  border-left: none!important;
+  border-right: none!important;
+  border-top-left-radius: 0!important;
+  border-top-right-radius: 0!important;
+}
+
 /* Novel Stats Buttons */
 #novelStats label {
   display: inline;
@@ -474,6 +495,7 @@ body.locked #locked {
   height: 1.875em;
   width: 1.875em;
   padding: 0.31em 0.5em;
+  color: #fff;
 }
 
 #wordSprint {
@@ -513,6 +535,10 @@ body.locked #locked {
   text-align: center;
   border-top: 3px solid var(--background-color);
   border-left: 3px solid var(--background-color);
+}
+
+.novelStats__modal input {
+  color: var(--background-color);
 }
 
 .novelStats__modal.visible {
@@ -674,7 +700,7 @@ body.locked #locked {
   width: var(--width);
   z-index: 4;
   background-color: #444;
-  color: var(--background-color);
+  color: #fff;
   padding: 0.75em 0;
   text-align: center;
   cursor: pointer;

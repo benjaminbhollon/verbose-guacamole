@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://kit.fontawesome.com">
     <title>Verbose Guacamole</title>
+    <link rel="stylesheet" href="./assets/css/theme.css">
     <link rel="stylesheet" href="./assets/css/easymde.css">
     <link rel="stylesheet" href="./assets/css/global.css">
     <link rel="stylesheet" href="./assets/css/editor.css">
@@ -46,7 +47,7 @@
       </div>
     </div>
     <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, 0, false)" ondragover="event.preventDefault()">
-      <div id="fileTree__actions" ondrop=".moveItem(event, 0, true)">
+      <div id="fileTree__actions" ondrop="api.moveItem(event, 0, true)">
         <div class="left">
           <a href="#" title="Create file or folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
         </div>
@@ -66,8 +67,8 @@
     </section>
     <section id="git">
       <div id="git__main">
-        <h3>Commits</h3>
-        <div id="git__commits">
+        <h3>Recent Commits</h3>
+        <div id="git__commits" class="vr">
 
         </div>
         <div class="sticky-bottom">
