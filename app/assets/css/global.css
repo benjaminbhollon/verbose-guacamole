@@ -1,3 +1,8 @@
+:root {
+  --background-color: #fff;
+	--text-color: #000;
+}
+
 body, body * {
   box-sizing: border-box;
 }
@@ -8,7 +13,6 @@ body, html {
 }
 
 body {
-  --background-color: hsl(118, 72%, 90%);
   font-family: 'Trebuchet MS', Calibri, sans-serif;
   margin: 0;
   font-size: 1.3em;
@@ -16,10 +20,12 @@ body {
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--background-color);
+  transition: 0.2s;
 }
 
 header {
   background-color: hsl(118, 72%, 79%);
+  color: black;
   padding: 1em;
 }
 
@@ -40,6 +46,15 @@ details {
 
 summary {
   cursor: pointer;
+}
+
+a {
+  color: #80a6ff;
+  transition: 0.2s;
+}
+
+a:hover {
+  color: var(--text-color);
 }
 
 a.fa {

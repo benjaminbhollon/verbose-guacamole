@@ -14,10 +14,6 @@ body.git-closed {
   --right-width: 0%;
 }
 
-a {
-  color: inherit;
-}
-
 .--hidden {
   display: none!important;
 }
@@ -210,7 +206,7 @@ a {
 }
 
 #git__commitText, #git input[type="submit"] {
-  background-color: #fff;
+  background-color: var(--text-color);
   border-width: 1px;
   margin: 0;
 }

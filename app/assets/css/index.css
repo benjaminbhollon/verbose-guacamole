@@ -47,8 +47,9 @@ footer a {
   margin: 0;
   padding: 0.83em 0;
   position: sticky;
+  background: var(--background-color);
+  transition: 0.2s;
   top: 0;
-  background-color: var(--background-color)
 }
 
 /* Projects */
