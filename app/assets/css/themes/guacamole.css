@@ -1,0 +1,34 @@
+body {
+    --background-color: hsl(118, 72%, 90%);
+    --color: #000;
+    --light-color: #333;
+    --font-family: 'Trebuchet MS', Calibri, sans-serif;
+    --font-size: 1.3em;
+}
+
+header {
+  --background-color: hsl(118, 72%, 79%);
+}
+
+code {
+  --background-color: silver;
+  --color: #000;
+}
+
+input[type="submit"] {
+  --background-color: transparent;
+}
+
+input[type="submit"]:hover, input[type="submit"]:focus {
+  --background-color: #8883;
+}
+
+input[type="submit"]:active {
+  --background-color: #8886;
+}
+
+.modal {
+  --background-color: #444;
+  --color: #fff;
+  --light-color: #fff8;
+}
