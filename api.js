@@ -455,7 +455,7 @@ if (inEditor) {
     ignoreLock: () => {
       readOnly = false;
       q('body').dataset.readonly = 'false';
-      api.resetEditor();
+      api.openFile(currentFile.path, currentFile.name, true);
     },
     init: async (params) => {
       try {
