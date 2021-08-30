@@ -429,6 +429,7 @@ body.locked #locked {
 
 /* Novel Stats Buttons */
 #novelStats label {
+  color: var(--background-color);
   display: inline;
   text-align: center;
   cursor: pointer;
