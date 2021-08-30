@@ -114,13 +114,9 @@ label.canChange:focus-within::after {
 }
 
 .success, .failure {
-  background-color: green;
+  background-color: var(--background-color);
   padding: 1em;
-  color: white;
-}
-
-.failure {
-  background-color: red;
+  color: var(--color);
 }
 
 /* Modals */

@@ -40,4 +40,4 @@ VerbGuac is still under development. Future features include:
 ![v0.3.3 Editor](./screenshots/v0.3.3-editor.png)
 
 ## License
-Verbose Guacamole is released under the [GPL-3.0](./LICENSE) license.
+Verbose Guacamole is released under the [GPL-3.0](./LICENSE) license. Specific files may be released under different licenses, which will be noted accordingly (such as the official themes, released under MIT, as noted in the comments).

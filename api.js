@@ -829,7 +829,6 @@ if (inEditor) {
 
       // If the editor already exists, clear it
       if (editor) {
-        console.log(editor.value());
         editor.value('');
         editor.toTextArea();
       }
