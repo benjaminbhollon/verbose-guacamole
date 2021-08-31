@@ -48,7 +48,7 @@
       </div>
     </div>
     <section id="fileTree" oncontextmenu="showContextMenu(event)" ondrop="moveItem(event, 0, false)" ondragover="event.preventDefault()">
-      <div id="fileTree__actions" ondrop=".moveItem(event, 0, true)">
+      <div id="fileTree__actions" ondrop="api.moveItem(event, 0, true)">
         <div class="left">
           <a href="#" title="Create file or folder" class="fa fa-plus" onclick="showContextMenu(event)"></a>
         </div>
