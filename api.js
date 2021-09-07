@@ -296,6 +296,8 @@ if (inEditor) {
         parent = project.index;
       } else if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
         folder = folder.parentNode;
+        folder.open = true;
+        api.setOpenFolders();
       } else if (folder === null || folder.tagName !== 'DETAILS') {
         parent = project.index;
       }
@@ -1012,6 +1014,32 @@ if (inEditor) {
           break;
       }
     },
+    startRename: (e) => {
+      const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
+      setTimeout(() => {
+        if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
+        e.contentEditable = true;
+        if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
+        e.focus();
+        e.addEventListener('keydown', (event) => {
+          if (event.key === ' ' && e.tagName === 'SUMMARY') {
+            event.preventDefault();
+            document.execCommand('insertText', false, ' ');
+          }
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            e.blur();
+          }
+          if (event.key === 'Escape') {
+            const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.id || e.parentNode.id));
+            e.innerText = file.name;
+            e.blur();
+          }
+        });
+        e.addEventListener('blur', api.renameItem.bind(this, e));
+        document.execCommand('selectAll', false, null)
+      }, 300);
+    },
     startSprint: (s = 0, m = 0, h = 0) => {
       if (!(s+m+h)) return; // smh = shaking my head (because you set a timer for 0)
 
@@ -1074,32 +1102,6 @@ if (inEditor) {
     },
     suggestWords: (w) => {
       return dictionary.suggest(w);
-    },
-    startRename: (e) => {
-      const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
-      setTimeout(() => {
-        if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
-        e.contentEditable = true;
-        if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
-        e.focus();
-        e.addEventListener('keydown', (event) => {
-          if (event.key === ' ' && e.tagName === 'SUMMARY') {
-            event.preventDefault();
-            document.execCommand('insertText', false, ' ');
-          }
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            e.blur();
-          }
-          if (event.key === 'Escape') {
-            const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.id || e.parentNode.id));
-            e.innerText = file.name;
-            e.blur();
-          }
-        });
-        e.addEventListener('blur', api.renameItem.bind(this, e));
-        document.execCommand('selectAll', false, null)
-      }, 300);
     },
     throttle: (f, delay) => {
       // Based on https://www.geeksforgeeks.org/javascript-throttling/
