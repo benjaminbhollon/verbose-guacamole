@@ -1,0 +1,173 @@
+/* META */
+/* @name: Mono Light */
+/* @id: monoLight */
+/* @author: Benjamin Hollon */
+/* @link: https://seewitheyesclosed.com */
+/* @license: MIT */
+/* @tags: light, monochrome, official */
+/* @derivedFrom: official/guacamole */
+
+:root {
+  /* Declare main colors */
+  --main: #000;
+  --background: #fff;
+}
+
+body {
+    --background-color: var(--background);
+    --color: var(--main);
+    --light-color: var(--color);
+    --font-family: 'Trebuchet MS', Calibri, sans-serif;
+    --font-size: 1.3em;
+}
+
+header {
+  --background-color: var(--background);
+  border-bottom: 2px solid;
+  margin-top: -2px;
+}
+
+code {
+  --background-color: silver;
+  --color: #000;
+}
+
+input[type="submit"] {
+  --background-color: transparent;
+}
+
+input[type="submit"]:hover, input[type="submit"]:focus, input[type="submit"]:active  {
+  --background-color: var(--main);
+  --color: var(--background);
+}
+
+.success {
+  --color: var(--main);
+  --background-color: var(--background);
+}
+
+
+.failure {
+  --background-color: var(--main);
+  --color: var(--background);
+}
+
+.modal {
+  --background-color: var(--background);
+  --color: var(--main);
+  border: 2px solid;
+}
+
+#editor, #fileTree, #git {
+  --border-color: var(--main);
+}
+
+#git__commits, #git h3 {
+  --border-color: var(--main);
+}
+
+#git__commits span:hover {
+  --background-color: var(--main);
+  --color: var(--background);
+}
+
+#git__commitText {
+  --border-color: var(--main);
+}
+
+#git__commits > span .preview {
+  --color: var(--main);
+  --background-color: var(--background);
+}
+
+#git__commits > span .preview:hover {
+  --background-color: #ddd;
+}
+
+#git__commitText, #git input[type="submit"] {
+  --background-color: var(--background);
+}
+
+#git .help {
+  --color: var(--main);
+}
+
+#fileTree__list:not(.searching) .active {
+  --background-color: var(--main);
+  --color: var(--background);
+}
+
+#fileTree #fileTree__list .file.editing,
+#fileTree #fileTree__list summary[contenteditable="true"] {
+  --border-color: var(--main);
+  --color: var(--main);
+  --background-color: var(--background);
+}
+
+#fileTree__list.searching span:not(.result), #fileTree__list.searching details summary:not(.result) {
+  --color: #bbb;
+}
+
+.contextMenu {
+  --background-color: var(--background);
+  --border-color: var(--main);
+  --item-hover-color: #ccc;
+  --color: var(--main);
+}
+
+#novelStats, .tab {
+  --background-color: var(--main);
+  --color: var(--background);
+}
+
+#novelStats label:hover {
+  --background-color: #fff3;
+}
+
+#wordGoal {
+  --fill: #fff8;
+  --flash-background: #0f0;
+  --flash-color: var(--peel);
+}
+
+#wordGoal__list > div,
+#wordGoal__archived > div {
+  --fill: #0002;
+  --border-color: var(--main);
+}
+
+#wordGoal__list > div.completed,
+#wordGoal__archived > div.completed {
+  --background-color: var(--main);
+  --color: var(--background);
+}
+
+#wordGoal__list > div .archive {
+  --color: var(--background);
+  --background-color: var(--main);
+}
+
+.novelStats__modal {
+  --background-color: var(--background);
+  --color: var(--main);
+}
+
+.label[data-label="blank"] {
+  --hue: 0;
+  --saturation: 0%;
+  --lightness: 95%;
+}
+
+
+/* Editor Styles */
+.cm-comment {
+  font-family: monospace;
+}
+
+.cm-tab {
+  background-color: #ff04;
+}
+
+.cm-spell-error {
+  background-color: #0f0;
+}

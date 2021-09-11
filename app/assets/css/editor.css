@@ -227,10 +227,8 @@ textarea {
   display: block;
   border-top: 1px solid var(--border-color);
   position: relative;
-}
-
-#git__commits span:hover {
-  background-color: var(--background-color);
+    background-color: var(--background-color);
+  color: var(--color);
 }
 
 #git__commitText {
@@ -250,6 +248,7 @@ textarea {
 }
 
 #git__commits > span .preview {
+  color: var(--color);
   display: none;
   text-align: center;
   right: 0.5em;
@@ -279,6 +278,8 @@ textarea {
   right: 0;
   z-index: 1000;
   background-color: var(--background-color);
+  --color: inherit;
+  color: var(--color);
   display: none;
 }
 
@@ -422,6 +423,7 @@ body.locked #locked {
 
 /* Novel Stats Buttons */
 #novelStats label {
+  background-color: var(--background-color);
   color: var(--color);
   display: inline;
   text-align: center;
@@ -436,10 +438,6 @@ body.locked #locked {
   padding: 0.31em 1em!important;
 }
 
-#novelStats label:hover {
-  background-color: var(--background-color);
-}
-
 #wordSprint i {
   position: absolute;
   top: 50%;
@@ -448,7 +446,7 @@ body.locked #locked {
   transform: translate(-50%, -50%);
 }
 
-#novelStats input:checked + label {
+#novelStats input:checked + label, #novelStats input:checked + label:hover {
   background-color: var(--color);
   color: var(--background-color);
 }

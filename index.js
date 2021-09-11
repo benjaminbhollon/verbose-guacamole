@@ -90,13 +90,14 @@ function openProject() {
 let menus = {};
 let themeNames = {
   guacamole: 'Guacamole',
+  monoLight: 'Mono Light',
+  //monoDark: 'Mono Dark'
 };
 function setTheme(id) {
   theme = id;
   fs.writeFileSync(path.resolve(app.getPath('appData'), 'verbose-guacamole', 'currentTheme.txt'), id);
   win.webContents.send('setTheme', id);
   updateMenus();
-  console.info('Theme set to ' + themeNames[id]);
 }
 function updateMenus() {
   menus = {
@@ -165,6 +166,7 @@ function updateMenus() {
                     webPreferences: {
                       nodeIntegration: false,
                       enableRemoteModule: false,
+                      preload: path.join(app.getAppPath(), 'preload.js'),
                       contextIsolation: true
                     }
                   });
@@ -255,6 +257,7 @@ function updateMenus() {
                     webPreferences: {
                       nodeIntegration: false,
                       enableRemoteModule: false,
+                      preload: path.join(app.getAppPath(), 'preload.js'),
                       contextIsolation: true
                     }
                   });

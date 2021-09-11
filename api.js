@@ -7,6 +7,8 @@ const { shell, ipcRenderer } = require('electron');
 let themeId = localStorage.theme ? localStorage.theme : 'guacamole';
 let themeLocations = {
   guacamole: path.resolve('./app/assets/css/themes/guacamole.css'),
+  monoLight: path.resolve('./app/assets/css/themes/monoLight.css'),
+  //monoDark: path.resolve('./app/assets/css/themes/monoDark.css'),
 }
 
 let paths = {};
