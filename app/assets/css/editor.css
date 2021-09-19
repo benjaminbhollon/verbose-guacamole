@@ -481,6 +481,11 @@ body.locked #locked {
   font-size: 1.3em;
 }
 
+/* Stats */
+#stats i {
+  margin-right: -0.25em; /* Correcting for icon width */
+}
+
 /* Word Sprints */
 #wordSprint__popup .running,
 #wordSprint__popup .running,

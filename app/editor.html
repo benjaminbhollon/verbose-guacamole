@@ -98,21 +98,31 @@
         <span>Editing <span id="novelStats__open">New File</span></span>
       </div>
       <div class="right">
+        <input id="stats__checkbox" type="checkbox" class="--hidden" class="novelStats__modal">
+        <label onclick="document.getElementById('stats__popup').classList.toggle('visible')" title="Stats" for="stats__checkbox" id="stats">
+          <i class="fas fa-chart-line"></i>
+        </label>
         <input id="wordSprint__checkbox" type="checkbox" class="--hidden" class="novelStats__modal">
         <label onclick="document.getElementById('wordSprint__popup').classList.toggle('visible')" title="Word Sprints" for="wordSprint__checkbox" id="wordSprint">
           <i class="fas fa-running"></i>
         </label>
         <input id="wordGoal__checkbox" type="checkbox" class="--hidden">
-        <label onclick="this.classList.remove('flash');document.getElementById('wordGoal__popup').classList.toggle('visible');api.archiveCompleteGoals()" id="wordGoal" for="wordGoal__checkbox">
+        <label title="Click to view and set word goals" onclick="this.classList.remove('flash');document.getElementById('wordGoal__popup').classList.toggle('visible');api.archiveCompleteGoals()" id="wordGoal" for="wordGoal__checkbox">
           Total words: <span id="novelStats__words">0</span>
         </label>
       </div>
     </section>
     <div id="modals">
+      <div id="stats__popup" class="novelStats__modal" data-mode="set">
+        <h2>Stats</h2>
+        <div class="stats__data">
+          <p>As you write, cool stats about your novel-writing experience will show up here!</p>
+        </div>
+      </div>
       <div id="wordSprint__popup" class="novelStats__modal" data-mode="set">
         <h2>Word Sprints</h2>
         <div class="set">
-          <p>Start a new word sprint:</p>
+          <p>Start a new word sprint: (use the format <code>hh:mm:ss</code>)</p>
           <input type="text" id="wordSprint__timeInput" placeholder="Try 15:00 (15 mins) or 1:00:00 (1 hr)">
           <input type="submit" value="Start Sprint" onclick="startSprint()">
         </div>
