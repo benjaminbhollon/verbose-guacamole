@@ -5,10 +5,9 @@
   "description": "A editor for writers (especially novelists) powered on the markdown and git technologies.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rm -rf dist && tsc",
-    "start": "electron-forge start",
-    "make": "electron-forge make",
-    "package": "electron-forge package",
+    "start": "rm -rf dist && tsc && electron-forge start",
+    "make": "rm -rf dist && tsc && electron-forge make",
+    "package": "rm -rf dist && tsc && electron-forge package",
     "prettier": "prettier --write package.json tsconfig.json src/**/*.ts"
   },
   "repository": {

@@ -1,12 +1,5 @@
 // Import modules
-import {
-  shell,
-  app,
-  BrowserWindow,
-  Menu,
-  dialog,
-  ipcMain,
-} from "electron";
+import { shell, app, BrowserWindow, Menu, dialog, ipcMain } from "electron";
 import path from "path";
 import fs from "fs";
 
