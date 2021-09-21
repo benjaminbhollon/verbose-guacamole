@@ -3,11 +3,13 @@
   "productName": "Verbose Guacamole",
   "version": "0.3.3",
   "description": "A editor for writers (especially novelists) powered on the markdown and git technologies.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "rm -rf dist && tsc",
     "start": "electron-forge start",
     "make": "electron-forge make",
-    "package": "electron-forge package"
+    "package": "electron-forge package",
+    "prettier": "prettier --write package.json tsconfig.json src/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -25,7 +27,8 @@
     "@electron-forge/maker-rpm": "^6.0.0-beta.59",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
     "@electron-forge/maker-zip": "^6.0.0-beta.59",
-    "electron": "^13.2.1"
+    "electron": "^13.2.1",
+    "prettier": "^2.4.1"
   },
   "dependencies": {
     "easymde": "^2.15.0",
