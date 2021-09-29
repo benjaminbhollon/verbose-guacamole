@@ -1,14 +1,69 @@
 // Include packages
 const path = require('path');
+const fs = require('fs');
 const { shell, ipcRenderer } = require('electron');
+
+// Themes
+let themeId = localStorage.theme ? localStorage.theme : 'guacamole';
+let themeLocations = {
+  guacamole: path.resolve('./app/assets/css/themes/guacamole.css'),
+  monoLight: path.resolve('./app/assets/css/themes/monoLight.css'),
+  //monoDark: path.resolve('./app/assets/css/themes/monoDark.css'),
+}
+
+let paths = {};
+(async () => {
+  // Get app data directory
+  await (new Promise((resolve, reject) => {
+    ipcRenderer.send('getDirs');
+    ipcRenderer.on('getDirs', (event, data, novels) => {
+      paths = {
+        data,
+        novels
+      };
+      resolve();
+    });
+  }));
+})();
 
 const page = path.parse(location.href.split('?')[0]).name
 const inEditor = page === 'editor';
 
-let api = {};
+// Quick versions of document.querySelector and document.querySelectorAll
+const q = s => document.querySelector(s);
+const qA = s => document.querySelectorAll(s);
+
+let api = {
+  openProject: () => {
+    ipcRenderer.send('openProject');
+  },
+  openURI: (uri) => {
+    shell.openExternal(uri);
+  },
+  newProject: () => {
+    document.getElementById('newProject').classList.add('visible');
+  },
+  updateNewProjectModal: () => {
+    q('#newProject__saveLocation').innerText = q('#newProject__folder').value =
+      path.resolve(
+        paths.novels,
+        q('#newProject__title').value.trim().length ?
+          q('#newProject__title').value.trim() :
+          'Untitled Novel'
+      );
+    localStorage.defaultAuthor = q('#newProject__author').value;
+  },
+  loadTheme: () => {
+    let link = document.createElement( "link" );
+    link.href = themeLocations[themeId];
+    link.type = "text/css";
+    link.rel = "stylesheet";
+
+    document.getElementsByTagName( "head" )[0].appendChild( link );
+  },
+};
 
 if (inEditor) {
-  const fs = require('fs');
   const simpleGit = require('simple-git');
   const querystring = require('querystring');
   const marked = require('marked');
@@ -41,7 +96,6 @@ if (inEditor) {
   let clearing = false;
   let currentlyDragging = null;
   let hoveringOver = null;
-  let appPath = null;
   let startingWords = 0;
   let sprint = {}
   let params = {};
@@ -53,10 +107,6 @@ if (inEditor) {
   const dictionary = new Typo('en_US');
 
   let customDictionary = [];
-
-  // Quick versions of document.querySelector and document.querySelectorAll
-  const q = s => document.querySelector(s);
-  const qA = s => document.querySelectorAll(s);
 
   // Define what separates a word
   const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
@@ -95,7 +145,7 @@ if (inEditor) {
     return HSL;
   }
 
-  api = {
+  const editorAPI = {
     addGoal: (type, words) => {
       const allowedTypes = [
         'session',
@@ -128,7 +178,7 @@ if (inEditor) {
     },
     addToDictionary: (w) => {
       customDictionary.push(w);
-      fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), customDictionary.join('\n'));
+      fs.writeFileSync(path.resolve(paths.data, './customDictionary.txt'), customDictionary.join('\n'));
 
       return true;
     },
@@ -203,7 +253,11 @@ if (inEditor) {
       }
 
       if (what === 'master' && editable && stash) {
-        await git.stash(['apply']);
+        try {
+          await git.stash(['apply']);
+        } catch (err) {
+          console.warn(err);
+        }
       }
 
       project = JSON.parse(fs.readFileSync(projectPath, {
@@ -248,6 +302,8 @@ if (inEditor) {
         parent = project.index;
       } else if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
         folder = folder.parentNode;
+        folder.open = true;
+        api.setOpenFolders();
       } else if (folder === null || folder.tagName !== 'DETAILS') {
         parent = project.index;
       }
@@ -407,30 +463,31 @@ if (inEditor) {
     ignoreLock: () => {
       readOnly = false;
       q('body').dataset.readonly = 'false';
-      api.resetEditor();
+      api.openFile(currentFile.path, currentFile.name, true);
     },
     init: async (params) => {
-      // Get app data directory
-      await (new Promise((resolve, reject) => {
-        ipcRenderer.send('appDataDir');
-        ipcRenderer.on('appDataDir', (event, args) => {
-          appPath = args;
-          resolve();
-        });
-      }));
-
       try {
-        customDictionary = fs.readFileSync(path.resolve(appPath, './customDictionary.txt'), {
+        customDictionary = fs.readFileSync(path.resolve(paths.data, './customDictionary.txt'), {
           encoding:'utf8',
           flag:'r'
         }).split('\n').filter(l => l.length);
       } catch (err) {
         console.error(err);
-        fs.writeFileSync(path.resolve(appPath, './customDictionary.txt'), '');
+        fs.writeFileSync(path.resolve(paths.data, './customDictionary.txt'), '');
       }
 
       params = querystring.parse(params);
       projectPath = params.f;
+
+      // Create project directory if necessary
+      if (params.new) {
+        if (!fs.existsSync(paths.novels)){
+          fs.mkdirSync(paths.novels);
+        }
+        if (!fs.existsSync(projectPath)){
+          fs.mkdirSync(projectPath);
+        }
+      }
 
       // Initialize git in project directory
       git = simpleGit({
@@ -446,6 +503,11 @@ if (inEditor) {
 
       if (params.new) {
         console.info('New project alert! Let me get that set up for you...');
+        project.metadata = {
+          title: params['meta.title'],
+          author: params['meta.author'],
+          synopsis: params['meta.synopsis']
+        }
         console.info('Creating project file...');
         projectPath = path.resolve(projectPath, 'project.vgp');
         await fs.writeFile(
@@ -462,7 +524,7 @@ if (inEditor) {
             }
           }
         );
-        console.info('Creating initial file...');
+        console.info('Creating title page...');
         try {
           fs.mkdirSync(path.resolve(path.dirname(projectPath), './content'));
         } catch(err) {
@@ -470,7 +532,7 @@ if (inEditor) {
         }
         await fs.writeFile(
           path.resolve(path.dirname(projectPath), project.index[0].path),
-          '',
+          `# ${project.metadata.title}\nby ${project.metadata.author}`,
           {
             encoding: 'utf8',
             flag: 'w'
@@ -498,9 +560,9 @@ if (inEditor) {
       } else {
         if (gitEnabled) {
       	  if ((await git.branch()).all.length <= 0) { // Project started without git
-	    console.info('Creating initial commit...');
-	    await git.add('./*');
-	    await git.commit('Create project');
+      	    console.info('Creating initial commit...');
+      	    await git.add('./*');
+      	    await git.commit('Create project');
       	  }
           if ((await git.branch()).current !== 'master') await api.checkout('master', true);
 
@@ -641,9 +703,6 @@ if (inEditor) {
       // Save
       api.saveProject();
     },
-    newProject: () => {
-      ipcRenderer.send('newProject');
-    },
     openFile: (p, n, first = false) => {
       if (currentFile === api.flatten(project.index).find(i => i.path === p) && !first) return;
       api.resetEditor();
@@ -672,12 +731,6 @@ if (inEditor) {
       project.openFile = id;
       api.saveProject();
       return document.getElementById(id);
-    },
-    openProject: () => {
-      ipcRenderer.send('openProject');
-    },
-    openURI: (uri) => {
-      shell.openExternal(uri);
     },
     placeholders,
     populateFiletree: () => {
@@ -899,6 +952,9 @@ if (inEditor) {
         return false;
       }
 
+      const confirmMessage = "Warning! Reverting will permanently remove any changes since the last commit. If you think you might want them later for any reason, make sure you create a commit before continuing!";
+      if (!confirm(confirmMessage)) return;
+
       const range = `${where}..HEAD`;
 
       await git.reset({'--hard': null});
@@ -967,6 +1023,32 @@ if (inEditor) {
           break;
       }
     },
+    startRename: (e) => {
+      const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
+      setTimeout(() => {
+        if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
+        e.contentEditable = true;
+        if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
+        e.focus();
+        e.addEventListener('keydown', (event) => {
+          if (event.key === ' ' && e.tagName === 'SUMMARY') {
+            event.preventDefault();
+            document.execCommand('insertText', false, ' ');
+          }
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            e.blur();
+          }
+          if (event.key === 'Escape') {
+            const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.id || e.parentNode.id));
+            e.innerText = file.name;
+            e.blur();
+          }
+        });
+        e.addEventListener('blur', api.renameItem.bind(this, e));
+        document.execCommand('selectAll', false, null)
+      }, 300);
+    },
     startSprint: (s = 0, m = 0, h = 0) => {
       if (!(s+m+h)) return; // smh = shaking my head (because you set a timer for 0)
 
@@ -1029,32 +1111,6 @@ if (inEditor) {
     },
     suggestWords: (w) => {
       return dictionary.suggest(w);
-    },
-    startRename: (e) => {
-      const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
-      setTimeout(() => {
-        if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
-        e.contentEditable = true;
-        if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
-        e.focus();
-        e.addEventListener('keydown', (event) => {
-          if (event.key === ' ' && e.tagName === 'SUMMARY') {
-            event.preventDefault();
-            document.execCommand('insertText', false, ' ');
-          }
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            e.blur();
-          }
-          if (event.key === 'Escape') {
-            const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.id || e.parentNode.id));
-            e.innerText = file.name;
-            e.blur();
-          }
-        });
-        e.addEventListener('blur', api.renameItem.bind(this, e));
-        document.execCommand('selectAll', false, null)
-      }, 300);
     },
     throttle: (f, delay) => {
       // Based on https://www.geeksforgeeks.org/javascript-throttling/
@@ -1257,6 +1313,8 @@ if (inEditor) {
     },
   };
 
+  api = {...editorAPI, ...api};
+
   let project = {
     metadata: {
       title: 'Untitled Novel',
@@ -1265,7 +1323,7 @@ if (inEditor) {
     },
     index: [
       {
-        name: 'New File',
+        name: 'Title Page',
         path: './content/' + api.fileName(),
         words: 0
       }
@@ -1371,24 +1429,46 @@ ipcRenderer.on('relocate', (event, to) => {
   }
   location.href = to;
 })
+ipcRenderer.on('newProject', (event, to) => {
+  if (inEditor) {
+    // Save files
+    api.saveFile();
+    api.saveProject();
+
+    // Unlock project for other sessions
+    api.unlockProject();
+  }
+
+  api.newProject();
+})
+ipcRenderer.on('setTheme', (event, id) => {
+  localStorage.theme = id;
+  if (inEditor) {
+    // Save files
+    api.saveFile();
+    api.saveProject();
+
+    // Unlock project for other sessions
+    api.unlockProject();
+  }
+
+  location.reload();
+})
 
 if (inEditor) {
   ipcRenderer.send('appMenuEditor');
-  module.exports = api;
 }
 else {
   ipcRenderer.send('appMenuDefault');
-  module.exports = {
-    openProject: () => {
-      ipcRenderer.send('openProject');
-    },
-    openURI: (uri) => {
-      shell.openExternal(uri);
-    },
-    newProject: () => {
-      ipcRenderer.send('newProject');
-    },
-  };
 }
 
-setTimeout(() => console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.'), 1500);
+module.exports = api;
+
+setTimeout(() => {
+  // Add "Create Project" modal
+  q('#modals').innerHTML += fs.readFileSync('./app/assets/html/newProjectModal.html');
+  q('#newProject__author').value = localStorage.defaultAuthor;
+  api.updateNewProjectModal();
+
+  console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.');
+}, 3000);

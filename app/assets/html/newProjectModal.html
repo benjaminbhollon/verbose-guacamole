@@ -1,0 +1,22 @@
+ <div class="modal" id="newProject">
+   <h3>New Project Details</h3>
+   <form method="get" action="./editor.html">
+     <label class="canChange">
+       Title
+       <input name="meta.title" id="newProject__title" oninput="api.updateNewProjectModal()" value="Untitled Novel" placeholder="Pick something memorable, yet short." type="text" required>
+     </label>
+     <label class="canChange">
+       Author
+       <input name="meta.author" id="newProject__author" oninput="api.updateNewProjectModal()" placeholder="We'll remember this next time." type="text" required>
+     </label>
+     <label class="canChange">
+       Synopsis
+       <textarea name="meta.synopsis" placeholder="Tell me all about it..."></textarea>
+     </label>
+     <input type="hidden" name="f" id="newProject__folder">
+     <input type="hidden" value="true" name="new" id="newProject__folder">
+     <p>A new folder for your project will be created at <code id="newProject__saveLocation"></code>. You can move it later (but not while editing!).</p>
+     <input onclick="this.value = 'Working...'" type="submit" value="Start writing!">
+   </form>
+   <input onclick="document.getElementById('newProject').classList.remove('visible')" type="submit" value="Never mind.">
+ </div>

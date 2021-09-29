@@ -8,18 +8,18 @@ body, html {
 }
 
 body {
-  --background-color: hsl(118, 72%, 90%);
-  font-family: 'Trebuchet MS', Calibri, sans-serif;
+  font-family: var(--font-family);
   margin: 0;
-  font-size: 1.3em;
+  font-size: var(--font-size);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--background-color);
+  color: var(--color);
 }
 
 header {
-  background-color: hsl(118, 72%, 79%);
+  background-color: var(--background-color);
   padding: 1em;
 }
 
@@ -44,6 +44,17 @@ summary {
 
 a.fa {
   text-decoration: none;
+}
+
+a {
+  color: inherit;
+}
+
+code {
+  background-color: var(--background-color);
+  color: var(--color);
+  padding: 0 0.15em;
+  border-radius: 0.15em;
 }
 
 /* Forms */
@@ -85,6 +96,7 @@ input[type="checkbox"] {
 
 input[type="submit"] {
   cursor: pointer;
+  background-color: var(--background-color);
 }
 
 input[type="color"] {
@@ -94,20 +106,54 @@ input[type="color"] {
   cursor: pointer;
 }
 
-input[type="submit"]:hover, input[type="submit"]:focus {
-  background-color: #8883;
-}
-
-input[type="submit"]:active {
-  background-color: #8886;
+label.canChange:focus-within::after {
+  content: 'You can change this later.';
+  font-size: 0.8rem;
+  font-style: italic;
+  font-weight: normal;
 }
 
 .success, .failure {
-  background-color:green;
-  padding:1em;
-  color:white;
+  background-color: var(--background-color);
+  padding: 1em;
+  color: var(--color);
 }
 
-.failure {
-  background-color:red;
+/* Modals */
+#modals {
+  position: absolute;
+}
+
+.modal {
+  width: 95vw;
+  max-width: 600px;
+  max-height: 75vh;
+  overflow: auto;
+  position: fixed;
+  background-color: var(--background-color);
+  color: var(--color);
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  padding: 1em;
+  border-radius: 0.5em;
+  display: none;
+}
+
+.modal.visible {
+  display: block;
+}
+
+.modal h3 {
+  text-align: center;
+}
+
+.modal a.button {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  padding: 0.5em;
+  border: 2px solid;
+  margin: 0.15em 0;
 }

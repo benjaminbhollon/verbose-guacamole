@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8">
     <title>Verbose Guacamole</title>
+    <!-- Include Guacamole theme as a fallback for unset values -->
+    <link rel="stylesheet" href="./assets/css/themes/guacamole.css">
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <script src="./assets/js/global.js"></script>
     <link rel="stylesheet" href="./assets/css/global.css">
     <link rel="stylesheet" href="./assets/css/index.css">
   </head>
@@ -28,6 +31,7 @@
         <div id="releases__list">Loading...</div>
       </div>
     </div>
+    <div id="modals"></div>
     <footer>
       <p>
         <a href="javascript:api.openURI('https://github.com/benjaminbhollon/verbose-guacamole')">Code</a> |

@@ -1,0 +1,170 @@
+/* META */
+/* @name: Guacamole */
+/* @id: guacamole */
+/* @author: Benjamin Hollon */
+/* @link: https://seewitheyesclosed.com */
+/* @license: MIT */
+/* @tags: light, colorful, official */
+/* @derivedFrom: */
+
+:root {
+  /* Declare main colors */
+  --guacamole: hsl(118, 72%, 90%);
+  --peel: #440;
+}
+
+body {
+    --background-color: var(--guacamole);
+    --color: #000;
+    --light-color: #333;
+    --font-family: 'Trebuchet MS', Calibri, sans-serif;
+    --font-size: 1.3em;
+}
+
+header {
+  --background-color: hsl(118, 72%, 79%);
+}
+
+code {
+  --background-color: silver;
+  --color: #000;
+}
+
+input[type="submit"] {
+  --background-color: transparent;
+}
+
+input[type="submit"]:hover, input[type="submit"]:focus {
+  --background-color: #8883;
+}
+
+input[type="submit"]:active {
+  --background-color: #8886;
+}
+
+.success, .failure {
+  --color: #fff;
+}
+
+.success {
+  --background-color: green;
+}
+
+
+.failure {
+  --background-color: red;
+}
+
+.modal {
+  --background-color: #444;
+  --color: #fff;
+  --light-color: #fff8;
+}
+
+#editor, #fileTree, #git {
+  --border-color: #ccc;
+}
+
+#git__commits, #git h3 {
+  --border-color: #777;
+}
+
+#git__commits > span:hover {
+  --background-color: #ccc5;
+}
+
+#git__commitText {
+  --border-color: #858585;
+}
+
+#git__commits > span .preview {
+  --color: #000;
+  --background-color: #fff;
+}
+
+#git__commits > span .preview:hover {
+  --background-color: #ddd;
+}
+
+#git__commitText, #git input[type="submit"] {
+  --background-color: #fff;
+}
+
+#git .help {
+  --color: gray;
+}
+
+#fileTree__list:not(.searching) .active {
+  --background-color: #2D99F7;
+  --color: #fff;
+}
+
+#fileTree #fileTree__list .file.editing,
+#fileTree #fileTree__list summary[contenteditable="true"] {
+  --border-color: orange;
+  --color: #000;
+  --background-color: #fff;
+}
+
+#fileTree__list.searching span:not(.result), #fileTree__list.searching details summary:not(.result) {
+  --color: #bbb;
+}
+
+.contextMenu {
+  --background-color: #fff;
+  --border-color: #aaa;
+  --item-hover-color: #ccc;
+  --color: #000;
+}
+
+#novelStats, .tab {
+  --background-color: #444;
+  --color: var(--guacamole);
+}
+
+#novelStats label:hover {
+  --background-color: #fff3;
+}
+
+#wordGoal {
+  --fill: hsla(118, 72%, 90%, 0.5);
+  --flash-background: #0f0;
+  --flash-color: var(--peel);
+}
+
+#wordGoal__list > div,
+#wordGoal__archived > div {
+  --fill: #0f02;
+  --border-color: #080;
+}
+
+#wordGoal__list > div.completed,
+#wordGoal__archived > div.completed {
+  --background-color: #0f0;
+  --color: var(--peel);
+}
+
+#wordGoal__list > div .archive {
+  --color: #f00;
+  --background-color: #fff;
+}
+
+.novelStats__modal {
+  --background-color: #fff;
+}
+
+.label[data-label="blank"] {
+  --hue: 0;
+  --saturation: 0%;
+  --lightness: 95%;
+}
+
+
+/* Editor Styles */
+.cm-comment {
+  font-family: monospace;
+}
+
+.cm-tab {
+  background-color: #ff04;
+}
