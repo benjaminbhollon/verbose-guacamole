@@ -253,7 +253,11 @@ if (inEditor) {
       }
 
       if (what === 'master' && editable && stash) {
-        await git.stash(['apply']);
+        try {
+          await git.stash(['apply']);
+        } catch (err) {
+          console.warn(err);
+        }
       }
 
       project = JSON.parse(fs.readFileSync(projectPath, {
@@ -556,9 +560,9 @@ if (inEditor) {
       } else {
         if (gitEnabled) {
       	  if ((await git.branch()).all.length <= 0) { // Project started without git
-	    console.info('Creating initial commit...');
-	    await git.add('./*');
-	    await git.commit('Create project');
+      	    console.info('Creating initial commit...');
+      	    await git.add('./*');
+      	    await git.commit('Create project');
       	  }
           if ((await git.branch()).current !== 'master') await api.checkout('master', true);
 
@@ -947,6 +951,9 @@ if (inEditor) {
         console.warn('Git is disabled!');
         return false;
       }
+
+      const confirmMessage = "Warning! Reverting will permanently remove any changes since the last commit. If you think you might want them later for any reason, make sure you create a commit before continuing!";
+      if (!confirm(confirmMessage)) return;
 
       const range = `${where}..HEAD`;
 

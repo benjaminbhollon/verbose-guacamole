@@ -94,10 +94,10 @@
     </section>
     <div id="git__tab" onclick="togglePanel('git', this.id)" class="tab right" data-mode="close"></div>
     <section id="novelStats">
-      <div class="left">
+      <div class="--float-left">
         <span>Editing <span id="novelStats__open">New File</span></span>
       </div>
-      <div class="right">
+      <div class="--float-right">
         <input id="stats__checkbox" type="checkbox" class="--hidden" class="novelStats__modal">
         <label onclick="document.getElementById('stats__popup').classList.toggle('visible')" title="Stats" for="stats__checkbox" id="stats">
           <i class="fas fa-chart-line"></i>
@@ -116,7 +116,7 @@
       <div id="stats__popup" class="novelStats__modal" data-mode="set">
         <h2>Stats</h2>
         <div class="stats__data">
-          <p>As you write, cool stats about your novel-writing experience will show up here!</p>
+          <p>In the future, cool stats about your novel-writing experience will show up here!</p>
         </div>
       </div>
       <div id="wordSprint__popup" class="novelStats__modal" data-mode="set">

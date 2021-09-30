@@ -18,6 +18,14 @@ body.git-closed {
   display: none!important;
 }
 
+.--float-left {
+  float: left;
+}
+
+.--float-right {
+  float: right;
+}
+
 #editor, #fileTree, #git {
   height: 100%;
   max-height: calc(100vh - 1.5em);
@@ -401,17 +409,17 @@ body.locked #locked {
   z-index: 1;
 }
 
-#novelStats .left, #novelStats .right {
+#novelStats > div {
   width: 50%;
   font-size: 0.8em;
 }
 
-#novelStats .left {
+#novelStats > .--float-left {
   float: left;
   border-right: 1px solid;
 }
 
-#novelStats .right {
+#novelStats > .--float-right {
   float: right;
   text-align: right;
 }
