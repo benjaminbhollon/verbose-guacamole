@@ -9,6 +9,9 @@ let projectsPath = path.resolve(app.getPath('documents'), './VerbGuac Projects/'
 if (!fs.existsSync(projectsPath)){
   fs.mkdirSync(projectsPath);
 }
+if (!fs.existsSync(path.resolve(app.getPath('appData'), 'verbose-guacamole'))){
+  fs.mkdirSync(path.resolve(app.getPath('appData'), 'verbose-guacamole'));
+}
 let theme = 'guacamole';
 if (fs.existsSync(path.resolve(app.getPath('appData'), 'verbose-guacamole', 'currentTheme.txt'))) {
   theme = fs.readFileSync(path.resolve(app.getPath('appData'), 'verbose-guacamole', 'currentTheme.txt'), {
@@ -43,7 +46,7 @@ function createWindow () {
   win.hide();
   win.maximize();
 
-  win.loadFile('./app/index.html');
+  win.loadFile('./frontend/index.html');
 }
 
 app.whenReady().then(createWindow);
@@ -80,7 +83,7 @@ function openProject() {
       win.webContents.send('relocate', url.format({
         protocol: 'file',
         slashes: 'true',
-        pathname: path.join(__dirname, `./app/editor.html`)
+        pathname: path.join(__dirname, `./frontend/editor.html`)
       }) + `?f=${encodeURIComponent(result.filePaths[0])}`);
     }
   });
@@ -171,7 +174,7 @@ function updateMenus() {
                     }
                   });
 
-                  help.loadFile('./app/help/git/commits.html');
+                  help.loadFile('./frontend/help/git/commits.html');
                 }
               }
             ]
@@ -262,7 +265,7 @@ function updateMenus() {
                     }
                   });
 
-                  help.loadFile('./app/help/git/commits.html');
+                  help.loadFile('./frontend/help/git/commits.html');
                 }
               }
             ]

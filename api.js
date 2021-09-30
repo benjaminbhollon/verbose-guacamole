@@ -1,67 +1,52 @@
 // Include packages
 const path = require('path');
 const fs = require('fs');
-const { shell, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 
-// Themes
-let themeId = localStorage.theme ? localStorage.theme : 'guacamole';
-let themeLocations = {
-  guacamole: path.resolve('./app/assets/css/themes/guacamole.css'),
-  monoLight: path.resolve('./app/assets/css/themes/monoLight.css'),
-  //monoDark: path.resolve('./app/assets/css/themes/monoDark.css'),
-}
-
+// Get paths
 let paths = {};
 (async () => {
   // Get app data directory
   await (new Promise((resolve, reject) => {
     ipcRenderer.send('getDirs');
     ipcRenderer.on('getDirs', (event, data, novels) => {
-      paths = {
-        data,
-        novels
-      };
+      paths.data = data;
+      paths.novels = novels;
       resolve();
     });
   }));
 })();
 
-const page = path.parse(location.href.split('?')[0]).name
+// API methods
+let api = {};
+const apiLocation = './api/';
+const apiCategories = fs.readdirSync(apiLocation);
+function addAPIMethods(category) {
+  if (apiCategories.indexOf(category) === -1) {
+    console.error(`Could not add ${category} API methods: not found`);
+    return [];
+  }
+
+  fs
+    .readdirSync(path.resolve(apiLocation, category))
+    .forEach(method => {
+      api[path.parse(method).name] =
+        require(path.resolve(apiLocation, category, method))(
+          api,
+          paths,
+        );
+    });
+
+  return true;
+}
+
+const page = path.parse(location.href.split('?')[0]).name;
 const inEditor = page === 'editor';
 
 // Quick versions of document.querySelector and document.querySelectorAll
-const q = s => document.querySelector(s);
-const qA = s => document.querySelectorAll(s);
+const {q, qA} = require('./modules/queries.js');
 
-let api = {
-  openProject: () => {
-    ipcRenderer.send('openProject');
-  },
-  openURI: (uri) => {
-    shell.openExternal(uri);
-  },
-  newProject: () => {
-    document.getElementById('newProject').classList.add('visible');
-  },
-  updateNewProjectModal: () => {
-    q('#newProject__saveLocation').innerText = q('#newProject__folder').value =
-      path.resolve(
-        paths.novels,
-        q('#newProject__title').value.trim().length ?
-          q('#newProject__title').value.trim() :
-          'Untitled Novel'
-      );
-    localStorage.defaultAuthor = q('#newProject__author').value;
-  },
-  loadTheme: () => {
-    let link = document.createElement( "link" );
-    link.href = themeLocations[themeId];
-    link.type = "text/css";
-    link.rel = "stylesheet";
-
-    document.getElementsByTagName( "head" )[0].appendChild( link );
-  },
-};
+addAPIMethods('default');
 
 if (inEditor) {
   const simpleGit = require('simple-git');
@@ -1466,8 +1451,11 @@ module.exports = api;
 
 setTimeout(() => {
   // Add "Create Project" modal
-  q('#modals').innerHTML += fs.readFileSync('./app/assets/html/newProjectModal.html');
-  q('#newProject__author').value = localStorage.defaultAuthor;
+  q('#modals').innerHTML += fs.readFileSync('./frontend/assets/html/newProjectModal.html');
+  q('#newProject__author').value =
+    localStorage.defaultAuthor ?
+    localStorage.defaultAuthor :
+    '';
   api.updateNewProjectModal();
 
   console.info('%cWARNING!', 'font-size: 3em;color:red', '\nDo not copy/paste code in here unless you know EXACTLY what you\'re doing! Running code from external sources could give hackers unexpected access to your device.');
