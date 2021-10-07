@@ -52,31 +52,12 @@ if (inEditor) {
   const simpleGit = require('simple-git');
   const querystring = require('querystring');
   const marked = require('marked');
-  const EasyMDE = require('easymde');
   const Typo = require('typo-js');
+  const Editor = require('./classes/Editor.js')(api);
 
   // Initialize variables
   let git = null;
-  let placeholders = [
-    'It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair, we had everything before us, we had nothing before us, we were all going to Heaven, we were all going direct the other way. (A Tale of Two Cities)',
-    'It was a dark and stormy night. (A Wrinkle in Time)',
-    'Call me Ishmael. (Moby Dick)',
-    'It was a pleasure to burn. (Fahrenheit 451)',
-    'It is a truth universally acknowledged that a single man in possession of a good fortune must be in want of a wife. (Pride and Prejudice)',
-    'In a hole in the ground there lived a hobbit. (The Hobbit)',
-    'Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small, unregarded yellow sun. (The Hitchhiker\'s Guide to the Galaxy)',
-    'It was a bright cold day in April, and the clocks were striking thirteen. (1984)',
-    'All children, except one, grow up. (Peter Pan)',
-    'There was a boy called Eustace Clarence Scrubb, and he almost deserved it. (Voyage of the Dawn Treader)',
-    'The drought had lasted now for ten million years, and the reign of the terrible lizards had long since ended. (2001: A Space Odyssey)',
-    'When he was nearly thirteen, my brother Jem got his arm badly broken at the elbow. (To Kill a Mockingbird)',
-    'There was no possibility of taking a walk that day. (Jane Eyre)',
-    'First the colors. Then the humans. (The Book Thief)',
-    '“Where’s Papa going with that ax?” (Charlotte\'s Web)',
-    'The thousand injuries of Fortunato I had borne as I best could, but when he ventured upon insult I vowed revenge. (The Cask of Amontillado)',
-    'Happy families are all alike; every unhappy family is unhappy in its own way. (Anna Karenina)',
-  ];
-  let editor = null;
+  let editors = [];
   let currentFile = null;
   let clearing = false;
   let currentlyDragging = null;
@@ -84,18 +65,15 @@ if (inEditor) {
   let startingWords = 0;
   let sprint = {}
   let params = {};
-  let projectPath = {};
   let readOnly = false;
   let togglePreview = null;
   let gitEnabled = true;
   const endSprintSound = new Audio('./assets/audio/sprintDone.mp3');
+  const events = {};
+
+  // Dictionary
   const dictionary = new Typo('en_US');
-
   let customDictionary = [];
-
-  // Define what separates a word
-  const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
-  _toggleFullScreen = inEditor ? EasyMDE.toggleFullScreen : () => null;
 
   // Random int from min to max
   function rand(min, max) {
@@ -245,7 +223,7 @@ if (inEditor) {
         }
       }
 
-      project = JSON.parse(fs.readFileSync(projectPath, {
+      project = JSON.parse(fs.readFileSync(api.projectPath, {
         encoding:'utf8',
         flag:'r'
       }));
@@ -302,7 +280,7 @@ if (inEditor) {
 
       if (type === 'file') {
         fs.writeFileSync(
-          path.resolve(path.dirname(projectPath), filePath),
+          path.resolve(path.dirname(api.projectPath), filePath),
           '',
           {
             encoding: 'utf8',
@@ -373,13 +351,13 @@ if (inEditor) {
           if (f.children) {
             deleteInFolder(f.children);
           } else {
-            fs.unlinkSync(path.resolve(path.dirname(projectPath), f.path));
+            fs.unlinkSync(path.resolve(path.dirname(api.projectPath), f.path));
           }
         }
       }
 
       if (item.tagName === 'SPAN') {
-        fs.unlinkSync(path.resolve(path.dirname(projectPath), file.path));
+        fs.unlinkSync(path.resolve(path.dirname(api.projectPath), file.path));
       } else if (item.tagName === 'SUMMARY') {
         deleteInFolder(file.children);
       }
@@ -404,12 +382,20 @@ if (inEditor) {
         api.saveProject();
       }, 0);
     },
-    editorValue: (v) => {
+    editorValue: (v, editorIndex = 0) => {
       if (v) {
-        return editor.value(v);
+        return editors[editorIndex].value(v);
       } else {
         if (editor === null) return;
-        return editor.value();
+        return editors[editorIndex].value();
+      }
+    },
+    emit: (eventName, ...vars) => {
+      if (events[eventName]) {
+        events[eventName].forEach(callback => callback(...vars));
+        return true;
+      } else {
+        return false;
       }
     },
     fileName: () => {
@@ -448,7 +434,7 @@ if (inEditor) {
     ignoreLock: () => {
       readOnly = false;
       q('body').dataset.readonly = 'false';
-      api.openFile(currentFile.path, currentFile.name, true);
+      api.openFile(currentFile.path, currentFile.name);
     },
     init: async (params) => {
       try {
@@ -462,21 +448,21 @@ if (inEditor) {
       }
 
       params = querystring.parse(params);
-      projectPath = params.f;
+      api.projectPath = params.f;
 
       // Create project directory if necessary
       if (params.new) {
         if (!fs.existsSync(paths.novels)){
           fs.mkdirSync(paths.novels);
         }
-        if (!fs.existsSync(projectPath)){
-          fs.mkdirSync(projectPath);
+        if (!fs.existsSync(api.projectPath)){
+          fs.mkdirSync(api.projectPath);
         }
       }
 
       // Initialize git in project directory
       git = simpleGit({
-        baseDir: (params.new ? projectPath : path.dirname(projectPath))
+        baseDir: (params.new ? api.projectPath : path.dirname(api.projectPath))
       });
       try {
         await git.init();
@@ -494,9 +480,9 @@ if (inEditor) {
           synopsis: params['meta.synopsis']
         }
         console.info('Creating project file...');
-        projectPath = path.resolve(projectPath, 'project.vgp');
+        api.projectPath = path.resolve(api.projectPath, 'project.vgp');
         await fs.writeFile(
-          projectPath,
+          api.projectPath,
           JSON.stringify(project),
           {
             encoding: 'utf8',
@@ -511,12 +497,12 @@ if (inEditor) {
         );
         console.info('Creating title page...');
         try {
-          fs.mkdirSync(path.resolve(path.dirname(projectPath), './content'));
+          fs.mkdirSync(path.resolve(path.dirname(api.projectPath), './content'));
         } catch(err) {
           console.warn(err);
         }
         await fs.writeFile(
-          path.resolve(path.dirname(projectPath), project.index[0].path),
+          path.resolve(path.dirname(api.projectPath), project.index[0].path),
           `# ${project.metadata.title}\nby ${project.metadata.author}`,
           {
             encoding: 'utf8',
@@ -538,10 +524,10 @@ if (inEditor) {
         }
 
         console.info('Done! Changing URL to avoid refresh-slipups.');
-        history.replaceState(null, null, './editor.html?f=' + projectPath);
+        history.replaceState(null, null, './editor.html?f=' + api.projectPath);
         startingWords = 0;
 
-        fs.writeFileSync(path.resolve(path.dirname(projectPath), '.gitignore'), '.lock');
+        fs.writeFileSync(path.resolve(path.dirname(api.projectPath), '.gitignore'), '.lock');
       } else {
         if (gitEnabled) {
       	  if ((await git.branch()).all.length <= 0) { // Project started without git
@@ -554,7 +540,7 @@ if (inEditor) {
           api.populateGitHistory();
         }
 
-        project = JSON.parse(fs.readFileSync(projectPath, {
+        project = JSON.parse(fs.readFileSync(api.projectPath, {
           encoding:'utf8',
           flag:'r'
         }));
@@ -564,7 +550,7 @@ if (inEditor) {
         api.flatten(project.index)
           .filter(i => typeof i.children === 'undefined')
           .forEach(file => {
-            file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
+            file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(api.projectPath), file.path), {
               encoding:'utf8',
               flag:'r'
             }));
@@ -624,8 +610,11 @@ if (inEditor) {
         return goal;
       });
 
+      // Create editor
+      editors.push(new Editor(q('#editorTextarea')));
+
       api.populateFiletree();
-      api.openFile(currentFile.path, currentFile.name, true);
+      api.openFile(currentFile.path, currentFile.name, 0);
       api.updateLabelCSS();
 
       setTimeout(() => {
@@ -645,7 +634,7 @@ if (inEditor) {
     },
     lockProject: () => {
       try {
-        if (fs.statSync(path.resolve(projectPath, '../.lock'))) {
+        if (fs.statSync(path.resolve(api.projectPath, '../.lock'))) {
           readOnly = true;
           document.body.classList.add('locked');
         }
@@ -655,7 +644,7 @@ if (inEditor) {
         }
       }
 
-      fs.writeFileSync(path.resolve(projectPath, '../.lock'), '');
+      fs.writeFileSync(path.resolve(api.projectPath, '../.lock'), '');
       return true;
     },
     moveItem: (p, t, c, index, order, main = false) => {
@@ -688,36 +677,26 @@ if (inEditor) {
       // Save
       api.saveProject();
     },
-    openFile: (p, n, first = false) => {
-      if (currentFile === api.flatten(project.index).find(i => i.path === p) && !first) return;
-      api.resetEditor();
-      clearing = true;
-      const value = fs.readFileSync(path.resolve(path.dirname(projectPath), p), {
-        encoding:'utf8',
-        flag:'r'
-      });
-      editor.value(value);
-      currentFile = api.flatten(project.index).find(i => i.path === p);
-      clearing = false;
-
-      // Calculate word counts
-      api.flatten(project.index).filter(i => typeof i.children === 'undefined').forEach(file => {
-        file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(projectPath), file.path), {
-          encoding:'utf8',
-          flag:'r'
-        }));
-      });
+    on: (eventName, callback = () => undefined) => {
+      if (typeof eventName === 'string') {
+        if (typeof events[eventName] === 'array')
+          events[eventName].push(callback);
+        else
+          events[eventName] = [callback];
+      }
+    },
+    openFile: (p, n, editorIndex = 0) => {
+      return editors[editorIndex].open(p);
 
       api.updateStats();
     },
-    openItem: (id) => {
+    openItem: (id, editorIndex = 0) => {
       const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === id);
-      api.openFile(file.path, file.name);
+      api.openFile(file.path, file.name, editorIndex);
       project.openFile = id;
       api.saveProject();
       return document.getElementById(id);
     },
-    placeholders,
     populateFiletree: () => {
       document.getElementById('fileTree__list').innerHTML = '';
 
@@ -817,92 +796,6 @@ if (inEditor) {
         console.error(err);
       }
     },
-    resetEditor: () => {
-      clearing = true;
-
-      // If the editor already exists, clear it
-      if (editor) {
-        editor.value('');
-        editor.toTextArea();
-      }
-      placeholderN = Date.now() % (api.placeholders.length - 1);
-      let options = {
-        element: document.getElementById("editorTextarea"),
-        spellChecker: false,
-        status: false,
-        placeholder: api.placeholders[placeholderN],
-      	insertTexts: {
-      		image: ["![](https://", ")"],
-      	},
-        autofocus: true,
-        autoDownloadFontAwesome: false,
-        toolbar: [
-          'bold',
-          'italic',
-          'heading',
-          '|',
-          'quote',
-          'unordered-list',
-          'ordered-list',
-          'link',
-          '|',
-          'preview',
-          {
-            name: 'fullscreen',
-            action: toggleFullScreen,
-            className: 'fa fa-arrows-alt no-disable',
-            title: 'Focus Mode (F11)'
-          },
-          '|',
-          'guide'
-        ],
-        shortcuts: {
-          toggleFullScreen: null
-        }
-      };
-      if (readOnly) {
-        options.hideIcons = ['side-by-side', 'image', 'preview'];
-        options.placeholder = '';
-      }
-      editor = new EasyMDE(options);
-
-      // Fullscreen
-      const debouncedSaveFile = api.debounce(api.saveFile, 500);
-      const throttledUpdateStats = api.throttle(api.updateStats, 50);
-      editor.codemirror.on("change", () => {
-        if (clearing) return;
-        throttledUpdateStats();
-        debouncedSaveFile();
-      });
-      clearing = false;
-
-      editor.codemirror.addOverlay({
-        token: function(stream) {
-          // Based on https://github.com/sparksuite/codemirror-spell-checker/blob/master/src/js/spell-checker.js
-  				var ch = stream.peek();
-  				var word = "";
-
-  				if(rx_word.includes(ch)) {
-  					stream.next();
-  					return null;
-  				}
-
-  				while((ch = stream.peek()) != null && !rx_word.includes(ch)) {
-  					word += ch;
-  					stream.next();
-  				}
-
-  				if(api.checkWord(word.replace(/‘|’/g, "'")) !== true)
-  					return "spell-error"; // CSS class: cm-spell-error
-
-  				return null;
-  			}
-      });
-
-
-      togglePreview = editor.toolbar.find(t => t.name === 'preview').action;
-      if (readOnly && !editor.isPreviewActive()) setTimeout(() => {togglePreview(editor)}, 0);
-    },
     renameItem: (e) => {
       e.contentEditable = false;
       if (e.tagName === 'SPAN') e.parentNode.classList.remove('editing');
@@ -954,18 +847,13 @@ if (inEditor) {
 
       await api.checkout('master', true, false);
     },
-    saveFile: (v) => {
-      if (readOnly) return false;
-      let p = currentFile.path;
-      let value = null;
-      if (!v) value = editor.value();
-      else value = v;
-
-      fs.writeFileSync(path.resolve(path.dirname(projectPath), p), value);
+    saveFile: (editorIndex = 0) => {
+      console.log('200 OK');
+      return editors[editorIndex].save();
     },
     saveProject: () => {
       if (readOnly) return false;
-      fs.writeFileSync(path.resolve(projectPath), JSON.stringify(project));
+      fs.writeFileSync(path.resolve(api.projectPath), JSON.stringify(project));
     },
     setOpenFolders: () => {
       let folders = [...qA('#fileTree__list details')];
@@ -1032,7 +920,7 @@ if (inEditor) {
         });
         e.addEventListener('blur', api.renameItem.bind(this, e));
         document.execCommand('selectAll', false, null)
-      }, 300);
+      }, 300); // Delay time to see if this is an open action rather than rename
     },
     startSprint: (s = 0, m = 0, h = 0) => {
       if (!(s+m+h)) return; // smh = shaking my head (because you set a timer for 0)
@@ -1123,7 +1011,7 @@ if (inEditor) {
       // Don't unlock if you've detected another window locked it
       if (document.body.classList.contains('locked')) return false;
       try {
-        fs.unlinkSync(path.resolve(projectPath, '../.lock'));
+        fs.unlinkSync(path.resolve(api.projectPath, '../.lock'));
       } catch (err) {
         console.warn(err);
       }
@@ -1241,7 +1129,7 @@ if (inEditor) {
       q('#style__labelColors').innerText = css;
     },
     updateStats: async () => {
-      let content = marked(editor.value());
+      let content = marked(api.editorValue());
       var div = document.createElement("div");
       div.innerHTML = content;
       content = div.innerText;
@@ -1272,7 +1160,7 @@ if (inEditor) {
       api.updateGoals();
     },
     wordCount: (t) => {
-      let value = typeof t === 'undefined' ? editor.value() : t;
+      let value = typeof t === 'undefined' ? api.editorValue() : t;
 
       let content = marked(value);
       var div = document.createElement("div");
@@ -1298,7 +1186,9 @@ if (inEditor) {
     },
   };
 
-  api = {...editorAPI, ...api};
+  for (method of Object.keys(editorAPI)) {
+    api[method] = editorAPI[method];
+  }
 
   let project = {
     metadata: {
@@ -1322,7 +1212,6 @@ if (inEditor) {
     },
     labels: []
   };
-  let placeholderN = Date.now() % api.placeholders.length;
 
   ipcRenderer.on('updateProjectDetails', () => {
     api.showModal('projectDetails');
@@ -1360,23 +1249,6 @@ if (inEditor) {
       }, 15);
     }
   })();
-}
-
-// Fullscreen
-toggleFullScreen = (e) => {
-  document.body.classList.toggle('focusMode');
-  function escapeFunction(event) {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      document.exitFullscreen();
-      document.body.classList.remove('focusMode');
-      document.removeEventListener('keydown', escapeFunction);
-    }
-  }
-  if (!document.body.classList.contains('focusMode')) document.exitFullscreen();
-  else document.documentElement.requestFullscreen();
-  document.body.addEventListener('keydown', escapeFunction);
-  if (e !== null) _toggleFullScreen(e);
 }
 
 // Respond to main process
