@@ -691,6 +691,7 @@ if (inEditor) {
       api.updateStats();
     },
     openItem: (id, editorIndex = 0) => {
+      api.focusItem(id);
       const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === id);
       api.openFile(file.path, file.name, editorIndex);
       project.openFile = id;
@@ -717,8 +718,8 @@ if (inEditor) {
                 ondragstart="startMoveItem(event)"
                 ondragend="stopMoveItem(event)"
                 title="${item.name}"
-                onclick='event.preventDefault();api.focusItem(this.parentNode.id);'
-                ondblclick='this.parentNode.toggleAttribute("open");api.setOpenFolders();'
+                onclick='if (this.contentEditable !== "true") {setTimeout(api.setOpenFolders, 100);} else {event.preventDefault();console.log("hello?")}'
+                ondblclick='api.startRename(this)'
                 oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
               >${item.name}</summary>
             </details>`;
@@ -742,8 +743,8 @@ if (inEditor) {
                 id="${api.idFromPath(item.path)}__filename"
                 class="filename"
                 title="${item.name}"
-                onclick='event.preventDefault();api.focusItem(this.parentNode.id)'
-                ondblclick='api.openItem(this.parentNode.id)'
+                onclick='event.preventDefault();api.openItem(this.parentNode.id)'
+                ondblclick='api.startRename(this)'
                 oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
               >
                 ${item.name}
@@ -897,30 +898,26 @@ if (inEditor) {
       }
     },
     startRename: (e) => {
-      const isOpen = (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile);
-      setTimeout(() => {
-        if (isOpen !== (e.tagName === 'SUMMARY' ? e.parentNode.open : currentFile)) return;
-        e.contentEditable = true;
-        if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
-        e.focus();
-        e.addEventListener('keydown', (event) => {
-          if (event.key === ' ' && e.tagName === 'SUMMARY') {
-            event.preventDefault();
-            document.execCommand('insertText', false, ' ');
-          }
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            e.blur();
-          }
-          if (event.key === 'Escape') {
-            const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.id || e.parentNode.id));
-            e.innerText = file.name;
-            e.blur();
-          }
-        });
-        e.addEventListener('blur', api.renameItem.bind(this, e));
-        document.execCommand('selectAll', false, null)
-      }, 300); // Delay time to see if this is an open action rather than rename
+      e.contentEditable = true;
+      if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
+      e.focus();
+      e.addEventListener('keydown', (event) => {
+        if (event.key === ' ' && e.tagName === 'SUMMARY') {
+          event.preventDefault();
+          document.execCommand('insertText', false, ' ');
+        }
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          e.blur();
+        }
+        if (event.key === 'Escape') {
+          const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.id || e.parentNode.id));
+          e.innerText = file.name;
+          e.blur();
+        }
+      });
+      e.addEventListener('blur', api.renameItem.bind(this, e));
+      document.execCommand('selectAll', false, null);
     },
     startSprint: (s = 0, m = 0, h = 0) => {
       if (!(s+m+h)) return; // smh = shaking my head (because you set a timer for 0)
