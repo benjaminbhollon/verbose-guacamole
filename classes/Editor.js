@@ -185,26 +185,36 @@ module.exports = (api, projectPath) => {
       return result;
     }
     spellcheck() {
+      // Create an array of all the lines in the current document
       const lines = this.value().split('\n');
 
+      // For each line...
       for (let line = 0; line < lines.length; line++) {
+        // Each char will be added to word. When the word is over, this can be read and will be reset.
         let word = '';
+        // The starting position of the current word. When word === '', set this to the current char position
         let startingPos = 0;
-        for (let chpos = 0; chpos < lines[line].length; chpos++) {
-          const ch = lines[line][chpos];
 
-          if (rx_word.includes(ch) && !word.length) {
+        // For each char
+        for (let chpos = 0; chpos < lines[line].length; chpos++) {
+          const ch = lines[line][chpos]; // Store the char value
+
+          if (rx_word.includes(ch) && !word.length) { // This is a divider between words, but there isn't a word yet
             continue;
-          } else {
-            if (!word.length) {
+          } else { // This is a normal char
+            if (!word.length) { // If there is no word yet, reset the startingPos
               startingPos = chpos;
             }
+
+            // Add the current char to the word
             word += ch;
           }
 
+          // Checks if the next char divides words
           if (lines[line][chpos + 1] === undefined || rx_word.includes(lines[line][chpos + 1])) {
             // Word is done
-            if (!api.checkWord(word.replace(/‘|’/g, "'"))) {
+            if (!api.checkWord(word.replace(/‘|’/g, "'"))) { // If true, the word is mispelled
+              // Mark the incorrect
               this.instance.codemirror.markText(
                 {line, ch: startingPos},
                 {line, ch: chpos + 1},
@@ -212,6 +222,14 @@ module.exports = (api, projectPath) => {
                   className: 'cm-spell-error'
                 }
               );
+            } else {
+              // If this word was marked incorrect in the past, remove that mark
+              this.instance.codemirror.findMarks(
+                {line, ch: startingPos},
+                {line, ch: chpos + 1}
+              ).forEach(toClear => {
+                toClear.clear();
+              });
             }
 
             // Reset word
@@ -220,7 +238,7 @@ module.exports = (api, projectPath) => {
         }
       }
     }
-  }
+  } // That's a lot of closing braces, can you keep 'em all straight? ;)
 
   return Editor;
 }
