@@ -133,6 +133,7 @@ module.exports = (api, projectPath) => {
     }
 
     open(filePath) {
+      this.randomizePlaceholder();
       this.opening = true;
       this.currentPath = path.resolve(path.dirname(api.projectPath), filePath);
       const result = this.value(
@@ -149,8 +150,12 @@ module.exports = (api, projectPath) => {
       return result;
     }
     randomizePlaceholder() {
-      const result = placeholders[Date.now() % placeholders.length];
-      this.instance.codemirror.options.placeholder = result;
+      const previous = this.instance.codemirror.getOption('placeholder');
+      let result = previous;
+      while (previous === result) {
+        result = placeholders[Date.now() % placeholders.length];
+      }
+      this.instance.codemirror.setOption('placeholder', result);
       return result;
     }
     save() {

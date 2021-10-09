@@ -849,7 +849,6 @@ if (inEditor) {
       await api.checkout('master', true, false);
     },
     saveFile: (editorIndex = 0) => {
-      console.log('200 OK');
       return editors[editorIndex].save();
     },
     saveProject: () => {
