@@ -94,16 +94,19 @@ module.exports = (api, projectPath) => {
       this.opening = false;
 
       const debouncedSaveFile = api.debounce(this.save.bind(this), 500);
+      const debouncedSpellcheck = api.debounce(this.spellcheck.bind(this), 500);
       const throttledUpdateStats = api.throttle(api.updateStats, 50);
       this.instance.codemirror.on("change", () => {
         if (this.opening) return;
         throttledUpdateStats();
         debouncedSaveFile();
         api.emit('editorChange');
+
+        debouncedSpellcheck();
       });
 
 
-      this.instance.codemirror.addOverlay({
+      /*this.instance.codemirror.addOverlay({
         token: function(stream) {
           // Based on https://github.com/sparksuite/codemirror-spell-checker/blob/master/src/js/spell-checker.js
   				var ch = stream.peek();
@@ -119,12 +122,14 @@ module.exports = (api, projectPath) => {
   					stream.next();
   				}
 
+          console.log(stream.current());
+
   				if(api.checkWord(word.replace(/‘|’/g, "'")) !== true)
   					return "spell-error"; // CSS class: cm-spell-error
 
   				return null;
   			}
-      });
+      });*/
 
       togglePreview = this.instance.toolbar.find(t => t.name === 'preview').action;
       if (readOnly && !this.instance.isPreviewActive()) setTimeout(() => {togglePreview(this.instance)}, 0);
@@ -147,6 +152,7 @@ module.exports = (api, projectPath) => {
       )
       api.emit('fileOpen', filePath);
       this.opening = false;
+      this.spellcheck();
       return result;
     }
     randomizePlaceholder() {
@@ -177,6 +183,42 @@ module.exports = (api, projectPath) => {
       const result = this.instance.value(v);
       api.emit('setEditorValue', v);
       return result;
+    }
+    spellcheck() {
+      const lines = this.value().split('\n');
+
+      for (let line = 0; line < lines.length; line++) {
+        let word = '';
+        let startingPos = 0;
+        for (let chpos = 0; chpos < lines[line].length; chpos++) {
+          const ch = lines[line][chpos];
+
+          if (rx_word.includes(ch) && !word.length) {
+            continue;
+          } else {
+            if (!word.length) {
+              startingPos = chpos;
+            }
+            word += ch;
+          }
+
+          if (lines[line][chpos + 1] === undefined || rx_word.includes(lines[line][chpos + 1])) {
+            // Word is done
+            if (!api.checkWord(word.replace(/‘|’/g, "'"))) {
+              this.instance.codemirror.markText(
+                {line, ch: startingPos},
+                {line, ch: chpos + 1},
+                {
+                  className: 'cm-spell-error'
+                }
+              );
+            }
+
+            // Reset word
+            word = '';
+          }
+        }
+      }
     }
   }
 
