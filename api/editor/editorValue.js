@@ -9,12 +9,18 @@ const { q, qA } = require('../../modules/queries.js');
 // Note that URIs inside either of these functions are relative to api.js, not this file.
 module.exports = (api, paths, extra) => {
   // You can put variables your code needs to access between runs here.
+  const editors = extra.editors;
 
   //This is the final function that will become part of the API.
   // You MAY make it async.
   // You MAY add parameters.
-  function returnFunction() {
-
+  function returnFunction(v, editorIndex = 0) {
+    if (v) {
+      return editors[editorIndex].value(v);
+    } else {
+      if (editor === null) return;
+      return editors[editorIndex].value();
+    }
   }
 
   return returnFunction;

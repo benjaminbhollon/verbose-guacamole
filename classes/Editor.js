@@ -105,32 +105,6 @@ module.exports = (api, projectPath) => {
         debouncedSpellcheck();
       });
 
-
-      /*this.instance.codemirror.addOverlay({
-        token: function(stream) {
-          // Based on https://github.com/sparksuite/codemirror-spell-checker/blob/master/src/js/spell-checker.js
-  				var ch = stream.peek();
-  				var word = "";
-
-  				if(rx_word.includes(ch)) {
-  					stream.next();
-  					return null;
-  				}
-
-  				while((ch = stream.peek()) != null && !rx_word.includes(ch)) {
-  					word += ch;
-  					stream.next();
-  				}
-
-          console.log(stream.current());
-
-  				if(api.checkWord(word.replace(/‘|’/g, "'")) !== true)
-  					return "spell-error"; // CSS class: cm-spell-error
-
-  				return null;
-  			}
-      });*/
-
       togglePreview = this.instance.toolbar.find(t => t.name === 'preview').action;
       if (readOnly && !this.instance.isPreviewActive()) setTimeout(() => {togglePreview(this.instance)}, 0);
 
