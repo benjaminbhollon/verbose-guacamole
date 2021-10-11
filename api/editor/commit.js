@@ -9,24 +9,28 @@ const { q, qA } = require('../../modules/queries.js');
 // Note that URIs inside either of these functions are relative to api.js, not this file.
 module.exports = (api, paths, extra) => {
   // You can put variables your code needs to access between runs here.
-  const editors = extra.editors;
-  const project = extra.project;
+  const git = extra.git;
 
   //This is the final function that will become part of the API.
   // You MAY make it async.
   // You MAY add parameters.
-  function returnFunction(id, n, editorIndex = 0) {
-    // Requires the id rather than the path because even with relative paths, you can end up anywhere in the system, so it's safer for security reasons only to allow files that are part of the project
-    const file = api.flatten(project.index)
-      .filter(f => f.children === undefined)
-      .find(f => api.idFromPath(f.path) === id)
+  async function returnFunction(m) {
+    if (!api.gitEnabled) {
+      console.warn('Git is disabled!');
+      return false;
+    }
+    const message = m ? m : document.getElementById('git__commitText').value;
+    document.getElementById('git__commitButton').innerText = 'Working...';
 
-    if (file === undefined) return false;
+    try {
+      await git.add('./*').commit(message)._chain;
+      document.getElementById('git__commitButton').innerText = 'Commit';
+      document.getElementById('git__commitText').value = '';
+    } catch (err) {
+      window.alert(err);
+    }
 
-    q('#novelStats__open').innerText = n;
-    api.updateStats();
-
-    return editors[editorIndex].open(file.path);
+    setTimeout(api.populateGitHistory, 500);
   }
 
   return returnFunction;

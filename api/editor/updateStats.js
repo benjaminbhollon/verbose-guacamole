@@ -42,7 +42,7 @@ module.exports = (api, paths, extra) => {
     project.history.wordCount[(new Date()).toISOString().split('T')[0]] = api.wordCountTotal();
 
     document.getElementById('novelStats__words').innerText = totalWords.toLocaleString() +
-      ` (${(totalWords < startingWords ? '' : '+') + (totalWords - startingWords).toLocaleString()})`;
+      ` (${(totalWords < api.startingWords ? '' : '+') + (totalWords - api.startingWords).toLocaleString()})`;
 
     api.updateGoals();
   }

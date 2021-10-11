@@ -54,16 +54,17 @@ if (inEditor) {
   const querystring = require('querystring');
   const marked = require('marked');
   const Typo = require('typo-js');
-  const Editor = require('./classes/Editor.js')(api);
 
   // Initialize variables
-  let git = null;
+  api.params = querystring.parse(location.search.slice(1));
+  api.projectPath = api.params.f;
+  const git = simpleGit({
+    baseDir: (api.params.new ? api.projectPath : path.dirname(api.projectPath))
+  });
   let editors = [];
   let clearing = false;
   let currentlyDragging = null;
   let hoveringOver = null;
-  let startingWords = 0;
-  let params = {};
   let togglePreview = null;
   const events = {};
 
@@ -72,65 +73,7 @@ if (inEditor) {
   let customDictionary = [];
 
   const editorAPI = {
-    checkout: async (what, editable, stash = true) => {
-      if (!api.gitEnabled) {
-        console.warn('Git is disabled!');
-        return false;
-      }
-      if (!(what === 'master' && editable) && stash) {
-        await git.stash();
-      }
-      const result = await git.checkout(what);
-
-      if (!editable) {
-        api.readOnly = true;
-        q('body').dataset.readonly = 'true';
-        q('#git__revertButton').dataset.hash = what;
-      } else {
-        api.readOnly = false;
-        q('body').dataset.readonly = 'false';
-      }
-
-      if (what === 'master' && editable && stash) {
-        try {
-          await git.stash(['apply']);
-        } catch (err) {
-          console.warn(err);
-        }
-      }
-
-      updatedProject = JSON.parse(fs.readFileSync(api.projectPath, {
-        encoding:'utf8',
-        flag:'r'
-      }));
-      for (let key of Object.keys(updatedProject)) {
-        project[key] = updatedProject[key];
-      }
-      api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
-
-      api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, true);
-      api.populateFiletree();
-      api.populateGitHistory();
-    },
-    commit: async (m) => {
-      if (!api.gitEnabled) {
-        console.warn('Git is disabled!');
-        return false;
-      }
-      const message = m ? m : document.getElementById('git__commitText').value;
-      document.getElementById('git__commitButton').innerText = 'Working...';
-
-      try {
-        await git.add('./*').commit(message)._chain;
-        document.getElementById('git__commitButton').innerText = 'Commit';
-        document.getElementById('git__commitText').value = '';
-      } catch (err) {
-        window.alert(err);
-      }
-
-      setTimeout(api.populateGitHistory, 500);
-    },
-    init: async (params) => {
+    init: async () => {
       api.readOnly = false;
 
       try {
@@ -144,11 +87,8 @@ if (inEditor) {
         api.customDictionary = [];
       }
 
-      params = querystring.parse(params);
-      api.projectPath = params.f;
-
       // Create project directory if necessary
-      if (params.new) {
+      if (api.params.new) {
         if (!fs.existsSync(paths.novels)){
           fs.mkdirSync(paths.novels);
         }
@@ -157,10 +97,10 @@ if (inEditor) {
         }
       }
 
-      // Initialize git in project directory
-      git = simpleGit({
-        baseDir: (params.new ? api.projectPath : path.dirname(api.projectPath))
-      });
+      // Create editor
+      editors.push(new Editor(q('#editorTextarea')));
+
+      // Try to initialize git to see if it's enabled
       try {
         await git.init();
         api.gitEnabled = true;
@@ -170,7 +110,7 @@ if (inEditor) {
         q('#git').classList.add('disabled');
       }
 
-      if (params.new) {
+      if (api.params.new) {
         console.info('New project alert! Let me get that set up for you...');
         project.metadata = {
           title: params['meta.title'],
@@ -256,7 +196,7 @@ if (inEditor) {
               flag:'r'
             }));
           });
-        startingWords = api.wordCountTotal();
+        api.startingWords = api.wordCountTotal();
 
         /* Compatibility */
 
@@ -311,9 +251,6 @@ if (inEditor) {
         return goal;
       });
 
-      // Create editor
-      editors.push(new Editor(q('#editorTextarea')));
-
       api.populateFiletree();
       api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, 0);
       api.updateLabelCSS();
@@ -321,47 +258,6 @@ if (inEditor) {
       setTimeout(() => {
         document.getElementById(api.idFromPath(api.currentFile.path)).click();
       }, 1000);
-    },
-    populateGitHistory: async () => {
-      if (!api.gitEnabled) {
-        console.warn('Git is disabled!');
-        return false;
-      }
-      try {
-        const log = await git.log();
-        let html = log.all.map(h => {
-          const preview = `<span class="preview" onclick="api.checkout('${h.hash}', false)"><i class="fa fa-eye"></i>`;
-          return `<span id='commit-${h.hash}'>${h.message}${h.hash !== log.all[0].hash ? preview : ''}</span></span>`;
-        }).reverse().join('');
-        q('#git__commits').innerHTML = html;
-
-        q('#git').scrollTop = q('#git').scrollHeight;
-      } catch (err) {
-        console.error(err);
-      }
-    },
-    revertTo: async (where, name) => {
-      if (!api.gitEnabled) {
-        console.warn('Git is disabled!');
-        return false;
-      }
-
-      const confirmMessage = "Warning! Reverting will permanently remove any changes since the last commit. If you think you might want them later for any reason, make sure you create a commit before continuing!";
-      if (!confirm(confirmMessage)) return;
-
-      const range = `${where}..HEAD`;
-
-      await git.reset({'--hard': null});
-
-      await api.checkout('master', false, false);
-
-      await git.stash();
-
-      await git.revert(range, {'--no-commit': null});
-
-      await api.commit(`Revert to "${q(`#commit-${where}`).innerText}"`);
-
-      await api.checkout('master', true, false);
     },
   };
 
@@ -386,7 +282,13 @@ if (inEditor) {
     labels: []
   };
 
-  addAPIMethods('editor', {project, events, editors, dictionary});
+  addAPIMethods('editor', {
+    project,
+    events,
+    editors,
+    dictionary,
+    git
+  });
 
   project.index.push(
     {

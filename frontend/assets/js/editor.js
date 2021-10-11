@@ -1,6 +1,3 @@
-// Get path parameters
-const params = location.search.slice(1);
-
 // Quick versions of document.querySelector and document.querySelectorAll
 const q = s => document.querySelector(s);
 const qA = s => document.querySelectorAll(s);
@@ -227,4 +224,4 @@ function togglePanel(panelId, tabId) {
   localStorage.panelState = JSON.stringify(panelState);
 }
 
-api.init(params);
+api.init();
