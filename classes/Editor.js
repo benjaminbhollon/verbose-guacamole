@@ -96,14 +96,19 @@ module.exports = (api, projectPath) => {
 
     open(filePath) {
       const newPath = path.resolve(path.dirname(api.projectPath), filePath);
+      
       if (newPath !== this.currentPath) this.randomizePlaceholder();
+
       this.opening = true;
+
       if (api.readOnly && !this.instance.isPreviewActive()) {
         setTimeout(() => {togglePreview(this.instance)}, 0);
       } else if (!api.readOnly && this.instance.isPreviewActive()) {
         setTimeout(() => {togglePreview(this.instance)}, 0);
       }
+
       this.currentPath = newPath;
+
       const result = this.value(
         fs.readFileSync(
           this.currentPath,
@@ -113,9 +118,13 @@ module.exports = (api, projectPath) => {
           }
         )
       )
+
       api.emit('fileOpen', filePath);
+
       this.opening = false;
       this.spellcheck();
+      api.updateStats();
+
       return result;
     }
     randomizePlaceholder() {
@@ -205,12 +214,3 @@ module.exports = (api, projectPath) => {
 
   return Editor;
 }
-
-/*
-
-if (readOnly) {
-  options.hideIcons = ['side-by-side', 'image', 'preview'];
-  options.placeholder = '';
-}
-
-*/

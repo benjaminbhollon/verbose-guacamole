@@ -24,7 +24,6 @@ module.exports = (api, paths, extra) => {
     if (file === undefined) return false;
 
     q('#novelStats__open').innerText = n;
-    api.updateStats();
 
     return editors[editorIndex].open(file.path);
   }
