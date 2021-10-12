@@ -34,7 +34,7 @@ module.exports = (api, paths, extra) => {
               ondragstart="startMoveItem(event)"
               ondragend="stopMoveItem(event)"
               title="${item.name}"
-              onclick='if (this.contentEditable !== "true") {setTimeout(api.setOpenFolders, 100);} else {event.preventDefault();console.log("hello?")}'
+              onclick='if (this.contentEditable !== "true") {setTimeout(api.setOpenFolders, 100);} else {event.preventDefault();}'
               ondblclick='api.startRename(this)'
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
             >${item.name}</summary>

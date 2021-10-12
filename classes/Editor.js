@@ -3,25 +3,10 @@ const EasyMDE = require('easymde');
 const path = require('path');
 const fs = require('fs');
 
-const placeholders = [
-  'It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair, we had everything before us, we had nothing before us, we were all going to Heaven, we were all going direct the other way. (A Tale of Two Cities)',
-  'It was a dark and stormy night. (A Wrinkle in Time)',
-  'Call me Ishmael. (Moby Dick)',
-  'It was a pleasure to burn. (Fahrenheit 451)',
-  'It is a truth universally acknowledged that a single man in possession of a good fortune must be in want of a wife. (Pride and Prejudice)',
-  'In a hole in the ground there lived a hobbit. (The Hobbit)',
-  'Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small, unregarded yellow sun. (The Hitchhiker\'s Guide to the Galaxy)',
-  'It was a bright cold day in April, and the clocks were striking thirteen. (1984)',
-  'All children, except one, grow up. (Peter Pan)',
-  'There was a boy called Eustace Clarence Scrubb, and he almost deserved it. (Voyage of the Dawn Treader)',
-  'The drought had lasted now for ten million years, and the reign of the terrible lizards had long since ended. (2001: A Space Odyssey)',
-  'When he was nearly thirteen, my brother Jem got his arm badly broken at the elbow. (To Kill a Mockingbird)',
-  'There was no possibility of taking a walk that day. (Jane Eyre)',
-  'First the colors. Then the humans. (The Book Thief)',
-  '“Where’s Papa going with that ax?” (Charlotte\'s Web)',
-  'The thousand injuries of Fortunato I had borne as I best could, but when he ventured upon insult I vowed revenge. (The Cask of Amontillado)',
-  'Happy families are all alike; every unhappy family is unhappy in its own way. (Anna Karenina)',
-];
+// Quick versions of document.querySelector and document.querySelectorAll
+const { q, qA } = require('../modules/queries.js');
+
+const placeholders = fs.readFileSync('./assets/placeholders.txt', {encoding:'utf8', flag:'r'}).split('\n');
 // Define what separates a word
 const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
 _toggleFullScreen = EasyMDE.toggleFullScreen;
@@ -44,11 +29,10 @@ toggleFullScreen = (e) => {
 }
 
 module.exports = (api, projectPath) => {
+  const wasReadOnly = false;
   let togglePreview = null;
   class Editor {
     constructor(element, readOnly = false, extraOptions = {}) {
-      this.readOnly = readOnly;
-
       this.options = {
         element,
         spellChecker: false,
@@ -106,15 +90,20 @@ module.exports = (api, projectPath) => {
       });
 
       togglePreview = this.instance.toolbar.find(t => t.name === 'preview').action;
-      if (readOnly && !this.instance.isPreviewActive()) setTimeout(() => {togglePreview(this.instance)}, 0);
 
       api.emit('editorConstruct');
     }
 
     open(filePath) {
-      this.randomizePlaceholder();
+      const newPath = path.resolve(path.dirname(api.projectPath), filePath);
+      if (newPath !== this.currentPath) this.randomizePlaceholder();
       this.opening = true;
-      this.currentPath = path.resolve(path.dirname(api.projectPath), filePath);
+      if (api.readOnly && !this.instance.isPreviewActive()) {
+        setTimeout(() => {togglePreview(this.instance)}, 0);
+      } else if (!api.readOnly && this.instance.isPreviewActive()) {
+        setTimeout(() => {togglePreview(this.instance)}, 0);
+      }
+      this.currentPath = newPath;
       const result = this.value(
         fs.readFileSync(
           this.currentPath,
