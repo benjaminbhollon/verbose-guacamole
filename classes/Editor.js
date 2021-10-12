@@ -96,7 +96,7 @@ module.exports = (api, projectPath) => {
 
     open(filePath) {
       const newPath = path.resolve(path.dirname(api.projectPath), filePath);
-      
+
       if (newPath !== this.currentPath) this.randomizePlaceholder();
 
       this.opening = true;
@@ -117,7 +117,7 @@ module.exports = (api, projectPath) => {
             flag:'r'
           }
         )
-      )
+      );
 
       api.emit('fileOpen', filePath);
 

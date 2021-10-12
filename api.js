@@ -73,6 +73,21 @@ if (inEditor) {
     dictionary,
     git
   });
+  addAPIMethods('editorFiletree', {
+    project,
+    editors,
+    dictionary,
+    git
+  });
+  addAPIMethods('editorSprints');
+  addAPIMethods('editorGoals', {
+    project
+  });
+  addAPIMethods('editorGit', {
+    project,
+    editors,
+    git
+  });
 
   project.index.push(
     {
