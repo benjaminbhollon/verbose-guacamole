@@ -211,6 +211,20 @@ module.exports = (api, paths, extra) => {
       return goal;
     });
 
+    // Add to recent projects
+    let recentProjects = localStorage.recentProjects ? JSON.parse(localStorage.recentProjects) : [];
+    recentProjects.push({
+      title: project.metadata.title,
+      author: project.metadata.author,
+      path: api.projectPath
+    });
+
+    localStorage.recentProjects = JSON.stringify(
+      [...new Set(
+        recentProjects.map(JSON.stringify)
+      )].map(JSON.parse).slice(0, 5)
+    );
+
     api.populateFiletree();
     api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, 0);
     api.updateLabelCSS();

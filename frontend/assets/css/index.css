@@ -57,6 +57,25 @@ footer a {
   display: inline-block;
 }
 
+#manageProjects h3 {
+}
+
+#projects__recent {
+  font-size: 1rem;
+}
+
+.recentProject {
+  margin: 0;
+  padding: 0.5em;
+  cursor: pointer;
+  border: 0 solid #000;
+  border-width: 1px 0;
+}
+
+.recentProject:hover {
+  background-color: #ccc4;
+}
+
 /* Releases */
 #releases {
   margin: 0;
