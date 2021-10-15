@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { ipcRenderer } = require('electron');
 const removeMd = require('remove-markdown');
+const marked = require('marked');
 
 // Quick versions of document.querySelector and document.querySelectorAll
 const { q, qA } = require('../../modules/queries.js');
@@ -20,7 +21,7 @@ module.exports = (api, paths, extra) => {
   // You MAY add parameters.
   async function returnFunction(format) {
     const supportedFormats = [
-      //'epub',
+      'epub',
       'nanowrimo obfuscated',
       'markdown',
       'plain text'
@@ -50,7 +51,46 @@ module.exports = (api, paths, extra) => {
 
     switch (format.toLowerCase()) {
       case "epub":
+        result = api.flatten(project.index)
+          .filter(f => f.children === undefined)
+          .map(file => fs.readFileSync(
+            path.resolve(path.dirname(api.projectPath), file.path),
+            {
+              encoding:'utf8',
+              flag:'r'
+            }
+          ))
+          .filter(content => content.length)
+          .join('&&&&&&NEWSCENE&&&&&&')
+          .split('&&&&&&NEWSCENE&&&&&&#')
+          .map(content => ({
+            data: marked(
+              content
+                .split('\n')
+                .slice(1)
+                .join('\n')
+                .trim()
+                .split('&&&&&&NEWSCENE&&&&&&')
+                .join('\n\n---\n\n')
+            ),
+            title: removeMd(
+              content
+                .split('\n')[0]
+            ),
+          }));
 
+        const Epub = require("epub-gen");
+
+        new Epub({
+          title: project.metadata.title,
+          author: project.metadata.author,
+          content: result
+        }, exportPath).promise.then(
+          () => true,
+          err => {
+            alert("Failed to generate EPUB:\n\n" + err);
+          }
+        );
         break;
       case 'markdown':
         result = api.flatten(project.index)

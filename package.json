@@ -30,6 +30,7 @@
   "dependencies": {
     "easymde": "^2.15.0",
     "electron-squirrel-startup": "^1.0.0",
+    "epub-gen": "^0.1.0",
     "marked": "^2.1.3",
     "remove-markdown": "^0.3.0",
     "rss-parser": "^3.12.0",
