@@ -255,6 +255,14 @@ textarea {
   display: none!important;
 }
 
+[data-readonly='true'] #editor .editor-toolbar {
+  display: none;
+}
+
+[data-readonly='true'] #editor .CodeMirror {
+  top: 0;
+}
+
 #git__commits > span .preview {
   color: var(--color);
   display: none;

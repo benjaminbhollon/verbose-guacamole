@@ -103,7 +103,4 @@ dist
 # TernJS port file
 .tern-port
 
-# Compiled docs
-docs/_build/
-
 out/

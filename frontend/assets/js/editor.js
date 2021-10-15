@@ -1,6 +1,3 @@
-// Get path parameters
-const params = location.search.slice(1);
-
 // Quick versions of document.querySelector and document.querySelectorAll
 const q = s => document.querySelector(s);
 const qA = s => document.querySelectorAll(s);
@@ -131,7 +128,7 @@ function moveItem(event, index, main = false) {
 
 /* Modals */
 function updateProjectDetails() {
-  api.updateDetails({
+  api.updateProjectDetails({
     title: document.getElementById('projectDetails__title').value,
     author: document.getElementById('projectDetails__author').value,
     synopsis: document.getElementById('projectDetails__synopsis').value,
@@ -202,8 +199,8 @@ function resetSprint() {
 }
 
 /* Labels */
-function createLabel() {
-  return api.createLabel(q('#createLabel__name').value, q('#createLabel__color').value, q('#createLabel__description').value);
+function addLabel() {
+  return api.addLabel(q('#addLabel__name').value, q('#addLabel__color').value, q('#addLabel__description').value);
 }
 
 /* Tabs */
@@ -227,4 +224,4 @@ function togglePanel(panelId, tabId) {
   localStorage.panelState = JSON.stringify(panelState);
 }
 
-api.init(params);
+api.init();
