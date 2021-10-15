@@ -1,9 +1,0 @@
-site_name: Verbose Guacamole
-repo_url: https://github.com/benjaminbhollon/verbose-guacamole
-copyright: Verbose Guacamole is licensed under GPL-3.0
-theme:
-  name: readthedocs
-markdown_extensions:
-    - toc:
-        permalink: "#"
-edit_uri: edit/develop/docs/
