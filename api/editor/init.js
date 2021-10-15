@@ -144,7 +144,7 @@ module.exports = (api, paths, extra) => {
         });
       api.startingWords = api.wordCountTotal();
 
-      // Open folders
+      // Setup localStorage open files and folders
       if (!localStorage.projects) localStorage.projects = JSON.stringify({});
       projectsStorage = JSON.parse(localStorage.projects);
       if (!projectsStorage[api.projectPath]) projectsStorage[api.projectPath] = {};
@@ -157,6 +157,8 @@ module.exports = (api, paths, extra) => {
         if (!editor.openFolders) editor.openFolders = [];
 
         if (!editor.openFile) editor.openFile = api.idFromPath(api.currentFile.path);
+        else api.currentFile = api.flatten(project.index)
+          .find(f => api.idFromPath(f.path) === editor.openFile);
       }
 
       projectsStorage[api.projectPath].editors = editorsStorage;

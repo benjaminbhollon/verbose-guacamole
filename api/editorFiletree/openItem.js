@@ -18,7 +18,13 @@ module.exports = (api, paths, extra) => {
     api.focusItem(id);
     const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === id);
     api.openFile(api.idFromPath(file.path), file.name, editorIndex);
-    project.openFile = id;
+
+
+    const projectsStorage = JSON.parse(localStorage.projects)
+    const editorsStorage = projectsStorage[api.projectPath].editors;
+    editorsStorage[0].openFile = id;
+    localStorage.projects = JSON.stringify(projectsStorage);
+
     api.saveProject();
     return document.getElementById(id);
   }
