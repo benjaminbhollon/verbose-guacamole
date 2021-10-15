@@ -88,6 +88,9 @@ if (inEditor) {
     editors,
     git
   });
+  addAPIMethods('editorExport', {
+    project
+  });
 
   project.index.push(
     {

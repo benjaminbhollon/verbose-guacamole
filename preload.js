@@ -108,6 +108,9 @@ if (inEditor) {
   ipcRenderer.on('updateProjectDetails', () => {
     api.showModal('projectDetails');
   });
+  ipcRenderer.on('exportAs', (event, format) => {
+    api.exportAs(format);
+  });
 }
 
 setTimeout(() => {

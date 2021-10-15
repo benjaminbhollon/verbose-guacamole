@@ -88,6 +88,10 @@ function openProject() {
     }
   });
 }
+// Export project
+function exportAs(format) {
+  win.webContents.send('exportAs', format);
+}
 
 /* Application menu */
 let menus = {};
@@ -121,6 +125,44 @@ function updateMenus() {
             click() {
               newProject();
             }
+          },
+          {
+            type: 'separator'
+          },
+          {
+            label: 'Export as...',
+            submenu: [
+              {
+                label: 'EPUB',
+                click() {
+                  exportAs('EPUB');
+                }
+              },
+              {
+                label: 'Markdown',
+                click() {
+                  exportAs('Markdown');
+                }
+              },
+              {
+                label: 'Plain Text',
+                click() {
+                  exportAs('Plain Text');
+                }
+              },
+              {
+                label: 'NaNoWriMo Obfuscated',
+                click() {
+                  exportAs('NaNoWriMo Obfuscated');
+                }
+              },
+              {
+                label: 'More...',
+                click() {
+                  shell.openExternal('https://docs.verboseguacamole.com/en/latest/tutorials/export/')
+                }
+              },
+            ]
           },
           {
             type: 'separator'
@@ -335,6 +377,36 @@ ipcMain.on('closed', (event) => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+ipcMain.on('askForExportPath', (event, format, fileName) => {
+  const formatInfo = {
+    epub: {
+      name: 'EPUB ebook',
+      extensions: ['epub']
+    },
+    'markdown': {
+      name: 'Markdown',
+      extensions: ['md']
+    },
+    'plain text': {
+      name: 'Plain Text',
+      extensions: ['txt']
+    },
+    'nanowrimo obfuscated': {
+      name: 'NaNoWriMo Obfuscated',
+      extensions: ['txt']
+    },
+  };
+  dialog.showSaveDialog({
+    title: 'Export VerbGuac Project',
+    defaultPath: path.resolve(app.getPath('documents'), fileName + '.' + formatInfo[format.toLowerCase()].extensions[0]),
+    filters: {
+      name: formatInfo[format.toLowerCase()].name,
+      extensions: formatInfo[format.toLowerCase()].extensions
+    }
+  }).then(result => {
+    event.reply('askForExportPath', result.canceled ? false : result.filePath);
+  });
 });
 
 // Make appData directory
