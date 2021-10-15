@@ -6,3 +6,4 @@ theme:
 markdown_extensions:
     - toc:
         permalink: "#"
+edit_uri: edit/develop/docs/

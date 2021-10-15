@@ -144,17 +144,25 @@ module.exports = (api, paths, extra) => {
         });
       api.startingWords = api.wordCountTotal();
 
+      // Open folders
+      if (!localStorage.projects) localStorage.projects = JSON.stringify({});
+      projectsStorage = JSON.parse(localStorage.projects);
+      if (!projectsStorage[api.projectPath]) projectsStorage[api.projectPath] = {};
+
+      const editorsStorage = projectsStorage[api.projectPath].editors ? projectsStorage[api.projectPath].editors : [
+        {}
+      ];
+
+      for (const editor of editorsStorage) {
+        if (!editor.openFolders) editor.openFolders = [];
+
+        if (!editor.openFile) editor.openFile = api.idFromPath(api.currentFile.path);
+      }
+
+      projectsStorage[api.projectPath].editors = editorsStorage;
+      localStorage.projects = JSON.stringify(projectsStorage);
+
       /* Compatibility */
-
-      // with v0.1.0
-      if (typeof project.openFolders === 'undefined') project.openFolders = [];
-
-      // with <v0.1.2
-      if (typeof project.openFile === 'undefined') project.openFile = api.idFromPath(api.currentFile.path);
-
-      const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
-      if (typeof foundCurrent !== 'undefined') api.currentFile = foundCurrent;
-
       // with <v0.2.1
       if (typeof project.metadata.title !== 'string')
         project.metadata.title = project.metadata.title.final;
@@ -166,6 +174,10 @@ module.exports = (api, paths, extra) => {
 
       // with <v0.3.3
       if (typeof project.labels === 'undefined') project.labels = [];
+
+      // with <v0.3.5
+      if (typeof project.openFolders !== 'undefined') delete project.openFolders;
+      if (typeof project.openFile !== 'undefined') delete project.openFile;
     }
 
     // Lock project

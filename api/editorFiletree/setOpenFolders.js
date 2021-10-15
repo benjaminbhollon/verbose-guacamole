@@ -24,9 +24,11 @@ module.exports = (api, paths, extra) => {
       };
     });
 
-    project.openFolders = [...folders];
+    const projectsStorage = JSON.parse(localStorage.projects)
+    const editorsStorage = projectsStorage[api.projectPath].editors;
+    editorsStorage[0].openFolders = [...folders];
 
-    api.saveProject();
+    localStorage.projects = JSON.stringify(projectsStorage);
   }
 
   return returnFunction;

@@ -15,7 +15,9 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction() {
-    const toOpen = project.openFolders;
+    const toOpen = JSON.parse(localStorage.projects)[api.projectPath]
+      .editors[0]
+      .openFolders;
     for (const folder of toOpen) {
       try {
         document.getElementById(folder.id).open = folder.open;
