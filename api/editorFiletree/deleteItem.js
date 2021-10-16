@@ -40,7 +40,13 @@ module.exports = (api, paths, extra) => {
 
     file.delete = true;
 
+    // Remove files marked for deletion
     project.index = project.index.filter(i => !i.delete);
+    api.flatten(project.index)
+      .filter(f => f.children)
+      .forEach(f => {
+        f.children = f.children.filter(f => f.delete !== true);
+      });
 
     (item.tagName === 'SPAN' ? item : item.parentNode).remove();
 
@@ -50,7 +56,7 @@ module.exports = (api, paths, extra) => {
         if (api.flatten(project.index).filter(i => typeof i.children === 'undefined').length) {
           api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
           document.getElementById(api.idFromPath(api.currentFile.path)).click();
-          api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, true);
+          api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, 0);
         } else {
           api.createItem('file', true);
         }

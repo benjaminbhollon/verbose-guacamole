@@ -133,6 +133,14 @@ module.exports = (api, paths, extra) => {
       }
       api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
 
+      // Remove files marked for deletion
+      project.index = project.index.filter(i => !i.delete);
+      api.flatten(project.index)
+        .filter(f => f.children)
+        .forEach(f => {
+          f.children = f.children.filter(f => f.delete !== true);
+        });
+        
       // Calculate word counts
       api.flatten(project.index)
         .filter(i => typeof i.children === 'undefined')
