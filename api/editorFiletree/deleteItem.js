@@ -50,19 +50,17 @@ module.exports = (api, paths, extra) => {
 
     (item.tagName === 'SPAN' ? item : item.parentNode).remove();
 
-    setTimeout(() => {
-      const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
-      if (typeof foundCurrent === 'undefined') {
-        if (api.flatten(project.index).filter(i => typeof i.children === 'undefined').length) {
-          api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
-          document.getElementById(api.idFromPath(api.currentFile.path)).click();
-          api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, 0);
-        } else {
-          api.createItem('file', true);
-        }
+    const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
+    if (typeof foundCurrent === 'undefined') {
+      if (api.flatten(project.index).filter(i => typeof i.children === 'undefined').length) {
+        api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
+        document.getElementById(api.idFromPath(api.currentFile.path)).click();
+        api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, 0);
+      } else {
+        api.createItem('file', true);
       }
-      api.saveProject();
-    }, 0);
+    }
+    api.saveProject();
   }
 
   return returnFunction;
