@@ -19,6 +19,17 @@ module.exports = (api, paths, extra) => {
     const target = t ? api.flatten(project.index).find(f => f.path === t) : {children: project.index};
     const currentlyDragging = api.flatten(project.index).find(f => f.path === c);
 
+    if (currentlyDragging.children) {
+      // Make sure not moving into self
+      if (currentlyDragging.path === target.path) return false;
+
+      // Make sure not moving into subfolder
+      const subfolders = api.flatten(currentlyDragging.children)
+        .filter(f => typeof f.children !== 'undefined');
+
+      if (subfolders.find(f => f.path === target.path)) return false;
+    }
+
     // Remove from parent
     parent.children.splice(parent.children.indexOf(currentlyDragging), 1);
 

@@ -39,7 +39,6 @@ function updatePageXY(event) {
 document.onmousemove = updatePageXY;
 
 function getDraggingIndex() {
-  console.log(false);
   let index = [...hoveringOver.parentNode.children].indexOf(hoveringOver) - 1;;
   const rect = hoveringOver.getBoundingClientRect();
 
