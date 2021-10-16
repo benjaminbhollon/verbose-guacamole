@@ -203,7 +203,7 @@
     </div>
     <div id="contextMenu" class="contextMenu">
       <span onclick="api.deleteItem()" id="deleteButton">Delete</span>
-      <span onclick="api.startRename(document.querySelector('.active'))" id="renameButton">Rename</span>
+      <span onclick="api.startRename(document.querySelector('.active').classList.contains('filename') ? document.querySelector('.active') : document.querySelector('.active').querySelector('.filename'))" id="renameButton">Rename</span>
       <hr>
       <span onclick="api.createItem('file')">Create File</span>
       <span onclick="api.createItem('folder')">Create Folder</span>
