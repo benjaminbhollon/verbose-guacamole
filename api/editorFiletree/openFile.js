@@ -1,4 +1,6 @@
 // Require any modules here.
+const fs = require('fs');
+const path = require('path');
 
 // Quick versions of document.querySelector and document.querySelectorAll
 const { q, qA } = require('../../modules/queries.js');
@@ -24,6 +26,19 @@ module.exports = (api, paths, extra) => {
     if (file === undefined) return false;
 
     q('#novelStats__open').innerText = n;
+
+    // Calculate word counts
+    api.flatten(project.index)
+      .filter(i => typeof i.children === 'undefined')
+      .forEach(file => {
+        file.words = api.wordCount(fs.readFileSync(path.resolve(path.dirname(api.projectPath), file.path), {
+          encoding:'utf8',
+          flag:'r'
+        }));
+      });
+
+    // Set currentFile
+    api.currentFile = file;
 
     return editors[editorIndex].open(file.path);
   }

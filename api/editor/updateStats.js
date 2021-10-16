@@ -38,6 +38,7 @@ module.exports = (api, paths, extra) => {
 
     // Update novel stats
     document.getElementById('novelStats__open').innerText = api.currentFile.name;
+    
     let totalWords = api.wordCountTotal();
     project.history.wordCount[(new Date()).toISOString().split('T')[0]] = api.wordCountTotal();
 

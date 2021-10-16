@@ -157,9 +157,13 @@ module.exports = (api, paths, extra) => {
         if (!editor.openFolders) editor.openFolders = [];
 
         if (!editor.openFile) editor.openFile = api.idFromPath(api.currentFile.path);
-        else api.currentFile = api.flatten(project.index)
-          .find(f => api.idFromPath(f.path) === editor.openFile);
+        else {
+          api.currentFile = api.flatten(project.index)
+            .find(f => api.idFromPath(f.path) === editor.openFile);
+        }
       }
+
+      if (!api.currentFile) api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
 
       projectsStorage[api.projectPath].editors = editorsStorage;
       localStorage.projects = JSON.stringify(projectsStorage);
