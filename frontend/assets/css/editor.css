@@ -127,7 +127,7 @@ body.git-closed {
   color: var(--color);
 }
 
-#fileTree #fileTree__list .file.editing,
+#fileTree #fileTree__list .file.editing .filename,
 #fileTree #fileTree__list summary[contenteditable="true"] {
   text-overflow: initial;
   background-color: var(--background-color);
@@ -136,6 +136,10 @@ body.git-closed {
   user-select: text;
   cursor: initial;
   padding: 0;
+}
+
+#fileTree #fileTree__list summary[contenteditable="true"] {
+  list-style: none;
 }
 
 .filename {
