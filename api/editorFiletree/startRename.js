@@ -7,8 +7,9 @@ const { q, qA } = require('../../modules/queries.js');
 // If you don't need the paths object, you do not need to include it.
 // DO NOT add more parameters to this function.
 // Note that URIs inside either of these functions are relative to api.js, not this file.
-module.exports = (api, paths) => {
+module.exports = (api, paths, extra) => {
   // You can put variables your code needs to access between runs here.
+  const project = extra.project;
 
   //This is the final function that will become part of the API.
   // You MAY make it async.
@@ -27,7 +28,7 @@ module.exports = (api, paths) => {
         e.blur();
       }
       if (event.key === 'Escape') {
-        const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (e.id || e.parentNode.id));
+        const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === e.parentNode.id);
         e.innerText = file.name;
         e.blur();
       }
