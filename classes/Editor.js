@@ -6,7 +6,10 @@ const fs = require('fs');
 // Quick versions of document.querySelector and document.querySelectorAll
 const { q, qA } = require('../modules/queries.js');
 
-const placeholders = fs.readFileSync('./assets/placeholders.txt', {encoding:'utf8', flag:'r'}).split('\n');
+const placeholders = fs.readFileSync(
+  './assets/placeholders.txt',
+  {encoding:'utf8', flag:'r'}
+).split('\n').filter(p => p.length);
 // Define what separates a word
 const rx_word = "!\"“”#$%&()*+,-–—./:;<=>?@[\\]^_`{|}~ ";
 _toggleFullScreen = EasyMDE.toggleFullScreen;
