@@ -15,6 +15,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(e) {
+
     e.contentEditable = true;
     if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
     e.focus();

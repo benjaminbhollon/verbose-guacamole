@@ -67,11 +67,14 @@ module.exports = (api, paths, extra) => {
     api.saveProject();
 
     api.populateFiletree();
-    
+
     if (type === 'file') {
       api.openFile(api.idFromPath(filePath), 0);
-      api.focusItem(api.idFromPath(filePath));
-      if (!first) api.startRename(document.getElementById(api.idFromPath(filePath) + '__filename'));
+
+      setTimeout(() => {
+        api.focusItem(api.idFromPath(filePath));
+        if (!first) api.startRename(document.getElementById(api.idFromPath(filePath) + '__filename'));
+      }, 0);
     } else {
       document.getElementById(api.idFromPath(filePath)).click();
       document.getElementById(api.idFromPath(filePath)).open = true;
