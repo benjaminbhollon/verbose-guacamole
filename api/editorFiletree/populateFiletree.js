@@ -35,8 +35,9 @@ module.exports = (api, paths, extra) => {
               ondragend="stopMoveItem(event)"
               title="${item.name}"
               onclick='if (this.contentEditable !== "true") {setTimeout(api.setOpenFolders, 100);} else {event.preventDefault();}'
-              ondblclick='api.startRename(this)'
+              ondblclick="api.startRename('${api.idFromPath(item.path)}')"
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
+              onkeypress="folderKey(event)"
             >${item.name}</summary>
           </details>`;
           const itemClone = {...item};
@@ -54,13 +55,15 @@ module.exports = (api, paths, extra) => {
             ondragend="stopMoveItem(event)"
             ondragover="setHovering(this)"
             ondrag="updatePageXY(event)"
+            tabindex="0"
+            onkeypress="fileKey(event)"
           >
             <span
               id="${api.idFromPath(item.path)}__filename"
               class="filename"
               title="${item.name}"
               onclick='event.preventDefault();api.openItem(this.parentNode.id)'
-              ondblclick='api.startRename(this)'
+              ondblclick="api.startRename('${api.idFromPath(item.path)}')"
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
             >
               ${item.name}

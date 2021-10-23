@@ -224,4 +224,44 @@ function togglePanel(panelId, tabId) {
   localStorage.panelState = JSON.stringify(panelState);
 }
 
+/* Handle Keypresses */
+// Filetree
+function fileKey(event) {
+  switch (event.key) {
+    case 'Delete':
+      event.preventDefault();
+      api.deleteItem(event.currentTarget.id);
+      break;
+    case 'Space':
+    case 'Enter':
+      event.preventDefault();
+      api.focusItem(event.currentTarget.id);
+      api.openFile(event.currentTarget.id);
+      break;
+      break;
+    default:
+      const alphanumeric = "abcdefghijklmnopqrstuvwxyz0123456789";
+      if (alphanumeric.indexOf(event.key.toLowerCase()) >= 0 && !event.currentTarget.classList.contains('editing')) {
+        api.startRename(event.currentTarget.id);
+        event.stopPropagation();
+      }
+      break;
+  }
+}
+function folderKey(event) {
+  switch (event.key) {
+    case 'Delete':
+      event.preventDefault();
+      api.deleteItem(event.currentTarget.id);
+      break;
+    default:
+      const alphanumeric = "abcdefghijklmnopqrstuvwxyz0123456789";
+      if (alphanumeric.indexOf(event.key.toLowerCase()) >= 0 && !event.currentTarget.classList.contains('editing')) {
+        api.startRename(event.currentTarget.id);
+        event.stopPropagation();
+      }
+      break;
+  }
+}
+
 api.init();

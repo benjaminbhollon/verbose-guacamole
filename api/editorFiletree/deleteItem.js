@@ -16,8 +16,8 @@ module.exports = (api, paths, extra) => {
   //This is the final function that will become part of the API.
   // You MAY make it async.
   // You MAY add parameters.
-  function returnFunction() {
-    let item = q('#fileTree .active');
+  function returnFunction(id) {
+    let item = document.getElementById(id);
     if (!confirm(`Do you really want to delete this ${item.tagName === 'SPAN' ? 'file' : 'folder and everything in it'}? There is no undo.`)) return;
 
     let file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (item.tagName === 'SPAN' ? item.id : item.parentNode.id));

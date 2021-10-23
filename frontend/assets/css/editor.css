@@ -182,6 +182,10 @@ body.git-closed {
   color: var(--color);
 }
 
+#fileTree .folder:focus, #fileTree .file:not(.active):focus {
+  background-color: silver;
+}
+
 /* Git */
 #git {
   overflow-x: hidden;

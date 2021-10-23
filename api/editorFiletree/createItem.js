@@ -73,12 +73,12 @@ module.exports = (api, paths, extra) => {
 
       setTimeout(() => {
         api.focusItem(api.idFromPath(filePath));
-        if (!first) api.startRename(document.getElementById(api.idFromPath(filePath) + '__filename'));
+        if (!first) api.startRename(api.idFromPath(filePath));
       }, 0);
     } else {
       setTimeout(() => {
         document.getElementById(api.idFromPath(filePath)).open = true;
-        api.startRename(document.getElementById(api.idFromPath(filePath)).querySelector('summary'));
+        api.startRename(api.idFromPath(filePath));
       }, 0);
     }
   }

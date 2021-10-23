@@ -14,7 +14,13 @@ module.exports = (api, paths, extra) => {
   //This is the final function that will become part of the API.
   // You MAY make it async.
   // You MAY add parameters.
-  function returnFunction(e) {
+  function returnFunction(id) {
+    console.log(id);
+    const e = document.getElementById(id).querySelector(
+      document.getElementById(id).classList.contains('file') ?
+      '.filename' :
+      'summary'
+    );
 
     e.contentEditable = true;
     if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
