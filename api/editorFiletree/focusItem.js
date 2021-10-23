@@ -14,7 +14,6 @@ module.exports = (api, paths) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(id) {
-    console.log(id, document.getElementById(id));
     const element = document.getElementById(id).tagName === 'SPAN' ?
       document.getElementById(id) :
       document.getElementById(id).querySelector('summary');

@@ -76,8 +76,10 @@ module.exports = (api, paths, extra) => {
         if (!first) api.startRename(document.getElementById(api.idFromPath(filePath) + '__filename'));
       }, 0);
     } else {
-      document.getElementById(api.idFromPath(filePath)).click();
-      document.getElementById(api.idFromPath(filePath)).open = true;
+      setTimeout(() => {
+        document.getElementById(api.idFromPath(filePath)).open = true;
+        api.startRename(document.getElementById(api.idFromPath(filePath)).querySelector('summary'));
+      }, 0);
     }
   }
 
