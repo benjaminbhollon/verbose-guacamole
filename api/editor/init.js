@@ -33,16 +33,6 @@ module.exports = (api, paths, extra) => {
       api.customDictionary = [];
     }
 
-    // Create project directory if necessary
-    if (api.params.new) {
-      if (!fs.existsSync(paths.novels)){
-        fs.mkdirSync(paths.novels);
-      }
-      if (!fs.existsSync(api.projectPath)){
-        fs.mkdirSync(api.projectPath);
-      }
-    }
-
     // Create editor
     editors.push(new Editor(q('#editorTextarea')));
 
@@ -59,9 +49,9 @@ module.exports = (api, paths, extra) => {
     if (api.params.new) {
       console.info('New project alert! Let me get that set up for you...');
       project.metadata = {
-        title: params['meta.title'],
-        author: params['meta.author'],
-        synopsis: params['meta.synopsis']
+        title: api.params['meta.title'],
+        author: api.params['meta.author'],
+        synopsis: api.params['meta.synopsis']
       }
       console.info('Creating project file...');
       api.projectPath = path.resolve(api.projectPath, 'project.vgp');
@@ -109,7 +99,7 @@ module.exports = (api, paths, extra) => {
 
       console.info('Done! Changing URL to avoid refresh-slipups.');
       history.replaceState(null, null, './editor.html?f=' + api.projectPath);
-      startingWords = 0;
+      api.startingWords = 0;
 
       fs.writeFileSync(path.resolve(path.dirname(api.projectPath), '.gitignore'), '.lock');
     } else {
@@ -140,7 +130,7 @@ module.exports = (api, paths, extra) => {
         .forEach(f => {
           f.children = f.children.filter(f => f.delete !== true);
         });
-        
+
       // Calculate word counts
       api.flatten(project.index)
         .filter(i => typeof i.children === 'undefined')
@@ -152,29 +142,33 @@ module.exports = (api, paths, extra) => {
         });
       api.startingWords = api.wordCountTotal();
 
-      // Setup localStorage open files and folders
-      if (!localStorage.projects) localStorage.projects = JSON.stringify({});
-      projectsStorage = JSON.parse(localStorage.projects);
-      if (!projectsStorage[api.projectPath]) projectsStorage[api.projectPath] = {};
+      try {
+        // Setup localStorage open files and folders
+        if (!localStorage.projects) localStorage.projects = JSON.stringify({});
+        projectsStorage = JSON.parse(localStorage.projects);
+        if (!projectsStorage[api.projectPath]) projectsStorage[api.projectPath] = {};
 
-      const editorsStorage = projectsStorage[api.projectPath].editors ? projectsStorage[api.projectPath].editors : [
-        {}
-      ];
+        const editorsStorage = projectsStorage[api.projectPath].editors ? projectsStorage[api.projectPath].editors : [
+          {}
+        ];
 
-      for (const editor of editorsStorage) {
-        if (!editor.openFolders) editor.openFolders = [];
+        for (const editor of editorsStorage) {
+          if (!editor.openFolders) editor.openFolders = [];
 
-        if (!editor.openFile) editor.openFile = api.idFromPath(api.currentFile.path);
-        else {
-          api.currentFile = api.flatten(project.index)
-            .find(f => api.idFromPath(f.path) === editor.openFile);
+          if (!editor.openFile) editor.openFile = api.idFromPath(api.currentFile.path);
+          else {
+            api.currentFile = api.flatten(project.index)
+              .find(f => api.idFromPath(f.path) === editor.openFile);
+          }
         }
+
+        if (!api.currentFile) api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
+
+        projectsStorage[api.projectPath].editors = editorsStorage;
+        localStorage.projects = JSON.stringify(projectsStorage);
+      } catch(err) {
+        console.warn(err);
       }
-
-      if (!api.currentFile) api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
-
-      projectsStorage[api.projectPath].editors = editorsStorage;
-      localStorage.projects = JSON.stringify(projectsStorage);
 
       /* Compatibility */
       // with <v0.2.1

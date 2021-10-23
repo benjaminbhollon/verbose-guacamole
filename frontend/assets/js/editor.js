@@ -54,11 +54,13 @@ function setHovering(element) {
 }
 
 // Shows the context menu
+let focused = null;
 function showContextMenu(event) {
   event.stopPropagation();
   contextMenu.style.top = event.clientY + 'px';
   contextMenu.style.left = event.clientX + 'px';
 
+  focused = document.activeElement;
   if (!contextMenu.classList.contains('visible')) contextMenu.classList.toggle('visible');
 }
 

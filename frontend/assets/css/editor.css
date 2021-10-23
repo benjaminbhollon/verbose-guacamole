@@ -356,7 +356,7 @@ textarea {
 
 /* Loading */
 
-#loading, #locked {
+#loading, #locked, #projectDeletedError {
   position: fixed;
   top: 0;
   left: 0;
@@ -366,7 +366,7 @@ textarea {
   z-index: 1000;
 }
 
-#loading p, #locked div {
+#loading p, #locked div, #projectDeletedError div {
   margin: 0;
   position: absolute;
   left: 50vw;
@@ -382,19 +382,19 @@ textarea {
   display: inline-block;
 }
 
-#locked {
+#locked, #projectDeletedError {
   display: none;
 }
 
-#locked div {
+#locked div, #projectDeletedError div {
   font-size: 1em;
 }
 
-#locked h2 {
+#locked h2, #projectDeletedError h2 {
   text-align: center;
 }
 
-body.locked #locked {
+body.locked #locked, #projectDeletedError.visible {
   display: block;
 }
 

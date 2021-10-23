@@ -57,9 +57,6 @@ footer a {
   display: inline-block;
 }
 
-#manageProjects h3 {
-}
-
 #projects__recent {
   font-size: 1rem;
 }
@@ -99,4 +96,20 @@ footer a {
   max-width: 300px;
   display: inline-block;
   margin-top: 0;
+}
+
+#news__list {
+  font-size: 1rem;
+}
+
+#news__list > div {
+  margin: 0;
+  padding: 0.5em;
+  cursor: pointer;
+  border: 0 solid #000;
+  border-width: 1px 0;
+}
+
+.news__list > div:hover {
+  background-color: #ccc4;
 }

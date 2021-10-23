@@ -36,7 +36,7 @@ module.exports = (api, paths, extra) => {
               title="${item.name}"
               onclick='if (this.contentEditable !== "true") {setTimeout(api.setOpenFolders, 100);} else {event.preventDefault();}'
               ondblclick="api.startRename('${api.idFromPath(item.path)}')"
-              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
+              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();this.focus());"
               onkeypress="folderKey(event)"
             >${item.name}</summary>
           </details>`;
@@ -64,7 +64,7 @@ module.exports = (api, paths, extra) => {
               title="${item.name}"
               onclick='event.preventDefault();api.openItem(this.parentNode.id)'
               ondblclick="api.startRename('${api.idFromPath(item.path)}')"
-              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();api.focusItem(this.parentNode.id);"
+              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();this.parentNode.focus();"
             >
               ${item.name}
             </span>
