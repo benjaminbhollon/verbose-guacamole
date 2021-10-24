@@ -16,23 +16,24 @@ module.exports = (api, paths, extra) => {
   //This is the final function that will become part of the API.
   // You MAY make it async.
   // You MAY add parameters.
-  function returnFunction(type, first = false) {
-    let folder = q('#fileTree .active');
-    let parent = null;
-    if (first) {
-      parent = project.index;
-    } else if (folder && folder.tagName !== 'DETAILS' && folder.parentNode.tagName === 'DETAILS') {
-      folder = folder.parentNode;
-      folder.open = true;
-      api.setOpenFolders();
-    } else if (folder === null || folder.tagName !== 'DETAILS') {
-      parent = project.index;
+  function returnFunction(type, parentId = false, index = false, first = false) {
+    const parent = parentId ?
+      api.flatten(project.index)
+        .find(f =>
+          api.idFromPath(f.path) === parentId &&
+          typeof f.children !== 'undefined'
+        )
+        .children :
+      project.index;
+
+    if (!parent) {
+      console.error(`Could not find folder with ID "${parentId}"`);
+      return false;
     }
 
-    if (parent === null) {
-      var parentFile = api.flatten(project.index).find(i => api.idFromPath(i.path) === folder.id);
-      parent = parentFile.children;
-    }
+    const folderObject = parentId ?
+      undefined :
+      document.getElementById(parentId);
 
     const filePath = './content/' + api.fileName();
 
@@ -52,17 +53,33 @@ module.exports = (api, paths, extra) => {
         words: 0
       };
 
-      if (first) {
+      if (typeof index === "number") {
+        parent.splice(index, 0, newItem);
+      } else {
+        parent.push(newItem);
+      }
+    } else if (type === 'folder') {
+      const newItem = {
+        name: 'Untitled Folder',
+        path: filePath,
+        children: []
+      };
+
+      if (typeof index === "number") {
+        parent.splice(index, 0, newItem);
+      } else if (parentId) {
         parent.splice(0, 0, newItem);
       } else {
         parent.push(newItem);
       }
     }
-    else if (type === 'folder') parent.push({
-      name: 'Untitled Folder',
-      path: filePath,
-      children: []
-    });
+
+    if (parentId) {
+      console.log(parentId, document.getElementById(parentId));
+      document.getElementById(parentId).open = true;
+    }
+
+    api.setOpenFolders();
 
     api.saveProject();
 
@@ -74,12 +91,12 @@ module.exports = (api, paths, extra) => {
       setTimeout(() => {
         api.focusItem(api.idFromPath(filePath));
         if (!first) api.startRename(api.idFromPath(filePath));
-      }, 0);
+      }, 100);
     } else {
       setTimeout(() => {
         document.getElementById(api.idFromPath(filePath)).open = true;
         api.startRename(api.idFromPath(filePath));
-      }, 0);
+      }, 100);
     }
   }
 

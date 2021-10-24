@@ -128,6 +128,33 @@ function moveItem(event, index, main = false) {
   api.moveItem(parent, target, currentlyDragging, index, order, main);
 }
 
+/* Creating */
+function createItem(type) {
+  if (focused.classList.contains('folder') && focused.classList.contains('file')) {
+    console.error('Could not create ' + type + ': The focused element is not a file or a folder.');
+    return false;
+  }
+
+  const focusedType = focused.tagName === 'SUMMARY' ? 'folder' : 'file';
+  const id = focusedType === 'folder' ?
+    focused.parentNode.id :
+    focused.id;
+
+  let parentId = focusedType === 'folder' ?
+    id :
+    api.flatten(api.getProject().index)
+      .find(f =>
+        typeof f.children !== 'undefined' &&
+        f.children.find(c => api.idFromPath(c.path) === id)
+      );
+
+  if (typeof parentId !== 'string') parentId = typeof parentId === 'undefined' ?
+    false :
+    api.idFromPath(parentId.path);
+
+  api.createItem(type, parentId);
+}
+
 /* Modals */
 function updateProjectDetails() {
   api.updateProjectDetails({

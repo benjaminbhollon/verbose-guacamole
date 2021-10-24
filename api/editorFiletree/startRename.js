@@ -15,12 +15,16 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(id) {
-    console.log(id);
-    const e = document.getElementById(id).querySelector(
+    const e = document.getElementById(id)?.querySelector(
       document.getElementById(id).classList.contains('file') ?
       '.filename' :
       'summary'
     );
+
+    if (typeof e === 'undefined') {
+      console.error(`Could not find an item with id "${id}".`);
+      return false;
+    }
 
     e.contentEditable = true;
     if (e.tagName === 'SPAN') e.parentNode.classList.add('editing');
