@@ -17,6 +17,10 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(type, parentId = false, index = false, rename = true) {
+    if (type !== 'file' && type !== 'folder') {
+      console.error(`You can create an item with type "${type}".`);
+    }
+
     const parent = parentId ?
       api.flatten(project.index)
         .find(f =>
@@ -75,7 +79,6 @@ module.exports = (api, paths, extra) => {
     }
 
     if (parentId) {
-      console.log(parentId, document.getElementById(parentId));
       document.getElementById(parentId).open = true;
     }
 

@@ -140,19 +140,26 @@ function createItem(type) {
     focused.parentNode.id :
     focused.id;
 
-  let parentId = focusedType === 'folder' ?
-    id :
+  let parent = focusedType === 'folder' ?
+    api.flatten(api.getProject().index)
+      .find(f => api.idFromPath(f.path) === id) :
     api.flatten(api.getProject().index)
       .find(f =>
         typeof f.children !== 'undefined' &&
         f.children.find(c => api.idFromPath(c.path) === id)
       );
 
-  if (typeof parentId !== 'string') parentId = typeof parentId === 'undefined' ?
+  const parentId = typeof parent === 'undefined' ?
     false :
-    api.idFromPath(parentId.path);
+    api.idFromPath(parent.path);
 
-  api.createItem(type, parentId);
+  const index = focusedType === 'folder' ?
+    false :
+    (parent ? parent.children : api.getProject().index).findIndex(f =>
+      api.idFromPath(f.path) === id
+    ) + 1;
+
+  api.createItem(type, parentId, index, true);
 }
 
 /* Modals */
