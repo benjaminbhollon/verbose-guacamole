@@ -36,7 +36,7 @@ module.exports = (api, paths, extra) => {
               title="${item.name}"
               onclick='if (this.contentEditable !== "true") {setTimeout(api.setOpenFolders, 100);} else {event.preventDefault();}'
               ondblclick="api.startRename('${api.idFromPath(item.path)}')"
-              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();this.focus());"
+              oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();this.focus();"
               onkeypress="folderKey(event)"
             >${item.name}</summary>
           </details>`;

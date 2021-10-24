@@ -209,8 +209,8 @@
       </div>
     </div>
     <div id="contextMenu" class="contextMenu">
-      <span onclick="api.deleteItem(q('#fileTree .active').id)" id="deleteButton">Delete</span>
-      <span onclick="api.startRename(q('#fileTree .active').id)" id="renameButton">Rename</span>
+      <span onclick="api.deleteItem(focused.id || focused.parentNode.id)" id="deleteButton">Delete</span>
+      <span onclick="api.startRename(focused.id || focused.parentNode.id)" id="renameButton">Rename</span>
       <hr>
       <span onclick="createItem('file')">Create File</span>
       <span onclick="createItem('folder')">Create Folder</span>

@@ -288,7 +288,7 @@ function folderKey(event) {
   switch (event.key) {
     case 'Delete':
       event.preventDefault();
-      api.deleteItem(event.currentTarget.id);
+      api.deleteItem(event.currentTarget.parentNode.id);
       break;
     default:
       const alphanumeric = "abcdefghijklmnopqrstuvwxyz0123456789";

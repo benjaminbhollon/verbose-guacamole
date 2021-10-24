@@ -20,7 +20,7 @@ module.exports = (api, paths, extra) => {
     let item = document.getElementById(id);
     if (!confirm(`Do you really want to delete this ${item.tagName === 'SPAN' ? 'file' : 'folder and everything in it'}? There is no undo.`)) return;
 
-    let file = api.flatten(project.index).find(i => api.idFromPath(i.path) === (item.tagName === 'SPAN' ? item.id : item.parentNode.id));
+    let file = api.flatten(project.index).find(i => api.idFromPath(i.path) === item.id);
 
     function deleteInFolder(folder) {
       for (f of folder) {
@@ -48,7 +48,7 @@ module.exports = (api, paths, extra) => {
         f.children = f.children.filter(f => f.delete !== true);
       });
 
-    (item.tagName === 'SPAN' ? item : item.parentNode).remove();
+    item.remove();
 
     const foundCurrent = api.flatten(project.index).find(f => api.idFromPath(f.path) === project.openFile);
     if (typeof foundCurrent === 'undefined') {
