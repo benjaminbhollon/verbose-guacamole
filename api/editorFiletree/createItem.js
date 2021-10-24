@@ -16,7 +16,7 @@ module.exports = (api, paths, extra) => {
   //This is the final function that will become part of the API.
   // You MAY make it async.
   // You MAY add parameters.
-  function returnFunction(type, parentId = false, index = false, first = false) {
+  function returnFunction(type, parentId = false, index = false, rename = true) {
     const parent = parentId ?
       api.flatten(project.index)
         .find(f =>
@@ -90,12 +90,12 @@ module.exports = (api, paths, extra) => {
 
       setTimeout(() => {
         api.focusItem(api.idFromPath(filePath));
-        if (!first) api.startRename(api.idFromPath(filePath));
+        if (rename) api.startRename(api.idFromPath(filePath));
       }, 100);
     } else {
       setTimeout(() => {
         document.getElementById(api.idFromPath(filePath)).open = true;
-        api.startRename(api.idFromPath(filePath));
+        if (rename) api.startRename(api.idFromPath(filePath));
       }, 100);
     }
   }

@@ -57,7 +57,7 @@ module.exports = (api, paths, extra) => {
         document.getElementById(api.idFromPath(api.currentFile.path)).click();
         api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, 0);
       } else {
-        api.createItem('file', true);
+        api.createItem('file', false, 0, false);
       }
     }
     api.saveProject();
