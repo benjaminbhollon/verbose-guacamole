@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Verbose Guacamole</title>
+    <!-- Include Guacamole theme as a fallback for unset values -->
+    <link rel="stylesheet" href="./assets/css/themes/base.css">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <script src="./assets/js/global.js"></script>
+    <link rel="stylesheet" href="./assets/css/global.css">
+    <link rel="stylesheet" href="./assets/css/selectTheme.css">
+  </head>
+  <body>
+    <header>
+      <h1>Select a Theme</h1>
+    </header>
+    <div id="content">
+      <article>
+        <p>Select the picture of what you want Verbose Guacamole to look like for you. Or <a href='./index.html'>skip this step</a>.</p>
+        <img src="./assets/images/themes/guacamole.png" alt="Guacamole Color Theme" onkeypress="if (event.key === 'Enter') this.click()" onclick="api.setTheme('guacamole')" tabindex="0" title="Click to set your theme.">
+        <img src="./assets/images/themes/avocadoPeel.png" alt="Avocado Peel Color Theme" onkeypress="if (event.key === 'Enter') this.click()" onclick="api.setTheme('avocadoPeel')" tabindex="0" title="Click to set your theme.">
+        <img src="./assets/images/themes/monoLight.png" alt="Mono Light Color Theme" onkeypress="if (event.key === 'Enter') this.click()" onclick="api.setTheme('monoLight')" tabindex="0" title="Click to set your theme.">
+        <img src="./assets/images/themes/monoDark.png" alt="Mono Dark Color Theme" onkeypress="if (event.key === 'Enter') this.click()" onclick="api.setTheme('monoDark')" tabindex="0" title="Click to set your theme.">
+        <p>You can change this at any time in the application menu by navigating to <code>Preferences => Themes</code>.</p>
+        <input type="submit" value="Finish" onclick="location.href='./index.html'">
+      </article>
+    </div>
+    <div id="modals"></div>
+  </body>
+</html>

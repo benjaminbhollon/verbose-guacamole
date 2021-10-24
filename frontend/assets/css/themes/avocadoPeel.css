@@ -9,9 +9,12 @@
 
 :root {
   /* Main colors */
-  --main-background: #444;
+  --main-background: #333;
   --main-color: #fff;
   --main-light-color: #fff8;
+
+  /* Editor colors */
+  --editor-background: #var(--main-background);
 
   /* Header colors */
   --header-background: #222;
@@ -38,7 +41,7 @@
   --context-color: #000;
 
   /* Stats bar colors */
-  --stats-bar-background: #330;
+  --stats-bar-background: #220;
   --stats-bar-hover-color: #fff3;
   --stats-bar-color: var(--accent-color);
 

@@ -271,6 +271,10 @@ function togglePanel(panelId, tabId) {
 /* Handle Keypresses */
 // Filetree
 function fileKey(event) {
+  if (
+    event.currentTarget.contentEditable ||
+    event.currentTarget.querySelector('.filename').contentEditable
+  ) return false;
   const tabbable = [...qA('#fileTree__list .file, #fileTree__list .folder')];
   switch (event.key) {
     case 'ArrowUp':
@@ -306,6 +310,10 @@ function fileKey(event) {
   }
 }
 function folderKey(event) {
+  if (
+    event.currentTarget.contentEditable ||
+    event.currentTarget.querySelector('.folder').contentEditable
+  ) return false;
   const tabbable = [...qA('#fileTree__list .file, #fileTree__list .folder')];
   switch (event.key) {
     case 'ArrowUp':

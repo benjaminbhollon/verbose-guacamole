@@ -733,8 +733,8 @@ body.locked #locked, #projectDeletedError.visible {
 
 .EasyMDEContainer .CodeMirror {
   border-color: var(--border-color);
-  color: var(--color);
-  background-color: var(--background-color);
+  color: var(--editor-color);
+  background-color: var(--editor-background);
 }
 
 /*.CodeMirror-code {
@@ -766,6 +766,21 @@ body.locked #locked, #projectDeletedError.visible {
   background-color: var(--button-hover-color);
 }
 
+.CodeMirror .cm-spell-error:not(.cm-url):not(.cm-comment):not(.cm-tag):not(.cm-word) {
+  background-color: transparent;
+  display: inline-block;
+}
+
+.CodeMirror .cm-spell-error:not(.cm-url):not(.cm-comment):not(.cm-tag):not(.cm-word)::after {
+  content: '';
+  height: 2px;
+  margin-top: -2px;
+  position: relative;
+  display: block;
+  background: red;
+  border-width: 0.125em 0;
+  width: 100%;
+}
 
 /* Custom scrollbar */
 #fileTree__list::-webkit-scrollbar, #git::-webkit-scrollbar {

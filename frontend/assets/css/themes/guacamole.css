@@ -13,6 +13,9 @@
   --main-color: #000;
   --main-light-color: #333;
 
+  /* Editor colors */
+  --editor-background: #fff;
+
   /* Header colors */
   --header-background: hsl(118, 72%, 79%);
   --header-border-color: transparent;

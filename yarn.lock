@@ -1294,6 +1294,13 @@ ejs@^2.6.1:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.7.4.tgz#48661287573dcc53e366c7a1ae52c3a120eec9ba"
   integrity sha512-7vmuyh5+kuUyJKePhQfRQBhXV5Ce+RnaeeQArKu1EAMpL3WbgMt5WG6uQZpEVvYSSsxMXRKOewtDk9RaTKXRlA==
 
+electron-first-run@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/electron-first-run/-/electron-first-run-3.0.0.tgz#2227d9c3e5e41ee869accdb854ae2c14dcdd42a5"
+  integrity sha512-+GV8XX3vtVE9r+yuASNxsXm3FErdUnJAle4nvzBOPlEKT4Nuj044s3hgXkZh3aMupyMMYrNT+y4HVDUTOUABeg==
+  dependencies:
+    make-dir "^3.0.0"
+
 electron-installer-common@^0.10.2:
   version "0.10.3"
   resolved "https://registry.yarnpkg.com/electron-installer-common/-/electron-installer-common-0.10.3.tgz#40f9db644ca60eb28673d545b67ee0113aef4444"
@@ -2562,6 +2569,13 @@ lzma-native@^8.0.1:
     node-gyp-build "^4.2.1"
     readable-stream "^3.6.0"
 
+make-dir@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-3.1.0.tgz#415e967046b3a7f1d185277d84aa58203726a13f"
+  integrity sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==
+  dependencies:
+    semver "^6.0.0"
+
 make-fetch-happen@^9.1.0:
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/make-fetch-happen/-/make-fetch-happen-9.1.0.tgz#53085a09e7971433e6765f7971bf63f4e05cb968"
@@ -3591,7 +3605,7 @@ semver-compare@^1.0.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.1.tgz#a954f931aeba508d307bbf069eff0c01c96116f7"
   integrity sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
 
-semver@^6.2.0:
+semver@^6.0.0, semver@^6.2.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==

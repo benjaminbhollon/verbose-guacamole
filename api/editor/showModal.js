@@ -27,14 +27,17 @@ module.exports = (api, paths, extra) => {
         document.getElementById('projectDetails__synopsis').value = project.metadata.synopsis;
 
         modal.classList.add('visible');
+        modal.querySelector('input').focus();
         break;
       case 'projectGoalComplete':
         modal = document.getElementById('projectGoalComplete');
         modal.classList.add('visible');
+        modal.querySelector('input').focus();
         break;
       case 'addLabel':
         modal = document.getElementById('addLabel');
         modal.classList.add('visible');
+        modal.querySelector('input').focus();
         break;
       default:
         throw new Error(`There is no modal named '${name}'`);

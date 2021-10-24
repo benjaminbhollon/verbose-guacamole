@@ -45,6 +45,7 @@ module.exports = (api, paths, extra) => {
       q('#fileTree .active').classList.remove('active');
 
     element.classList.add('active');
+    api.activeFile = id;
 
     // Save openFile
     const projectsStorage = JSON.parse(localStorage.projects)

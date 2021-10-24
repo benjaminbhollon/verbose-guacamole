@@ -1,0 +1,15 @@
+#content {
+  text-align: center;
+}
+
+article {
+  max-width: 50ch;
+  display: inline-block;
+}
+
+img {
+  max-width: 100%;
+  max-height: 150px;
+  cursor: pointer;
+  display: inline-block;
+}

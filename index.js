@@ -5,6 +5,8 @@ const { shell, app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('
 const url = require('url');
 const path = require('path');
 const fs = require('fs');
+const firstRun = require('electron-first-run');
+
 let projectsPath = path.resolve(app.getPath('documents'), './VerbGuac Projects/');
 if (!fs.existsSync(projectsPath)){
   fs.mkdirSync(projectsPath);
@@ -46,7 +48,8 @@ function createWindow () {
   win.hide();
   win.maximize();
 
-  win.loadFile('./frontend/index.html');
+  if (firstRun()) win.loadFile('./frontend/selectTheme.html');
+  else win.loadFile('./frontend/index.html');
 }
 
 app.whenReady().then(createWindow);
@@ -183,7 +186,8 @@ function updateMenus() {
             label: 'Update Project Details',
             click() {
               win.webContents.send('updateProjectDetails');
-            }
+            },
+            accelerator: 'CommandOrControl+Shift+,'
           }
         ]
       },
@@ -224,7 +228,8 @@ function updateMenus() {
                 label: 'More help...',
                 click() {
                   shell.openExternal('https://docs.verboseguacamole.com');
-                }
+                },
+                accelerator: 'F1'
               }
             ]
           }
@@ -318,6 +323,13 @@ function updateMenus() {
                 }
               }
             ]
+          },
+          {
+            label: 'More help...',
+            click() {
+              shell.openExternal('https://docs.verboseguacamole.com');
+            },
+            accelerator: 'F1'
           }
         ]
       },
@@ -414,6 +426,9 @@ ipcMain.on('askForExportPath', (event, format, fileName) => {
   }).then(result => {
     event.reply('askForExportPath', result.canceled ? false : result.filePath);
   });
+});
+ipcMain.on('setTheme', (event, id) => {
+  setTheme(id);
 });
 
 // Make appData directory

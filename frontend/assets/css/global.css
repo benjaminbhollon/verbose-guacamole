@@ -121,6 +121,11 @@ label.canChange:focus-within::after {
   opacity: 1;
 }
 
+option {
+  background: initial!important;
+  color: initial!important;
+}
+
 /* Modals */
 #modals {
   position: absolute;

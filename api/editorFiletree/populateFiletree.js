@@ -33,7 +33,7 @@ module.exports = (api, paths, extra) => {
               ondragstart="startMoveItem(event)"
               ondragend="stopMoveItem(event)"
               title="${item.name}"
-              onclick='if (this.contentEditable !== "true") {api.setOpenFolders()} else {event.preventDefault();}'
+              onclick='if (this.contentEditable === "true") {event.preventDefault();} else {setTimeout(api.setOpenFolders, 25)}'
               ondblclick="api.startRename('${api.idFromPath(item.path)}')"
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();this.focus();"
               onkeydown="folderKey(event)"
@@ -91,9 +91,12 @@ module.exports = (api, paths, extra) => {
       return html;
     }
 
-    document.getElementById('fileTree__list').innerHTML = getLayer(project.index);
+    document.getElementById('fileTree__list').innerHTML =
+      getLayer(project.index);
 
     api.restoreOpenFolders();
+    if (api.activeFile)
+      document.getElementById(api.activeFile).classList.add('active');
   }
 
   return returnFunction;
