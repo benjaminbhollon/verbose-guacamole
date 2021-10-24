@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-module.exports = (api, paths, apiLocation = './api/') => {
+module.exports = (api, paths, apiLocation = path.resolve(__dirname, '../api/')) => {
   const apiCategories = fs.readdirSync(apiLocation);
 
   function addAPIMethods(category, extra = {}) {

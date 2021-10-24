@@ -7,7 +7,7 @@ const fs = require('fs');
 const { q, qA } = require('../modules/queries.js');
 
 const placeholders = fs.readFileSync(
-  './assets/placeholders.txt',
+  path.resolve(__dirname, '../assets/placeholders.txt'),
   {encoding:'utf8', flag:'r'}
 ).split('\n').filter(p => p.length);
 // Define what separates a word

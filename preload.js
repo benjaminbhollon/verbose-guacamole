@@ -153,7 +153,7 @@ apiF().then((api) => {
 
   setTimeout(() => {
     // Add "Create Project" modal
-    q('#modals').innerHTML += fs.readFileSync('./frontend/assets/html/newProjectModal.html');
+    q('#modals').innerHTML += fs.readFileSync(path.resolve(__dirname, './frontend/assets/html/newProjectModal.html'));
     q('#newProject__author').value =
       localStorage.defaultAuthor ?
       localStorage.defaultAuthor :

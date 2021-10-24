@@ -7,8 +7,8 @@ module.exports = api => {
   // Themes
   let themeId = localStorage.theme ? localStorage.theme : 'guacamole';
   let themeLocations = {
-    guacamole: path.resolve('./frontend/assets/css/themes/guacamole.css'),
-    monoLight: path.resolve('./frontend/assets/css/themes/monoLight.css'),
+    guacamole: path.resolve(__dirname + '../../../frontend/assets/css/themes/guacamole.css'),
+    monoLight: path.resolve(__dirname + '../../../frontend/assets/css/themes/monoLight.css'),
     //monoDark: path.resolve('./frontend/assets/css/themes/monoDark.css'),
   }
 
