@@ -90,16 +90,11 @@ module.exports = (api, paths, extra) => {
 
     if (type === 'file') {
       api.openFile(api.idFromPath(filePath), 0);
-
-      setTimeout(() => {
-        api.focusItem(api.idFromPath(filePath));
-        if (rename) api.startRename(api.idFromPath(filePath));
-      }, 100);
+      if (rename) api.startRename(api.idFromPath(filePath));
     } else {
-      setTimeout(() => {
-        document.getElementById(api.idFromPath(filePath)).open = true;
-        if (rename) api.startRename(api.idFromPath(filePath));
-      }, 100);
+      document.getElementById(api.idFromPath(filePath)).open = true;
+      api.setOpenFolders();
+      if (rename) api.startRename(api.idFromPath(filePath));
     }
   }
 

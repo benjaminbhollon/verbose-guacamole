@@ -19,11 +19,7 @@ module.exports = (api, paths, extra) => {
       .editors[0]
       .openFolders;
     for (const folder of toOpen) {
-      try {
-        document.getElementById(folder.id).open = folder.open;
-      } catch (err) {
-        setTimeout(api.restoreOpenFolders, 0);
-      }
+      document.getElementById(folder.id).open = folder.open;
     }
   }
 

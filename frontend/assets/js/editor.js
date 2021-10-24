@@ -156,11 +156,13 @@ function createItem(type) {
     false :
     api.idFromPath(parent.path);
 
-  const index = focusedType === 'folder' ?
+  let index = focusedType === 'folder' ?
     false :
     (parent ? parent.children : api.getProject().index).findIndex(f =>
       api.idFromPath(f.path) === id
     ) + 1;
+
+  if (!index && typeof parent === 'undefined') index = false;
 
   api.createItem(type, parentId, index, true);
 }
@@ -290,7 +292,6 @@ function fileKey(event) {
     case 'Space':
     case 'Enter':
       event.preventDefault();
-      api.focusItem(event.currentTarget.id);
       api.openFile(event.currentTarget.id);
       break;
       break;
@@ -360,6 +361,7 @@ function contextMenuKey(event) {
     case 'Escape':
       event.preventDefault();
       event.currentTarget.parentNode.classList.remove('visible');
+      event.currentTarget.parentNode.parentNode.classList.remove('dropdown');
       break;
     default:
       break;

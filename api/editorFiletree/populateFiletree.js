@@ -17,9 +17,8 @@ module.exports = (api, paths, extra) => {
   function returnFunction() {
     document.getElementById('fileTree__list').innerHTML = '';
 
-    function drawLayer(layer, id) {
+    function getLayer(layer) {
       let html = '';
-
       for (var item of layer) {
         if (typeof item.children !== 'undefined') {
           html += `
@@ -34,17 +33,13 @@ module.exports = (api, paths, extra) => {
               ondragstart="startMoveItem(event)"
               ondragend="stopMoveItem(event)"
               title="${item.name}"
-              onclick='if (this.contentEditable !== "true") {setTimeout(api.setOpenFolders, 100);} else {event.preventDefault();}'
+              onclick='if (this.contentEditable !== "true") {api.setOpenFolders()} else {event.preventDefault();}'
               ondblclick="api.startRename('${api.idFromPath(item.path)}')"
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();this.focus();"
               onkeydown="folderKey(event)"
             >${item.name}</summary>
+            ${getLayer({...item}.children)}
           </details>`;
-          const itemClone = {...item};
-          setTimeout(
-            () => {drawLayer(itemClone.children, api.idFromPath(itemClone.path))},
-            0
-          );
         } else {
           html += `
           <span
@@ -62,7 +57,7 @@ module.exports = (api, paths, extra) => {
               id="${api.idFromPath(item.path)}__filename"
               class="filename"
               title="${item.name}"
-              onclick='event.preventDefault();api.openItem(this.parentNode.id)'
+              onclick='event.preventDefault();api.openFile(this.parentNode.id)'
               ondblclick="api.startRename('${api.idFromPath(item.path)}')"
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();this.parentNode.focus();"
             >
@@ -93,9 +88,10 @@ module.exports = (api, paths, extra) => {
         }
       }
 
-      document.getElementById(id).innerHTML += html;
+      return html;
     }
-    drawLayer(project.index, 'fileTree__list');
+
+    document.getElementById('fileTree__list').innerHTML = getLayer(project.index);
 
     api.restoreOpenFolders();
   }

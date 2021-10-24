@@ -15,7 +15,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(id, editorIndex = 0) {
-    api.focusItem(id);
+    console.log(id, editorIndex);
     const file = api.flatten(project.index).find(i => api.idFromPath(i.path) === id);
     api.openFile(api.idFromPath(file.path), file.name, editorIndex);
 
@@ -25,7 +25,6 @@ module.exports = (api, paths, extra) => {
     editorsStorage[0].openFile = id;
     localStorage.projects = JSON.stringify(projectsStorage);
 
-    api.saveProject();
     return document.getElementById(id);
   }
 

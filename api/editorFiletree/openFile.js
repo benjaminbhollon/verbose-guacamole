@@ -37,6 +37,21 @@ module.exports = (api, paths, extra) => {
         }));
       });
 
+    // Mark element as active
+    const element = document.getElementById(id).tagName === 'SPAN' ?
+      document.getElementById(id) :
+      document.getElementById(id).querySelector('summary');
+    if (q('#fileTree .active'))
+      q('#fileTree .active').classList.remove('active');
+
+    element.classList.add('active');
+
+    // Save openFile
+    const projectsStorage = JSON.parse(localStorage.projects)
+    const editorsStorage = projectsStorage[api.projectPath].editors;
+    editorsStorage[0].openFile = id;
+    localStorage.projects = JSON.stringify(projectsStorage);
+
     // Set currentFile
     api.currentFile = file;
 

@@ -235,9 +235,7 @@ module.exports = (api, paths, extra) => {
     api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, 0);
     api.updateLabelCSS();
 
-    setTimeout(() => {
-      document.getElementById(api.idFromPath(api.currentFile.path)).click();
-    }, 1000);
+    document.getElementById(api.idFromPath(api.currentFile.path)).click();
   }
 
   return returnFunction;
