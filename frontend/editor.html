@@ -209,11 +209,11 @@
       </div>
     </div>
     <div id="contextMenu" class="contextMenu">
-      <span onclick="api.deleteItem(focused.id || focused.parentNode.id)" id="deleteButton">Delete</span>
-      <span onclick="api.startRename(focused.id || focused.parentNode.id)" id="renameButton">Rename</span>
+      <span tabindex="0" onkeydown="contextMenuKey(event)" onclick="api.deleteItem(focused.id || focused.parentNode.id)" id="deleteButton">Delete</span>
+      <span tabindex="0" onkeydown="contextMenuKey(event)" onclick="api.startRename(focused.id || focused.parentNode.id)" id="renameButton">Rename</span>
       <hr>
-      <span onclick="createItem('file')">Create File</span>
-      <span onclick="createItem('folder')">Create Folder</span>
+      <span tabindex="0" onkeydown="contextMenuKey(event)" onclick="createItem('file')">Create File</span>
+      <span tabindex="0" onkeydown="contextMenuKey(event)" onclick="createItem('folder')">Create Folder</span>
     </div>
     <div id="spellcheckMenu" class="contextMenu">
     </div>

@@ -37,7 +37,7 @@ module.exports = (api, paths, extra) => {
               onclick='if (this.contentEditable !== "true") {setTimeout(api.setOpenFolders, 100);} else {event.preventDefault();}'
               ondblclick="api.startRename('${api.idFromPath(item.path)}')"
               oncontextmenu="document.getElementById('deleteButton').style.display = document.getElementById('renameButton').style.display = 'block';event.preventDefault();this.focus();"
-              onkeypress="folderKey(event)"
+              onkeydown="folderKey(event)"
             >${item.name}</summary>
           </details>`;
           const itemClone = {...item};
@@ -56,7 +56,7 @@ module.exports = (api, paths, extra) => {
             ondragover="setHovering(this)"
             ondrag="updatePageXY(event)"
             tabindex="0"
-            onkeypress="fileKey(event)"
+            onkeydown="fileKey(event)"
           >
             <span
               id="${api.idFromPath(item.path)}__filename"
@@ -77,15 +77,16 @@ module.exports = (api, paths, extra) => {
                 ${(project.labels.length) ?
                   project.labels.map(l =>
                     `<span
-                      onclick="api.labelFile('${api.idFromPath(item.path)}', '${l.id}')"
-                      data-label="${l.id}"
+                       tabindex="0" onkeydown="contextMenuKey(event)"
+                       onclick="api.labelFile('${api.idFromPath(item.path)}', '${l.id}')"
+                       data-label="${l.id}"
                     >${l.name}</span>`
                   ).join('') :
                   `<span class="--no-click">No labels.</span>`
                 }
-                ${typeof item.label === 'undefined' ? '' : `<span onclick="api.labelFile('${api.idFromPath(item.path)}', undefined)">Remove Label</span>`}
+                ${typeof item.label === 'undefined' ? '' : `<span tabindex="0" onkeydown="contextMenuKey(event)" onclick="api.labelFile('${api.idFromPath(item.path)}', undefined)">Remove Label</span>`}
                 <hr>
-                <span onclick="api.showModal('addLabel')">Create Label</span>
+                <span tabindex="0" onkeydown="contextMenuKey(event)" onclick="api.showModal('addLabel')">Create Label</span>
               </div>
             </span>
           </span>`;

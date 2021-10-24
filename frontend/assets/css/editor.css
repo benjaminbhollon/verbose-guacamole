@@ -322,9 +322,12 @@ textarea {
   display: block;
   cursor: default;
   padding: 0.25em;
+  color: #000!important;
 }
 
-.contextMenu span:not(.--no-click, [data-label]):hover {
+.contextMenu span:not(.--no-click, [data-label]):hover,
+.contextMenu span:not(.--no-click, [data-label]):focus {
+  outline: 0;
   background-color: var(--item-hover-color);
 }
 
@@ -360,7 +363,8 @@ textarea {
   --alpha: 0.3;
 }
 
-.contextMenu [data-label]:hover {
+.contextMenu [data-label]:hover,
+.contextMenu [data-label]:focus {
   --alpha: 0.5;
 }
 

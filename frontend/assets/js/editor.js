@@ -62,6 +62,9 @@ function showContextMenu(event) {
 
   focused = document.activeElement;
   if (!contextMenu.classList.contains('visible')) contextMenu.classList.toggle('visible');
+  [...contextMenu.querySelectorAll('span')]
+    .filter(e => e.offsetParent !== null)[0]
+    .focus();
 }
 
 /* Search */
@@ -180,7 +183,10 @@ window.addEventListener("click", e => {
   document.getElementById('spellcheckMenu').classList.remove('visible');
   [...qA('.label.dropdown')].forEach(l => l.classList.remove('dropdown'));
 
-  if (event.path[0].classList.contains('label')) event.path[0].classList.add('dropdown');
+  if (event.path[0].classList.contains('label')) {
+    event.path[0].classList.add('dropdown');
+    event.path[0].querySelectorAll('[tabindex="0"]')[0].focus();
+  }
 });
 
 // Spellcheck
@@ -263,7 +269,20 @@ function togglePanel(panelId, tabId) {
 /* Handle Keypresses */
 // Filetree
 function fileKey(event) {
+  const tabbable = [...qA('#fileTree__list .file, #fileTree__list .folder')];
   switch (event.key) {
+    case 'ArrowUp':
+      if (tabbable.indexOf(event.currentTarget) - 1 < 0) break;
+      tabbable[tabbable.indexOf(event.currentTarget) - 1].focus();
+      break;
+    case 'ArrowDown':
+      if (tabbable.indexOf(event.currentTarget) + 1 >= tabbable.length) break;
+      tabbable[tabbable.indexOf(event.currentTarget) + 1].focus();
+      break;
+    case 'ArrowRight':
+      event.currentTarget.querySelector('.label').click();
+      break;
+    case 'Backspace':
     case 'Delete':
       event.preventDefault();
       api.deleteItem(event.currentTarget.id);
@@ -281,11 +300,28 @@ function fileKey(event) {
         api.startRename(event.currentTarget.id);
         event.stopPropagation();
       }
+
       break;
   }
 }
 function folderKey(event) {
+  const tabbable = [...qA('#fileTree__list .file, #fileTree__list .folder')];
   switch (event.key) {
+    case 'ArrowUp':
+      if (tabbable.indexOf(event.currentTarget) - 1 < 0) break;
+      tabbable[tabbable.indexOf(event.currentTarget) - 1].focus();
+      break;
+    case 'ArrowDown':
+      if (tabbable.indexOf(event.currentTarget) + 1 >= tabbable.length) break;
+      tabbable[tabbable.indexOf(event.currentTarget) + 1].focus();
+      break;
+    case 'ArrowRight':
+      event.currentTarget.parentNode.setAttribute('open', true);
+      break;
+    case 'ArrowLeft':
+      event.currentTarget.parentNode.removeAttribute('open');
+      break;
+    case 'Backspace':
     case 'Delete':
       event.preventDefault();
       api.deleteItem(event.currentTarget.parentNode.id);
@@ -296,6 +332,36 @@ function folderKey(event) {
         api.startRename(event.currentTarget.id);
         event.stopPropagation();
       }
+      break;
+  }
+}
+
+// Context menus
+function contextMenuKey(event) {
+  const tabbable = [
+    ...event.currentTarget.parentNode.querySelectorAll('[tabindex="0"]')
+  ];
+  switch (event.key) {
+    case 'ArrowUp':
+      if (tabbable.indexOf(event.currentTarget) - 1 < 0) break;
+      event.stopPropagation();
+      tabbable[tabbable.indexOf(event.currentTarget) - 1].focus();
+      break;
+    case 'ArrowDown':
+      if (tabbable.indexOf(event.currentTarget) + 1 >= tabbable.length) break;
+      event.stopPropagation();
+      tabbable[tabbable.indexOf(event.currentTarget) + 1].focus();
+      break;
+    case 'Space':
+    case 'Enter':
+      event.preventDefault();
+      event.currentTarget.click();
+      break;
+    case 'Escape':
+      event.preventDefault();
+      event.currentTarget.parentNode.classList.remove('visible');
+      break;
+    default:
       break;
   }
 }
