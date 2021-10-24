@@ -1,0 +1,196 @@
+:root {
+  /* Main colors */
+  --main-background: hsl(118, 72%, 90%);
+  --main-color: #000;
+  --main-light-color: #333;
+
+  /* Header colors */
+  --header-background: hsl(118, 72%, 79%);
+  --header-color: var(--main-color);
+  --header-border-color: transparent;
+
+  /* Form colors */
+  --button-hover-color: #8883;
+  --placeholder-color: var(--main-light-color);
+
+  /* Modal colors */
+  --modal-background: #444;
+  --modal-color: #fff;
+  --modal-light-color: #fff8;
+  --modal-border: 0;
+
+  /* Panel colors */
+  --panel-border-color: #777;
+
+  /* Filetree colors */
+  --active-file-background: #2d99f7;
+  --active-file-color: #fff;
+
+  /* Context menu colors */
+  --context-background: #fff;
+  --context-color: #000;
+  --context-hover-color: var(--button-hover-color);
+  --context-border-color: var(--panel-border-color);
+
+  /* Stats bar colors */
+  --stats-bar-background: #444;
+  --stats-bar-color: var(--main-background);
+  --stats-bar-hover-color: #fff3;
+
+  /* Stats modal colors */
+  --stats-modal-background: #fff;
+  --stats-modal-color: #000;
+
+  /* Goal colors */
+  --goal-summary-fill: hsla(118, 72%, 90%, 0.5);
+  --goal-progress-color: #000;
+  --goal-progress-fill: #0f02;
+  --goal-progress-border-color: #080;
+  --goal-complete-color: #440;
+  --goal-complete-background: #0f0;
+
+  /* Tab colors (inherited from --stats-bar by default) */
+  --tab-background: var(--stats-bar-background);
+  --tab-color: var(--stats-bar-color);
+
+  /* Specialized colors (you probably won't need to change these) */
+  --delete-color: #f00;
+  --delete-background: #fff;
+  --accent-color: hsl(118, 72%, 90%);
+  --selected-color: var(--active-file-color);
+  --selected-background: var(--active-file-background);
+
+  /* Scrollbar color */
+  --scrollbar-color: var(--main-color);
+  --scrollbar-background: var(--main-background);
+
+  /* Font styles */
+  --font-family: 'Trebuchet MS', Calibri, sans-serif;
+  --font-size: 1.3em;
+}
+
+body {
+  --background-color: var(--main-background);
+  --color: var(--main-color);
+  --light-color: var(--main-light-color);
+}
+
+input[type="submit"]:hover,
+input[type="submit"]:focus,
+input[type="submit"]:active {
+  --background-color: var(--button-hover-color);
+}
+
+.modal {
+  --background-color: var(--modal-background);
+  --color: var(--modal-color);
+  --light-color: var(--modal-light-color);
+  --border: var(--modal-border);
+}
+
+#editor, #fileTree, #git {
+  --border-color: var(--panel-border-color);
+}
+
+#git__commits, #git h3 {
+  --border-color: var(--panel-border-color);
+}
+
+#git__commits > span:hover {
+  --background-color: var(--button-hover-color);
+}
+
+#git__commitText {
+  --border-color: var(--panel-border-color);
+}
+
+#git__commits > span .preview {
+  --color: var(--main-color);
+  --background-color: var(--main-background-color);
+}
+
+#git__commits > span .preview:hover {
+  --background-color: var(--button-hover-color);
+}
+
+#fileTree__list:not(.searching) .active {
+  --background-color: var(--active-file-background);
+  --color: var(--active-file-color);
+}
+
+#fileTree__list.searching span:not(.result),
+#fileTree__list.searching details summary:not(.result) {
+  --color: var(--main-color);
+  opacity: 0.4;
+}
+
+.contextMenu {
+  --background-color: var(--context-background);
+  --border-color: var(--context-border-color);
+  --item-hover-color: var(--context-hover-color);
+  --color: var(--context-color);
+}
+
+#novelStats, .tab {
+  --background-color: var(--tab-background);
+  --color: var(--tab-color);
+}
+
+#novelStats label:hover:not(input:checked + label) {
+  --background-color: var(--stats-bar-hover-color);
+}
+
+#wordGoal {
+  --fill: var(--goal-summary-fill);
+  --flash-background: var(--goal-complete-background);
+  --flash-color: var(--goal-complete-color);
+}
+
+#wordGoal__list > div,
+#wordGoal__archived > div {
+  --fill: var(--goal-progress-fill);
+  --border-color: var(--goal-progress-border-color);
+}
+
+#wordGoal__list > div.completed,
+#wordGoal__archived > div.completed {
+  --background-color: var(--goal-complete-background);
+  --color: var(--goal-complete-color);
+}
+
+#wordGoal__list > div .archive {
+  --color: var(--delete-color);
+  --background-color: var(--delete-background);
+}
+
+.novelStats__modal {
+  --background-color: var(--stats-modal-background);
+  --color: var(--stats-modal-color);
+}
+
+.EasyMDEContainer .CodeMirror {
+  --border-color: var(--panel-border-color);
+}
+
+/* Overridable, but should work in most themes */
+code {
+  --background-color: silver;
+  --color: #000;
+}
+
+input[type="submit"] {
+  --background-color: transparent;
+}
+
+#fileTree #fileTree__list .file.editing,
+#fileTree #fileTree__list summary[contenteditable="true"] {
+  --border-color: orange;
+  --color: #000;
+  --background-color: #fff;
+}
+
+.label[data-label="blank"] {
+  --hue: 0;
+  --saturation: 0%;
+  --lightness: 95%;
+}

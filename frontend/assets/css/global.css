@@ -19,8 +19,10 @@ body {
 }
 
 header {
-  background-color: var(--background-color);
+  background-color: var(--header-background);
   padding: 1em;
+  border-bottom: 2px solid var(--header-border-color);
+  margin-top: -2px;
 }
 
 article {
@@ -106,17 +108,17 @@ input[type="color"] {
   cursor: pointer;
 }
 
-label.canChange:focus-within::after {
+label.canChange::after {
   content: 'You can change this later.';
   font-size: 0.8rem;
   font-style: italic;
   font-weight: normal;
+  opacity: 0;
+  transition: opacity 500ms;
 }
 
-.success, .failure {
-  background-color: var(--background-color);
-  padding: 1em;
-  color: var(--color);
+label.canChange:focus-within::after {
+  opacity: 1;
 }
 
 /* Modals */
@@ -139,6 +141,7 @@ label.canChange:focus-within::after {
   padding: 1em;
   border-radius: 0.5em;
   display: none;
+  border: var(--border);
 }
 
 .modal.visible {

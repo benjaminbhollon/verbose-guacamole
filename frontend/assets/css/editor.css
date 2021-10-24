@@ -4,6 +4,7 @@ body {
   text-align: left;
   display: grid;
   grid-template-columns: var(--left-width) calc(100% - var(--left-width) - var(--right-width)) var(--right-width);
+  border-collapse: collapse;
 }
 
 body.fileTree-closed {
@@ -68,7 +69,7 @@ body.git-closed {
 
 .CodeMirror {
   position: absolute;
-  top: 50px;
+  top: 41px;
   bottom: 0;
   right: 0;
   left: 0;
@@ -78,16 +79,25 @@ body.git-closed {
 #fileTree {
   padding-bottom: 1.5em;
   grid-column: 1;
+  overflow-y: hidden;
 }
 
 #fileTree__actions {
   position: sticky;
   top: 0;
   margin: 0;
-  padding: 0.5em 0 0.25em 0;
+  padding: 0.4em 0.7em 0.2em 0.7em;
   background-color: var(--background-color);
   z-index: 2;
   border-bottom: 1px solid var(--border-color);
+  color: var(--color);
+  height: 42px;
+}
+
+#fileTree__list {
+  max-height: calc(100vh - 42px - 1.5em);
+  overflow: auto;
+  padding-bottom: 2em;
 }
 
 #fileTree .file, #fileTree .folder {
@@ -160,11 +170,6 @@ body.git-closed {
   margin-left: 1.5em;
 }
 
-#fileTree__actions {
-  height: 2em;
-  padding: 0.5em;
-}
-
 #fileTree__actions > div {
   display: inline-block;
 }
@@ -194,6 +199,7 @@ body.git-closed {
 
 #fileTree .folder:focus, #fileTree .file:not(.active):focus {
   background-color: silver;
+  color: #000;
 }
 
 /* Git */
@@ -216,10 +222,11 @@ body.git-closed {
   position: sticky;
   top: 0;
   margin: 0;
-  padding: 0.5em 0 0.25em 0;
+  padding: 0.3em 0 0.2em 0;
   background-color: var(--background-color);
   z-index: 2;
   border-bottom: 1px solid var(--border-color);
+  color: var(--color);
 }
 
 #git .sticky-bottom {
@@ -498,13 +505,15 @@ body.locked #locked, #projectDeletedError.visible {
   width: 95%;
   height: auto;
   max-width: 400px;
-  max-height: calc(100vh - 1.5em);
+  max-height: min(50ch, calc(100vh - 1.5em));
+  overflow: auto;
   background-color: var(--background-color);
+  color: var(--color);
   padding: 1em;
   z-index: 5;
   text-align: center;
-  border-top: 3px solid var(--color);
-  border-left: 3px solid var(--color);
+  border-top: 3px solid;
+  border-left: 3px solid;
 }
 
 .novelStats__modal.visible {
@@ -513,7 +522,6 @@ body.locked #locked, #projectDeletedError.visible {
 
 .novelStats__modal h2 {
   margin: 0.25em;
-  color: #000;
   max-width: 12em;
   width: 95vw;
   font-size: 1.3em;
@@ -569,7 +577,7 @@ body.locked #locked, #projectDeletedError.visible {
 #wordGoal__list > div,
 #wordGoal__archived > div,
 #wordGoal:not(.flash) {
-    background: linear-gradient(to right, var(--fill) var(--percent), transparent 0);
+    background-image: linear-gradient(to right, var(--fill) var(--percent), transparent 0);
 }
 
 #wordGoal__list > div.completed,
@@ -700,4 +708,78 @@ body.locked #locked, #projectDeletedError.visible {
 
 .tab.left[data-mode="open"]::after, .tab.right[data-mode="close"]::after {
   content: '>';
+}
+
+
+/* Editor Styles */
+.cm-comment {
+  font-family: monospace;
+}
+
+.cm-tab {
+  background-color: #ff04;
+}
+
+.editor-toolbar {
+  padding: 5px;
+}
+
+.editor-toolbar, .editor-toolbar.fullscreen {
+  text-align: center;
+  border: 0;
+  border-radius: 0;
+  background-color: var(--background-color);
+}
+
+.EasyMDEContainer .CodeMirror {
+  border-color: var(--border-color);
+  color: var(--color);
+  background-color: var(--background-color);
+}
+
+/*.CodeMirror-code {
+  max-width: 58ch;
+  display: inline-block;
+}
+
+.CodeMirror-lines {
+  text-align: center;
+}*/
+
+.CodeMirror-cursor {
+  border-color: var(--color);
+}
+
+.CodeMirror-selected {
+  background: var(--selected-background)!important;
+}
+
+.CodeMirror-selectedtext {
+  color: var(--selected-color);
+}
+
+.editor-toolbar button {
+  color: var(--color);
+}
+
+.editor-toolbar button.active {
+  background-color: var(--button-hover-color);
+}
+
+
+/* Custom scrollbar */
+#fileTree__list::-webkit-scrollbar, #git::-webkit-scrollbar {
+  width: 0.4em;
+  border: 1px solid var(--scrollbar-background);
+}
+
+#fileTree__list::-webkit-scrollbar-track, #git::-webkit-scrollbar-track {
+  box-shadow: unset;
+  background-color: var(--scrollbar-background);
+}
+
+#fileTree__list::-webkit-scrollbar-thumb, #git::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-color);
+  outline: 0;
+  border-radius: 100em;
 }

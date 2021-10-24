@@ -22,7 +22,7 @@ footer a {
 .codewithlove a {
   text-decoration: none;
   font-weight: bold;
-  color: #a5f0a2;
+  color: var(--accent-color);
   transition: text-shadow 0.2s;
 }
 
@@ -65,12 +65,12 @@ footer a {
   margin: 0;
   padding: 0.5em;
   cursor: pointer;
-  border: 0 solid #000;
+  border: 0 solid;
   border-width: 1px 0;
 }
 
 .recentProject:hover {
-  background-color: #ccc4;
+  background-color: var(--button-hover-color);
 }
 
 /* Releases */
@@ -106,10 +106,10 @@ footer a {
   margin: 0;
   padding: 0.5em;
   cursor: pointer;
-  border: 0 solid #000;
+  border: 0 solid;
   border-width: 1px 0;
 }
 
-.news__list > div:hover {
-  background-color: #ccc4;
+#news__list > div:hover {
+  background-color: var(--button-hover-color);
 }

@@ -8,8 +8,9 @@ module.exports = api => {
   let themeId = localStorage.theme ? localStorage.theme : 'guacamole';
   let themeLocations = {
     guacamole: path.resolve(__dirname + '../../../frontend/assets/css/themes/guacamole.css'),
+    avocadoPeel: path.resolve(__dirname + '../../../frontend/assets/css/themes/avocadoPeel.css'),
     monoLight: path.resolve(__dirname + '../../../frontend/assets/css/themes/monoLight.css'),
-    //monoDark: path.resolve('./frontend/assets/css/themes/monoDark.css'),
+    monoDark: path.resolve(__dirname + '../../../frontend/assets/css/themes/monoDark.css'),
   }
 
   //This is the final function that will become part of the API.

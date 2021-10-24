@@ -1,24 +1,24 @@
 /* META */
-/* @name: Mono Light */
-/* @id: monoLight */
+/* @name: Mono Dark */
+/* @id: monoDark */
 /* @author: Benjamin Hollon */
 /* @link: https://seewitheyesclosed.com */
 /* @license: MIT */
-/* @tags: light, monochrome, official */
-/* @derivedFrom: official/guacamole */
+/* @tags: dark, monochrome, official */
+/* @derivedFrom: official/monoLight */
 
 :root {
   /* Main colors */
-  --main-background: #fff;
-  --main-color: #000;
-  --main-light-color: #333;
+  --main-background: #000;
+  --main-color: #fff;
+  --main-light-color: #bbb;
 
   /* Header colors */
   --header-background: var(--main-background);
-  --header-border-color: #000;
+  --header-border-color: #fff;
 
   /* Form colors */
-  --button-hover-color: #8883;
+  --button-hover-color: #fff3;
 
   /* Modal colors */
   --modal-background: var(--main-background);
@@ -30,8 +30,8 @@
   --panel-border-color: #777;
 
   /* Filetree colors */
-  --active-file-background: #000;
-  --active-file-color: #fff;
+  --active-file-background: #fff;
+  --active-file-color: #000;
 
   /* Context menu colors */
   --context-background: #fff;
@@ -43,17 +43,25 @@
   --stats-bar-hover-color: #fff4;
 
   /* Stats modal colors */
-  --stats-modal-background: #fff;
-  --stats-modal-color: #000;
+  --stats-modal-background: #000;
+  --stats-modal-color: #fff;
 
   /* Goal colors */
   --goal-summary-fill: #fff5;
-  --goal-progress-color: #000;
-  --goal-progress-fill: #0003;
-  --goal-progress-border-color: #000;
+  --goal-progress-color: #fff;
+  --goal-progress-fill: #fff5;
+  --goal-progress-border-color: #fff;
   --goal-complete-color: var(--main-background);
   --goal-complete-background: var(--main-color);
 
   /* Specialized Colors (you probably won't need to change these) */
   --accent-color: #fff;
+}
+
+#novelStats {
+  border-top: 1px solid;
+}
+
+.tab {
+  border: 1px solid var(--panel-border-color);
 }

@@ -9,36 +9,38 @@
 
 :root {
   /* Main colors */
-  --main-background: hsl(118, 72%, 90%);
-  --main-color: #000;
-  --main-light-color: #333;
+  --main-background: #444;
+  --main-color: #fff;
+  --main-light-color: #fff8;
 
   /* Header colors */
-  --header-background: hsl(118, 72%, 79%);
-  --header-border-color: transparent;
+  --header-background: #222;
+  --header-border-color: #fff;
 
   /* Form colors */
-  --button-hover-color: #8883;
+  --button-hover-color: hsla(118, 72%, 90%, 0.18);
 
   /* Modal colors */
   --modal-background: #444;
   --modal-color: #fff;
   --modal-light-color: #fff8;
+  --modal-border: 2px solid #fff;
 
   /* Panel colors */
-  --panel-border-color: #777;
+  --panel-border-color: var(--button-hover-color);
 
   /* Filetree colors */
-  --active-file-background: #2d99f7;
-  --active-file-color: #fff;
+  --active-file-background: var(--accent-color);
+  --active-file-color: #000;
 
   /* Context menu colors */
   --context-background: #fff;
   --context-color: #000;
 
   /* Stats bar colors */
-  --stats-bar-background: #444;
+  --stats-bar-background: #330;
   --stats-bar-hover-color: #fff3;
+  --stats-bar-color: var(--accent-color);
 
   /* Stats modal colors */
   --stats-modal-background: #fff;
@@ -51,4 +53,23 @@
   --goal-progress-border-color: #080;
   --goal-complete-color: #440;
   --goal-complete-background: #0f0;
+
+  --scrollbar-color: var(--accent-color);
+  --scrollbar-background: #330;
+}
+
+.editor-toolbar, #fileTree__actions, #git h3 {
+  --color: var(--accent-color);
+}
+
+#novelStats {
+  border-top: 1px solid;
+}
+
+.tab {
+  border: 1px solid var(--panel-border-color);
+}
+
+#modals + footer {
+  background-color: #222;
 }

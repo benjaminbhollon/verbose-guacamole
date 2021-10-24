@@ -97,8 +97,9 @@ function exportAs(format) {
 let menus = {};
 let themeNames = {
   guacamole: 'Guacamole',
+  avocadoPeel: 'Avocado Peel',
   monoLight: 'Mono Light',
-  //monoDark: 'Mono Dark'
+  monoDark: 'Mono Dark'
 };
 function setTheme(id) {
   theme = id;
@@ -217,6 +218,12 @@ function updateMenus() {
                   });
 
                   help.loadFile('./frontend/help/git/commits.html');
+                }
+              },
+              {
+                label: 'More help...',
+                click() {
+                  shell.openExternal('https://docs.verboseguacamole.com');
                 }
               }
             ]
