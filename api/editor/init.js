@@ -142,34 +142,6 @@ module.exports = (api, paths, extra) => {
         });
       api.startingWords = api.wordCountTotal();
 
-      try {
-        // Setup localStorage open files and folders
-        if (!localStorage.projects) localStorage.projects = JSON.stringify({});
-        projectsStorage = JSON.parse(localStorage.projects);
-        if (!projectsStorage[api.projectPath]) projectsStorage[api.projectPath] = {};
-
-        const editorsStorage = projectsStorage[api.projectPath].editors ? projectsStorage[api.projectPath].editors : [
-          {}
-        ];
-
-        for (const editor of editorsStorage) {
-          if (!editor.openFolders) editor.openFolders = [];
-
-          if (!editor.openFile) editor.openFile = api.idFromPath(api.currentFile.path);
-          else {
-            api.currentFile = api.flatten(project.index)
-              .find(f => api.idFromPath(f.path) === editor.openFile);
-          }
-        }
-
-        if (!api.currentFile) api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
-
-        projectsStorage[api.projectPath].editors = editorsStorage;
-        localStorage.projects = JSON.stringify(projectsStorage);
-      } catch(err) {
-        console.warn(err);
-      }
-
       /* Compatibility */
       // with <v0.2.1
       if (typeof project.metadata.title !== 'string')
@@ -187,6 +159,33 @@ module.exports = (api, paths, extra) => {
       if (typeof project.openFolders !== 'undefined') delete project.openFolders;
       if (typeof project.openFile !== 'undefined') delete project.openFile;
     }
+
+    // Setup localStorage open files and folders
+    if (!localStorage.projects) localStorage.projects = JSON.stringify({});
+    projectsStorage = JSON.parse(localStorage.projects);
+    if (!projectsStorage[api.projectPath]) {
+      projectsStorage[api.projectPath] = {
+        editors: []
+      };
+      localStorage.projects = JSON.stringify(projectsStorage);
+    }
+
+    if (!projectsStorage[api.projectPath].editors.length) {
+      !projectsStorage[api.projectPath].editors.push({
+        openFolders: [],
+        openFile: api.idFromPath(api.currentFile.path)
+      });
+    }
+
+    const editorsStorage = projectsStorage[api.projectPath].editors;
+
+    api.currentFile = api.flatten(project.index)
+      .find(f => api.idFromPath(f.path) === editorsStorage[0].openFile);
+
+    if (!api.currentFile) api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
+
+    projectsStorage[api.projectPath].editors = editorsStorage;
+    localStorage.projects = JSON.stringify(projectsStorage);
 
     // Lock project
     api.lockProject();

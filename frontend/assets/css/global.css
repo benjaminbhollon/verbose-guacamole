@@ -20,7 +20,6 @@ body {
 
 header {
   background-color: var(--header-background);
-  padding: 1em;
   border-bottom: 2px solid var(--header-border-color);
   margin-top: -2px;
 }
