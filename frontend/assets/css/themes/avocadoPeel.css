@@ -11,10 +11,10 @@
   /* Main colors */
   --main-background: #333;
   --main-color: #fff;
-  --main-light-color: #fff8;
+  --main-light-color: #bbb;
 
   /* Editor colors */
-  --editor-background: #var(--main-background);
+  --editor-background: var(--main-background);
 
   /* Header colors */
   --header-background: #222;
@@ -37,8 +37,8 @@
   --active-file-color: #000;
 
   /* Context menu colors */
-  --context-background: #fff;
-  --context-color: #000;
+  --context-background: #000;
+  --context-color: #fff;
 
   /* Stats bar colors */
   --stats-bar-background: #220;
@@ -46,16 +46,16 @@
   --stats-bar-color: var(--accent-color);
 
   /* Stats modal colors */
-  --stats-modal-background: #fff;
-  --stats-modal-color: #000;
+  --stats-modal-background: var(--main-background);
+  --stats-modal-color: var(--main-color);
 
   /* Goal colors */
-  --goal-summary-fill: hsla(118, 72%, 90%, 0.5);
+  --goal-summary-fill: hsla(118, 72%, 90%, 0.3);
   --goal-progress-color: #000;
-  --goal-progress-fill: #0f02;
-  --goal-progress-border-color: #080;
+  --goal-progress-fill: hsla(118, 72%, 90%, 0.3);
+  --goal-progress-border-color: hsl(118, 72%, 90%);
   --goal-complete-color: #440;
-  --goal-complete-background: #0f0;
+  --goal-complete-background: hsl(118, 72%, 90%);
 
   /* Scrollbar Colors */
   --scrollbar-color: var(--accent-color);

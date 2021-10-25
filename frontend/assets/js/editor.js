@@ -239,7 +239,6 @@ function resetSprint() {
   q('#wordSprint__timeLeft').innerText = '';
   q('#wordSprint__status').innerText = '';
   q('#wordSprint__popup').dataset.mode = 'set';
-  q('#wordSprint__cancel').style.display = 'block';
 }
 
 /* Labels */
@@ -293,7 +292,7 @@ function fileKey(event) {
       event.preventDefault();
       api.deleteItem(event.currentTarget.id);
       break;
-    case 'Space':
+    case ' ':
     case 'Enter':
       event.preventDefault();
       api.openFile(event.currentTarget.id);
@@ -305,14 +304,14 @@ function fileKey(event) {
         api.startRename(event.currentTarget.id);
         event.stopPropagation();
       }
+      console.log(event.key);
 
       break;
   }
 }
 function folderKey(event) {
   if (
-    event.currentTarget.contentEditable ||
-    event.currentTarget.querySelector('.folder').contentEditable
+    event.currentTarget.contentEditable === 'true'
   ) return false;
   const tabbable = [...qA('#fileTree__list .file, #fileTree__list .folder')];
   switch (event.key) {

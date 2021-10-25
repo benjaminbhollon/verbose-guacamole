@@ -44,7 +44,6 @@ module.exports = (api, projectPath) => {
       	insertTexts: {
       		image: ["![](https://", ")"],
       	},
-        autofocus: true,
         autoDownloadFontAwesome: false,
         toolbar: [
           'bold',

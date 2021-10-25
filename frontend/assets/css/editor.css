@@ -35,6 +35,12 @@ body.git-closed {
   z-index: 2;
 }
 
+body.focusMode > #fileTree,
+body.focusMode > #git,
+body.focusMode > #novelStats {
+  display: none;
+}
+
 #fileTree.closed, #git.closed {
   width: 0;
   height: 0;
@@ -42,10 +48,35 @@ body.git-closed {
 }
 
 /* Editor */
+.editor-toolbar {
+  padding: 5px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.editor-toolbar, .editor-toolbar.fullscreen {
+  text-align: center;
+  border: 0;
+  border-radius: 0;
+  background-color: var(--background-color);
+  height: auto;
+}
+
+.editor-toolbar button {
+  color: var(--color);
+}
+
+.editor-toolbar button.active, .editor-toolbar button:hover {
+  background-color: var(--button-hover-color);
+}
 
 #editor {
   z-index: 3;
   grid-column: 2;
+}
+
+.focusMode #editor {
+  border: 0;
 }
 
 #editor textarea {
@@ -53,10 +84,9 @@ body.git-closed {
 }
 
 #editor__stats {
-  text-align: right;
+  text-align: center;
   background-color: inherit;
-  height: 2em;
-  line-height: 2em;
+  line-height: 1.5em;
   z-index: 2;
   background-color: var(--background-color);
 }
@@ -65,14 +95,33 @@ body.git-closed {
   height: calc(100% - 2em);
   overflow-y: auto;
   position: relative;
+  text-align: center;
 }
 
-.CodeMirror {
-  position: absolute;
-  top: 41px;
-  bottom: 0;
-  right: 0;
-  left: 0;
+.EasyMDEContainer .CodeMirror {
+  width: 100%;
+  height: 100%;
+  max-height: calc(100% - 2.5em);
+  max-width: 55ch;
+  display: inline-block;
+  text-align: left;
+  border-color: var(--border-color);
+  color: var(--editor-color);
+  background-color: var(--editor-background);
+}
+
+.EasyMDEContainer .CodeMirror-fullscreen {
+  left: 50%;
+  transform: translateX(-50%);
+  border-right: 1px solid var(--border-color)!important;
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.editor-preview {
+  color: var(--editor-color);
+  background-color: var(--editor-background);
 }
 
 /* Files */
@@ -319,7 +368,6 @@ textarea {
   right: 0;
   z-index: 1000;
   background-color: var(--background-color);
-  --color: inherit;
   color: var(--color);
   display: none;
 }
@@ -329,7 +377,7 @@ textarea {
   display: block;
   cursor: default;
   padding: 0.25em;
-  color: #000!important;
+  color: var(--color)!important;
 }
 
 .contextMenu span:not(.--no-click, [data-label]):hover,
@@ -537,11 +585,13 @@ body.locked #locked, #projectDeletedError.visible {
 #wordSprint__popup .running,
 #wordSprint__popup .finished,
 #wordSprint__popup .set,
+#wordSprint__cancel,
 #wordSprint__popup[data-mode='finished'] #wordSprint__timeLeft {
   display: none;
 }
 
 #wordSprint__popup[data-mode='running'] .running,
+#wordSprint__popup[data-mode='running'] #wordSprint__cancel,
 #wordSprint__popup[data-mode='finished'] .running,
 #wordSprint__popup[data-mode='finished'] .finished,
 #wordSprint__popup[data-mode='set'] .set {
@@ -710,6 +760,28 @@ body.locked #locked, #projectDeletedError.visible {
   content: '>';
 }
 
+/* Charts */
+.charts-css tr {
+  margin: 0 1px;
+}
+
+.charts-css td {
+  cursor: default;
+  overflow: hidden;
+  color: transparent;
+}
+
+.charts-css tr:nth-child(odd) {
+  --color: var(--main-light-color);
+}
+
+.charts-css tr:nth-child(even) {
+  --color: var(--main-color);
+}
+
+.charts-css tr:hover {
+  opacity: 0.8;
+}
 
 /* Editor Styles */
 .cm-comment {
@@ -718,25 +790,6 @@ body.locked #locked, #projectDeletedError.visible {
 
 .cm-tab {
   background-color: #ff04;
-}
-
-.editor-toolbar {
-  padding: 5px;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.editor-toolbar, .editor-toolbar.fullscreen {
-  text-align: center;
-  border: 0;
-  border-radius: 0;
-  background-color: var(--background-color);
-}
-
-.EasyMDEContainer .CodeMirror {
-  border-color: var(--border-color);
-  color: var(--editor-color);
-  background-color: var(--editor-background);
 }
 
 /*.CodeMirror-code {
@@ -758,14 +811,6 @@ body.locked #locked, #projectDeletedError.visible {
 
 .CodeMirror-selectedtext {
   color: var(--selected-color);
-}
-
-.editor-toolbar button {
-  color: var(--color);
-}
-
-.editor-toolbar button.active {
-  background-color: var(--button-hover-color);
 }
 
 .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-comment):not(.cm-tag):not(.cm-word) {

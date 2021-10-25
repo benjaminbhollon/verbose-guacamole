@@ -21,7 +21,6 @@ module.exports = (api, paths) => {
       `You wrote ${written.toLocaleString()} word${written !== 1 ? 's' : ''}. Impressive!`;
 
     q('#wordSprint').style = '';
-    q('#wordSprint__cancel').style.display = 'none';
     q('#wordSprint').classList.remove('more');
     q('#wordSprint__popup').dataset.mode = 'finished';
     q('#wordSprint').innerHTML = '<i class="fas fa-running"></i>';

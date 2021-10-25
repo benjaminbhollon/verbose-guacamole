@@ -348,6 +348,15 @@ function updateMenus() {
                 checked: (id == theme)
               }
             }),
+          },
+          {
+            label: 'Select a theme...',
+            click() {
+              win.webContents.send('relocate', './selectTheme.html');
+            }
+          },
+          {
+            type: 'separator'
           }
         ]
       },
