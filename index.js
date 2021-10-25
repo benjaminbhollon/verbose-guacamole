@@ -44,8 +44,7 @@ function createWindow () {
       win.webContents.send('app-close');
     }
   });
-
-  win.hide();
+  
   win.maximize();
 
   if (firstRun()) win.loadFile('./frontend/selectTheme.html');

@@ -1,7 +1,7 @@
 {
   "name": "verbose-guacamole",
   "productName": "Verbose Guacamole",
-  "version": "0.3.4",
+  "version": "21.10.0",
   "description": "A editor for writers (especially novelists) powered on the markdown and git technologies.",
   "main": "index.js",
   "scripts": {
@@ -28,6 +28,7 @@
     "electron": "^15.1.2"
   },
   "dependencies": {
+    "@electron-forge/maker-dmg": "^6.0.0-beta.61",
     "easymde": "^2.15.0",
     "electron-first-run": "^3.0.0",
     "electron-squirrel-startup": "^1.0.0",
@@ -81,6 +82,14 @@
           "config": {
             "options": {
               "icon": "icons/icon.png"
+            }
+          }
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
+          "config": {
+            "options": {
+              "format": "ULFO"
             }
           }
         }
