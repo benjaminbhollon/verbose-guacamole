@@ -1,6 +1,9 @@
 # verbose-guacamole
 A editor for writers (especially novelists) powered by markdown and git.
 
+![Commit Activity](https://img.shields.io/github/commit-activity/m/benjaminbhollon/verbose-guacamole) ![Latest Release](https://img.shields.io/github/v/release/benjaminbhollon/verbose-guacamole?label=current%20release)
+![GPL-3.0 License](https://img.shields.io/github/license/benjaminbhollon/verbose-guacamole) ![Open Issues](https://img.shields.io/github/issues/benjaminbhollon/verbose-guacamole) [![Website Status](https://img.shields.io/website?url=https%3A%2F%2Fverboseguacamole.com)](https://verboseguacamole.com) ![Github Stars](https://img.shields.io/github/stars/benjaminbhollon/verbose-guacamole?style=social)
+
 ## Features
 
 ### Markdown editing
@@ -40,6 +43,8 @@ VerbGuac is still under development. Future features include:
 
 ## Screenshots
 ![v0.3.3 Editor](./screenshots/v0.3.3-editor.png)
+
+![v21.10 Color Themes](./screenshots/v21.10-themes.png)
 
 ## License
 Verbose Guacamole is released under the [GPL-3.0](./LICENSE) license. Specific files may be released under different licenses, which will be noted accordingly (such as the official themes, released under MIT, as noted in the comments).

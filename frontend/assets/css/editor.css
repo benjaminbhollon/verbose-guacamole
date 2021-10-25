@@ -722,6 +722,8 @@ body.locked #locked, #projectDeletedError.visible {
 
 .editor-toolbar {
   padding: 5px;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .editor-toolbar, .editor-toolbar.fullscreen {
@@ -783,17 +785,28 @@ body.locked #locked, #projectDeletedError.visible {
 }
 
 /* Custom scrollbar */
-#fileTree__list::-webkit-scrollbar, #git::-webkit-scrollbar {
+#fileTree__list::-webkit-scrollbar,
+.editor-toolbar::-webkit-scrollbar,
+#git::-webkit-scrollbar {
   width: 0.4em;
   border: 1px solid var(--scrollbar-background);
 }
 
-#fileTree__list::-webkit-scrollbar-track, #git::-webkit-scrollbar-track {
+.editor-toolbar::-webkit-scrollbar {
+  margin-top: 2px;
+  height: 0.2em;
+}
+
+#fileTree__list::-webkit-scrollbar-track,
+.editor-toolbar::-webkit-scrollbar-track,
+#git::-webkit-scrollbar-track {
   box-shadow: unset;
   background-color: var(--scrollbar-background);
 }
 
-#fileTree__list::-webkit-scrollbar-thumb, #git::-webkit-scrollbar-thumb {
+#fileTree__list::-webkit-scrollbar-thumb,
+.editor-toolbar::-webkit-scrollbar-thumb,
+#git::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-color);
   outline: 0;
   border-radius: 100em;

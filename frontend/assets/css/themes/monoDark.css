@@ -14,7 +14,7 @@
   --main-light-color: #bbb;
 
   /* Editor colors */
-  --editor-background: #var(--main-background);
+  --editor-background: var(--main-background);
 
   /* Header colors */
   --header-background: var(--main-background);

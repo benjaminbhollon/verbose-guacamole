@@ -57,6 +57,7 @@
   --goal-complete-color: #440;
   --goal-complete-background: #0f0;
 
+  /* Scrollbar Colors */
   --scrollbar-color: var(--accent-color);
   --scrollbar-background: #330;
 }

@@ -272,8 +272,8 @@ function togglePanel(panelId, tabId) {
 // Filetree
 function fileKey(event) {
   if (
-    event.currentTarget.contentEditable ||
-    event.currentTarget.querySelector('.filename').contentEditable
+    event.currentTarget.contentEditable === 'true' ||
+    event.currentTarget.querySelector('.filename').contentEditable === 'true'
   ) return false;
   const tabbable = [...qA('#fileTree__list .file, #fileTree__list .folder')];
   switch (event.key) {
