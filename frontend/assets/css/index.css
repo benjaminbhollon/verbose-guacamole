@@ -38,7 +38,7 @@ footer a {
 }
 
 #content > div {
-  max-height: calc(100vh - 13.7em);
+  max-height: calc(100vh - 13.8em);
   overflow: auto;
   padding: 0 0.75em;
 }

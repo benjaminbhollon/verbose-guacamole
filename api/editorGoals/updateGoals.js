@@ -32,7 +32,7 @@ module.exports = (api, paths, extra) => {
     if (goals.length && goals[0].type === 'project' && goals[0].completed) {
       q('#projectGoalComplete__wordCount').innerText = goals[0].words.toLocaleString();
       q('#projectGoalComplete__days').innerText =
-        Math.floor(
+        Math.ceil(
           (Date.now() - (new Date(goals[0].date))) / (1000 * 60 * 60 * 24)
         ).toLocaleString();
       setTimeout(api.showModal.bind(this, 'projectGoalComplete'), 1500);
