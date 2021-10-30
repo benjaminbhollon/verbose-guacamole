@@ -222,7 +222,7 @@ module.exports = (api, paths, extra) => {
 
     // Add to recent projects
     let recentProjects = localStorage.recentProjects ? JSON.parse(localStorage.recentProjects) : [];
-    recentProjects.push({
+    recentProjects.splice(0, 0, {
       title: project.metadata.title,
       author: project.metadata.author,
       path: api.projectPath

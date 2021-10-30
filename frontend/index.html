@@ -25,6 +25,8 @@
         <input type="submit" onclick="api.openProject()" value="Open Project">
         <br>
         <input type="submit" onclick="api.newProject()" value="New Project">
+        <label for="projects__alwaysOpenRecent"><input oninput="localStorage.alwaysOpenRecent = this.checked" type="checkbox" id="projects__alwaysOpenRecent"> Open the most recent project automatically</label>
+
         <h3>Recent Projects</h3>
         <div id="projects__recent">Loading...</div>
       </div>

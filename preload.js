@@ -21,6 +21,12 @@ apiF().then((api) => {
       if (!localStorage.recentProjects)
         localStorage.recentProjects = JSON.stringify([]);
 
+      if (!localStorage.alwaysOpenRecent)
+        localStorage.alwaysOpenRecent = 'false';
+
+      q('#projects__alwaysOpenRecent').checked =
+        localStorage.alwaysOpenRecent === 'true';
+
       const recentProjects = JSON.parse(localStorage.recentProjects)
         .map(project => {
           return `
@@ -29,13 +35,12 @@ apiF().then((api) => {
             </p>
           `.trim()
         })
-        .reverse()
         .join('');
       q('#projects__recent').innerHTML =
         recentProjects.length ?
         recentProjects :
-        'Projects you open will show up here.';
-    }, 250);
+        '<p>Projects you open will show up here</p>';
+    }, 100);
     const Parser = require('rss-parser');
     const parser = new Parser();
     (async () => {
@@ -125,7 +130,7 @@ apiF().then((api) => {
       api.unlockProject();
     }
     location.href = to;
-  })
+  });
   ipcRenderer.on('newProject', (event, to) => {
     if (inEditor) {
       // Save files
@@ -137,7 +142,7 @@ apiF().then((api) => {
     }
 
     api.newProject();
-  })
+  });
   ipcRenderer.on('setTheme', (event, id) => {
     localStorage.theme = id;
     if (inEditor) {
@@ -150,7 +155,16 @@ apiF().then((api) => {
     }
 
     location.reload();
-  })
+  });
+  ipcRenderer.on('justOpened', (event, to) => {
+    if (localStorage.alwaysOpenRecent === 'true') {
+      const shouldOpen = JSON.parse(localStorage.recentProjects)[0];
+      if (shouldOpen) {
+        location.href = `./editor.html?f=${encodeURIComponent(shouldOpen.path)}`;
+      }
+      console.log(shouldOpen);
+    }
+  });
   if (inEditor) {
     ipcRenderer.on('updateProjectDetails', () => {
       api.showModal('projectDetails');

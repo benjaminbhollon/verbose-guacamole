@@ -73,6 +73,11 @@ footer a {
   background-color: var(--button-hover-color);
 }
 
+label[for="projects__alwaysOpenRecent"] {
+  font-size: 1rem;
+  margin-bottom: 1.5em;
+}
+
 /* Releases */
 #releases {
   margin: 0;

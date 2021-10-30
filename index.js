@@ -53,6 +53,8 @@ function createWindow () {
 
   if (firstRun()) win.loadFile('./frontend/selectTheme.html');
   else win.loadFile('./frontend/index.html');
+
+  setTimeout(() => {win.webContents.send('justOpened')}, 1000);
 }
 
 app.whenReady().then(createWindow);
