@@ -42,9 +42,13 @@ function createWindow () {
     if (win) {
       e.preventDefault();
       win.webContents.send('app-close');
+      setTimeout(() => {
+        win = null;
+        app.quit();
+      }, 2000);
     }
   });
-  
+
   win.maximize();
 
   if (firstRun()) win.loadFile('./frontend/selectTheme.html');
@@ -401,9 +405,7 @@ ipcMain.on('appMenuEditor', (event) => {
 });
 ipcMain.on('closed', (event) => {
   win = null;
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  app.quit();
 });
 ipcMain.on('askForExportPath', (event, format, fileName) => {
   const formatInfo = {
