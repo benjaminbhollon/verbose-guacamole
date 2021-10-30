@@ -115,6 +115,7 @@ module.exports = (api, paths, extra) => {
         }
         if ((await git.branch()).current !== 'master') await api.checkout('master', true);
 
+
         api.populateGitHistory();
       }
 

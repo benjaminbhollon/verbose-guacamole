@@ -15,6 +15,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(editorIndex = 0) {
+    if (api.readOnly) return false;
     return editors[editorIndex].save();
   }
 

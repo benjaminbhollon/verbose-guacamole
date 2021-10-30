@@ -58,7 +58,7 @@ module.exports = async () => {
         document.getElementById('projectDeletedError').classList.add('visible');
         api.readOnly = true;
       }, 100);
-      return;
+      return api;
     }
 
     let editors = [];

@@ -15,6 +15,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(e) {
+    if (api.readOnly) return false;
     e.contentEditable = false;
     if (e.tagName === 'SPAN') e.parentNode.classList.remove('editing');
 

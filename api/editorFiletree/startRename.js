@@ -15,6 +15,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(id) {
+    if (api.readOnly) return false;
     const e = document.getElementById(id)?.querySelector(
       document.getElementById(id).classList.contains('file') ?
       '.filename' :

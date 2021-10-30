@@ -15,6 +15,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction() {
+    if (api.readOnly) return false;
     const toOpen = JSON.parse(localStorage.projects)[api.projectPath]
       .editors[0]
       .openFolders;

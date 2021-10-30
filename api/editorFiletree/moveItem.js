@@ -15,6 +15,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(p, t, c, index, order, main = false) {
+    if (api.readOnly) return false;
     const parent = p ? api.flatten(project.index).find(f => f.path === p) : {children: project.index};
     const target = t ? api.flatten(project.index).find(f => f.path === t) : {children: project.index};
     const currentlyDragging = api.flatten(project.index).find(f => f.path === c);

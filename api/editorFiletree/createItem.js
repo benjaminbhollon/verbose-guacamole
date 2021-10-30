@@ -17,6 +17,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(type, parentId = false, index = false, rename = true) {
+    if (api.readOnly) return false;
     if (type !== 'file' && type !== 'folder') {
       console.error(`You can create an item with type "${type}".`);
     }

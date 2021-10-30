@@ -53,9 +53,13 @@ module.exports = (api, paths, extra) => {
     }
     api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
 
-    api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name);
-    api.populateFiletree();
-    api.populateGitHistory();
+    try {
+      api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name);
+      api.populateFiletree();
+      api.populateGitHistory();
+    } catch(err) {
+      console.warn('GUI cleanup after checkout skipped: ', err);
+    }
   }
 
   return returnFunction;

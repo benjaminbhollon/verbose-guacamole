@@ -15,6 +15,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction() {
+    if (api.readOnly) return false;
     let folders = [...qA('#fileTree__list details')];
 
     folders = folders.map(folder => {
