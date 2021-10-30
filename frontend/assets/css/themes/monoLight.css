@@ -1,17 +1,17 @@
 /* META */
 /* @name: Mono Light */
-/* @id: monoLight */
+/* @id: official/monoLight */
 /* @author: Benjamin Hollon */
 /* @link: https://seewitheyesclosed.com */
 /* @license: MIT */
 /* @tags: light, monochrome, official */
-/* @derivedFrom: official/guacamole */
+/* @derivedFrom: official/base */
 
 :root {
   /* Main colors */
   --main-background: #fff;
   --main-color: #000;
-  --main-light-color: #333;
+  --main-light-color: #555;
 
   /* Editor colors */
   --editor-background: var(--main-background);

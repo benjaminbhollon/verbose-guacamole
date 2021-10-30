@@ -1,6 +1,6 @@
 /* META */
 /* @name: Guacamole */
-/* @id: guacamole */
+/* @id: official/guacamole */
 /* @author: Benjamin Hollon */
 /* @link: https://seewitheyesclosed.com */
 /* @license: MIT */
@@ -11,7 +11,7 @@
   /* Main colors */
   --main-background: hsl(118, 72%, 90%);
   --main-color: #000;
-  --main-light-color: #333;
+  --main-light-color: #555;
 
   /* Editor colors */
   --editor-background: #fff;

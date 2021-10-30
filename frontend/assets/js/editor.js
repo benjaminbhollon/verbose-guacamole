@@ -57,14 +57,18 @@ function setHovering(element) {
 let focused = null;
 function showContextMenu(event) {
   event.stopPropagation();
-  contextMenu.style.top = event.clientY + 'px';
-  contextMenu.style.left = event.clientX + 'px';
 
   focused = document.activeElement;
   if (!contextMenu.classList.contains('visible')) contextMenu.classList.toggle('visible');
   [...contextMenu.querySelectorAll('span')]
     .filter(e => e.offsetParent !== null)[0]
     .focus();
+
+  contextMenu.style.top = Math.min(
+    event.clientY,
+    window.innerHeight - (31 + contextMenu.offsetHeight)
+  ) + 'px';
+  contextMenu.style.left = event.clientX + 'px';
 }
 
 /* Search */
@@ -206,7 +210,10 @@ document.getElementById('editor').addEventListener('contextmenu', (event) => {
       (suggestions.length ? '<hr>' : '') +
       `<span onclick="api.addToDictionary('${event.path[0].innerText}');spellChecking.classList.remove('cm-spell-error')">Add to Dictionary</span>`;
     menu.classList.add('visible');
-    menu.style.top = event.clientY + 'px';
+    menu.style.top = Math.min(
+      event.clientY,
+      window.innerHeight - (31 + menu.offsetHeight)
+    ) + 'px';
     menu.style.left = event.clientX + 'px';
   }
 });
