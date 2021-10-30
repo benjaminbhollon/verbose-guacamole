@@ -15,10 +15,18 @@ module.exports = (api, paths) => {
   // You MAY make it async.
   // You MAY add parameters.
   function returnFunction(s = 0, m = 0, h = 0) {
-    if (!(s+m+h)) return; // smh = shaking my head (because you set a timer for 0)
+    if (!(s+m+h)) { // smh = shaking my head (because you set a timer for 0s)
+      q('#wordSprint__error').style.display = 'block';
+      return false;
+    } else {
+      q('#wordSprint__error').style.display = 'none';
+    }
 
     const start = Date.now();
-    const end = start + (1000 * s) + (1000 * 60 * m) + (1000 * 60 * 60 * h);
+    const end = start +
+      (1000 * s) +
+      (1000 * 60 * m) +
+      (1000 * 60 * 60 * h);
 
     q('#wordSprint').click();
 

@@ -130,8 +130,15 @@
       <div id="wordSprint__popup" class="novelStats__modal" data-mode="set">
         <h2>Word Sprints</h2>
         <div class="set">
-          <p>Start a new word sprint: (use the format <code>hh:mm:ss</code>)</p>
-          <input type="text" id="wordSprint__timeInput" placeholder="Try 15:00 (15 mins) or 1:00:00 (1 hr)">
+          <p>Start a new word sprint:</p>
+          <input type="text" id="wordSprint__timeInput" placeholder="Use the format hh:mm:ss">
+          <p id="wordSprint__error">That time doesn't make sense. Make sure you're using the format <code>hh:mm:ss</code> and that the length of the timer is more than zero seconds.</p>
+          <p id="wordSprint__autofill">
+            <span title="Click to start a five-minute sprint" onclick="q('#wordSprint__timeInput').value = this.innerText;startSprint()">5:00</span>
+            <span title="Click to start a fifteen-minute sprint" onclick="q('#wordSprint__timeInput').value = this.innerText;startSprint()">15:00</span>
+            <span title="Click to start a half-hour sprint" onclick="q('#wordSprint__timeInput').value = this.innerText;startSprint()">30:00</span>
+            <span title="Click to start an hour-long sprint" onclick="q('#wordSprint__timeInput').value = this.innerText;startSprint()">1:00:00</span>
+          </p>
           <input type="submit" value="Start Sprint" onclick="startSprint()">
         </div>
         <div class="running">

@@ -235,9 +235,9 @@ function spellCheckReplace(word) {
 function startSprint() {
   let time = q('#wordSprint__timeInput').value.split(':').reverse();
 
-  const seconds = (time[0] ? time[0]/1 : 0);
-  const minutes = (time[1] ? time[1]/1 : 0);
-  const hours = (time[2] ? time[2]/1 : 0);
+  const seconds = Math.max(0, time[0] ? time[0]/1 : 0);
+  const minutes = Math.max(0, time[1] ? time[1]/1 : 0);
+  const hours = Math.max(0, time[2] ? time[2]/1 : 0);
 
   api.startSprint(seconds, minutes, hours);
 }
