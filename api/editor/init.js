@@ -93,7 +93,9 @@ module.exports = (api, paths, extra) => {
       if (api.gitEnabled) {
         console.info('Creating initial commit...');
         await git.add('./*');
-        await git.commit('Create project');
+        await git.commit('Create project', {
+          '--author': project.metadata.author + ' <user@verboseguacamole.com>'
+        });
         await api.populateGitHistory();
       }
 
@@ -107,7 +109,9 @@ module.exports = (api, paths, extra) => {
         if ((await git.branch()).all.length <= 0) { // Project started without git
           console.info('Creating initial commit...');
           await git.add('./*');
-          await git.commit('Create project');
+          await git.commit('Create project', {
+            '--author': project.metadata.author + ' <user@verboseguacamole.com>'
+          });
         }
         if ((await git.branch()).current !== 'master') await api.checkout('master', true);
 

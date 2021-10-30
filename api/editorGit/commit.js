@@ -10,6 +10,7 @@ const { q, qA } = require('../../modules/queries.js');
 module.exports = (api, paths, extra) => {
   // You can put variables your code needs to access between runs here.
   const git = extra.git;
+  const project = extra.project;
 
   //This is the final function that will become part of the API.
   // You MAY make it async.
@@ -23,7 +24,9 @@ module.exports = (api, paths, extra) => {
     document.getElementById('git__commitButton').innerText = 'Working...';
 
     try {
-      await git.add('./*').commit(message)._chain;
+      await git.add('./*').commit(message, {
+        '--author': project.metadata.author + ' <user@verboseguacamole.com>'
+      })._chain;
       document.getElementById('git__commitButton').innerText = 'Commit';
       document.getElementById('git__commitText').value = '';
     } catch (err) {
