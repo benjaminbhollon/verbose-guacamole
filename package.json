@@ -1,7 +1,7 @@
 {
   "name": "verbose-guacamole",
   "productName": "Verbose Guacamole",
-  "version": "21.10.0",
+  "version": "21.10.1",
   "description": "A editor for writers (especially novelists) powered by the Markdown and Git technologies.",
   "main": "index.js",
   "scripts": {
