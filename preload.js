@@ -57,24 +57,33 @@ apiF().then((api) => {
       try {
         const feed = await parser.parseURL('https://github.com/benjaminbhollon/verbose-guacamole/releases.atom');
         const currentVersion = require('./package.json').version;
-        document.getElementById('releases__list').innerHTML = feed.items.map(item => {
-      const version = item.link.split('/').slice(-1)[0].slice(1);
-      return `
-      <div ${version === currentVersion ? 'class="current"' : ''}>
-       <h3>${item.title}</h3>
-       <details>
-         <summary>Release Notes</summary>
-         ${item.content.split('<hr>')[0]}
-       </details>
-       <p>${
-         version === currentVersion ?
-         `This is your current version.` :
-         `<a href="javascript:api.openURI('${item.link}')">Download</a>`
-       }</p>
-      </div>
-      `
-      }).join('<br>');
+        document.getElementById('releases__list').innerHTML = feed.items
+          .filter(item => {
+            return item.title.toLowerCase().indexOf('v0.') === -1 &&
+              item.title.toLowerCase().indexOf('beta') === -1 &&
+              item.title.indexOf('RC') === -1 &&
+              item.title.toLowerCase().indexOf('release candidate') === -1;
+          })
+          .map(item => {
+            const version = item.link.split('/').slice(-1)[0].slice(1);
+            return `
+          <div ${version === currentVersion ? 'class="current"' : ''}>
+           <h3>${item.title}</h3>
+           <details>
+             <summary>Release Notes</summary>
+             ${item.content.split('<hr>')[0]}
+           </details>
+           <p>${
+             version === currentVersion ?
+             `This is your current version.` :
+             `<a href="javascript:api.openURI('${item.link}')">Download</a>`
+           }</p>
+          </div>
+          `
+          })
+          .join('<br>');
       } catch (err) {
+        console.error(err);
         setTimeout(() => {
           document.getElementById('releases__list').innerHTML = '<p>Can\'t get releases right now.</p>';
         }, 15);
