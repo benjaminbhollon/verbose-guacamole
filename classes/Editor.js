@@ -104,19 +104,18 @@ module.exports = (api, projectPath) => {
       return this.open(this.currentPath);
     }
     async open(filePath) {
+      let result = '';
       if (this.previewingCommit) {
-        const result = git.readBlob({
+        result = git.readBlob({
           fs,
           dir: path.dirname(api.projectPath),
           oid: this.previewingCommit,
           filepath: path.relative(path.dirname(api.projectPath), path.resolve(path.dirname(api.projectPath), filePath))
         });
 
-        console.log(new TextDecoder().decode((await result).blob));
+        result = new TextDecoder().decode((await result).blob);
 
         api.populateFiletree();
-
-        return result;
       }
       const newPath = path.resolve(path.dirname(api.projectPath), filePath);
 
@@ -132,15 +131,14 @@ module.exports = (api, projectPath) => {
 
       this.currentPath = newPath;
 
-      const result = this.value(
-        fs.readFileSync(
-          this.currentPath,
-          {
-            encoding:'utf8',
-            flag:'r'
-          }
-        )
+      if (!result.length) result = fs.readFileSync(
+        this.currentPath,
+        {
+          encoding:'utf8',
+          flag:'r'
+        }
       );
+      result = this.value(result);
 
       api.emit('fileOpen', filePath);
 
