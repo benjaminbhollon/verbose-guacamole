@@ -16,7 +16,7 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   async function returnFunction() {
-    let content = marked(api.editorValue());
+    let content = marked.parse(api.editorValue());
     var div = document.createElement("div");
     div.innerHTML = content;
     content = div.innerText;

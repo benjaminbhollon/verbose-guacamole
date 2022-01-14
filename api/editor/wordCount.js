@@ -17,7 +17,7 @@ module.exports = (api, paths) => {
   function returnFunction(t) {
     let value = typeof t === 'undefined' ? api.editorValue() : t;
 
-    const content = marked(value);
+    const content = marked.parse(value);
     const div = document.createElement("div");
     div.innerHTML = content;
     value = div.innerText;

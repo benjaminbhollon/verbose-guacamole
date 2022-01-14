@@ -1,6 +1,7 @@
 // Require any modules here.
-const fs = require('fs');
 const path = require('path');
+const git = require('isomorphic-git');
+const fs = require('fs');
 
 // Quick versions of document.querySelector and document.querySelectorAll
 const { q, qA } = require('../../modules/queries.js');
@@ -13,7 +14,6 @@ module.exports = (api, paths, extra) => {
   // You can put variables your code needs to access between runs here.
   const project = extra.project;
   const editors = extra.editors;
-  const git = extra.git;
   const Editor = require('../../classes/Editor.js')(api);
 
   //This is the final function that will become part of the API.
@@ -36,15 +36,7 @@ module.exports = (api, paths, extra) => {
     // Create editor
     editors.push(new Editor(q('#editorTextarea')));
 
-    // Try to initialize git to see if it's enabled
-    try {
-      await git.init();
-      api.gitEnabled = true;
-    } catch (err) {
-      console.warn('Git is not installed. Continuing without.');
-      api.gitEnabled = false;
-      q('#git').classList.add('disabled');
-    }
+    api.gitEnabled = true;
 
     if (api.params.new) {
       console.info('New project alert! Let me get that set up for you...');
@@ -55,18 +47,12 @@ module.exports = (api, paths, extra) => {
       }
       console.info('Creating project file...');
       api.projectPath = path.resolve(api.projectPath, 'project.vgp');
-      await fs.writeFile(
+      fs.writeFileSync(
         api.projectPath,
         JSON.stringify(project),
         {
           encoding: 'utf8',
           flag: 'w'
-        },
-        (err) => {
-          if (err) throw new Error(err);
-          else {
-            console.info('File written successfully!');
-          }
         }
       );
       console.info('Creating title page...');
@@ -75,29 +61,27 @@ module.exports = (api, paths, extra) => {
       } catch(err) {
         console.warn(err);
       }
-      await fs.writeFile(
+      await fs.writeFileSync(
         path.resolve(path.dirname(api.projectPath), project.index[0].path),
         `# ${project.metadata.title}\nby ${project.metadata.author}`,
-        {
-          encoding: 'utf8',
-          flag: 'w'
-        },
-        (err) => {
-          if (err) throw new Error(err);
-          else {
-            console.info('File written successfully!');
-          }
-        }
       );
       api.currentFile = api.flatten(project.index).filter(i => typeof i.children === 'undefined')[0];
-      if (api.gitEnabled) {
-        console.info('Creating initial commit...');
-        await git.add('./*');
-        await git.commit('Create project', {
-          '--author': project.metadata.author + ' <user@verboseguacamole.com>'
-        });
-        await api.populateGitHistory();
-      }
+
+      console.info('Initializing git repo...');
+      await git.init({ fs, dir: path.dirname(api.projectPath) });
+
+      console.info('Creating initial commit...');
+      await git.add({fs, dir: path.dirname(api.projectPath), filepath: '.'});
+      await git.commit({
+        fs,
+        dir: path.dirname(api.projectPath),
+        author: {
+          name: project.metadata.author,
+          email: 'noreply@verboseguacamole.com'
+        },
+        message: 'Create project'
+      });
+      await api.populateGitHistory();
 
       console.info('Done! Changing URL to avoid refresh-slipups.');
       history.replaceState(null, null, './editor.html?f=' + api.projectPath);
@@ -105,19 +89,8 @@ module.exports = (api, paths, extra) => {
 
       fs.writeFileSync(path.resolve(path.dirname(api.projectPath), '.gitignore'), '.lock');
     } else {
-      if (api.gitEnabled) {
-        if ((await git.branch()).all.length <= 0) { // Project started without git
-          console.info('Creating initial commit...');
-          await git.add('./*');
-          await git.commit('Create project', {
-            '--author': project.metadata.author + ' <user@verboseguacamole.com>'
-          });
-        }
-        if ((await git.branch()).current !== 'master') await api.checkout('master', true);
+      api.populateGitHistory();
 
-
-        api.populateGitHistory();
-      }
 
       updatedProject = JSON.parse(fs.readFileSync(api.projectPath, {
         encoding:'utf8',

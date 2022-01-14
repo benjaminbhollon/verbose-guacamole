@@ -64,7 +64,7 @@ module.exports = (api, paths, extra) => {
           .join('&&&&&&NEWSCENE&&&&&&')
           .split('&&&&&&NEWSCENE&&&&&&#')
           .map(content => ({
-            data: marked(
+            data: marked.parse(
               content
                 .split('\n')
                 .slice(1)

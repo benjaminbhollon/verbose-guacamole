@@ -48,7 +48,7 @@ module.exports = async () => {
     }
 
     let git = null;
-    try {
+    /*try {
       git = simpleGit({
         baseDir: (api.params.new ? api.projectPath : path.dirname(api.projectPath))
       });
@@ -59,7 +59,7 @@ module.exports = async () => {
         api.readOnly = true;
       }, 100);
       return api;
-    }
+    }*/
 
     let editors = [];
     let clearing = false;

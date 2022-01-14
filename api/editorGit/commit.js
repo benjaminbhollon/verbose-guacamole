@@ -1,4 +1,7 @@
 // Require any modules here.
+const path = require('path');
+const git = require('isomorphic-git');
+const fs = require('fs');
 
 // Quick versions of document.querySelector and document.querySelectorAll
 const { q, qA } = require('../../modules/queries.js');
@@ -9,31 +12,31 @@ const { q, qA } = require('../../modules/queries.js');
 // Note that URIs inside either of these functions are relative to api.js, not this file.
 module.exports = (api, paths, extra) => {
   // You can put variables your code needs to access between runs here.
-  const git = extra.git;
   const project = extra.project;
 
   //This is the final function that will become part of the API.
   // You MAY make it async.
   // You MAY add parameters.
   async function returnFunction(m) {
-    if (!api.gitEnabled) {
-      console.warn('Git is disabled!');
-      return false;
-    }
     const message = m ? m : document.getElementById('git__commitText').value;
     document.getElementById('git__commitButton').innerText = 'Working...';
 
-    try {
-      await git.add('./*').commit(message, {
-        '--author': project.metadata.author + ' <user@verboseguacamole.com>'
-      })._chain;
-      document.getElementById('git__commitButton').innerText = 'Commit';
-      document.getElementById('git__commitText').value = '';
-    } catch (err) {
-      window.alert(err);
-    }
 
-    setTimeout(api.populateGitHistory, 500);
+    await git.add({fs, dir: path.dirname(api.projectPath), filepath: '.'});
+    await git.commit({
+      fs,
+      dir: path.dirname(api.projectPath),
+      author: {
+        name: project.metadata.author,
+        email: 'noreply@verboseguacamole.com'
+      },
+      message
+    });
+    document.getElementById('git__commitButton').innerText = 'Commit';
+    document.getElementById('git__commitText').value = '';
+    await api.populateGitHistory();
+
+    //setTimeout(api.populateGitHistory, 500);
   }
 
   return returnFunction;
