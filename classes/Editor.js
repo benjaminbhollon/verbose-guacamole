@@ -2,6 +2,7 @@
 const EasyMDE = require('easymde');
 const path = require('path');
 const fs = require('fs');
+const git = require('isomorphic-git');
 
 // Quick versions of document.querySelector and document.querySelectorAll
 const { q, qA } = require('../modules/queries.js');
@@ -79,6 +80,8 @@ module.exports = (api, projectPath) => {
 
       this.opening = false;
 
+      this.previewingCommit = false;
+
       const debouncedSaveFile = api.debounce(this.save.bind(this), 500);
       const debouncedSpellcheck = api.debounce(this.spellcheck.bind(this), 500);
       const throttledUpdateStats = api.throttle(api.updateStats, 50);
@@ -96,7 +99,25 @@ module.exports = (api, projectPath) => {
       api.emit('editorConstruct');
     }
 
-    open(filePath) {
+    previewCommit(commit) {
+      this.previewingCommit = commit;
+      return this.open(this.currentPath);
+    }
+    async open(filePath) {
+      if (this.previewingCommit) {
+        const result = git.readBlob({
+          fs,
+          dir: path.dirname(api.projectPath),
+          oid: this.previewingCommit,
+          filepath: path.relative(path.dirname(api.projectPath), path.resolve(path.dirname(api.projectPath), filePath))
+        });
+
+        console.log(new TextDecoder().decode((await result).blob));
+
+        api.populateFiletree();
+
+        return result;
+      }
       const newPath = path.resolve(path.dirname(api.projectPath), filePath);
 
       if (newPath !== this.currentPath) this.randomizePlaceholder();
