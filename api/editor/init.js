@@ -118,6 +118,7 @@ module.exports = (api, paths, extra) => {
             flag:'r'
           }));
         });
+
       api.startingWords = api.wordCountTotal();
 
       /* Compatibility */
@@ -208,7 +209,7 @@ module.exports = (api, paths, extra) => {
       )].map(JSON.parse).slice(0, 5)
     );
 
-    api.populateFiletree();
+    await api.populateFiletree();
     api.openFile(api.idFromPath(api.currentFile.path), api.currentFile.name, 0);
     api.updateLabelCSS();
 

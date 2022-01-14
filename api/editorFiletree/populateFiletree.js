@@ -1,7 +1,4 @@
 // Require any modules here.
-const path = require('path');
-const fs = require('fs');
-const git = require('isomorphic-git');
 
 // Quick versions of document.querySelector and document.querySelectorAll
 const { q, qA } = require('../../modules/queries.js');
@@ -19,17 +16,7 @@ module.exports = (api, paths, extra) => {
   // You MAY add parameters.
   async function returnFunction() {
     const editor = extra.editors[0];
-    if (editor.previewingCommit) {
-      project = await git.readBlob({
-        fs,
-        dir: path.dirname(api.projectPath),
-        oid: editor.previewingCommit,
-        filepath: 'project.vgp'
-      });
-      project = JSON.parse(new TextDecoder().decode(project.blob));
-    } else {
-      project = extra.project;
-    }
+    project = await api.getOldProject(editor.previewingCommit);
 
     document.getElementById('fileTree__list').innerHTML = '';
 
