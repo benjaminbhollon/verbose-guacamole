@@ -87,7 +87,7 @@
           </div>
           <div class="git__checkedOut">
             <p>You are viewing a past commit.</p>
-            <input type="submit" value="Return to Current Version" onclick="api.checkout('master', true)">
+            <input type="submit" value="Return to Current Version" onclick="api.viewCommit(false)">
             <input onclick="api.revertTo(this.dataset.hash)" id="git__revertButton" type="submit" value="Revert to this Commit">
           </div>
           <p class="help"><a href="./help/git/commits.html" target="_blank">What are commits?</a></p>

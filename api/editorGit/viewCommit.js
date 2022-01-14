@@ -15,6 +15,15 @@ module.exports = (api, paths, extra) => {
   // You MAY make it async.
   // You MAY add parameters.
   async function returnFunction(commit, editorIndex = 0) {
+    if (commit) {
+      api.readOnly = true;
+      q('body').dataset.readonly = 'true';
+      q('#git__revertButton').dataset.hash = commit;
+    } else {
+      api.readOnly = false;
+      q('body').dataset.readonly = 'false';
+    }
+
     return editors[editorIndex].previewCommit(commit);
   }
 

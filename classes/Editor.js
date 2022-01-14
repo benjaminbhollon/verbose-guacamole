@@ -101,6 +101,7 @@ module.exports = (api, projectPath) => {
 
     previewCommit(commit) {
       this.previewingCommit = commit;
+      if (!commit) api.populateFiletree();
       return this.open(this.currentPath);
     }
     async open(filePath) {
