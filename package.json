@@ -1,7 +1,7 @@
 {
   "name": "verbose-guacamole",
   "productName": "Verbose Guacamole",
-  "version": "21.10.0",
+  "version": "21.10.1",
   "description": "A editor for writers (especially novelists) powered by the Markdown and Git technologies.",
   "main": "index.js",
   "scripts": {
@@ -20,23 +20,23 @@
   },
   "homepage": "https://verboseguacamole.com",
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.59",
-    "@electron-forge/maker-deb": "^6.0.0-beta.59",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.59",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
-    "@electron-forge/maker-zip": "^6.0.0-beta.59",
-    "electron": "^15.1.2"
+    "@electron-forge/cli": "^6.0.0-beta.63",
+    "@electron-forge/maker-deb": "^6.0.0-beta.63",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.63",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.63",
+    "@electron-forge/maker-zip": "^6.0.0-beta.63",
+    "electron": "^16.0.7"
   },
   "dependencies": {
-    "@electron-forge/maker-dmg": "^6.0.0-beta.61",
-    "easymde": "^2.15.0",
+    "@electron-forge/maker-dmg": "^6.0.0-beta.63",
+    "easymde": "^2.16.0",
     "electron-first-run": "^3.0.0",
     "electron-squirrel-startup": "^1.0.0",
     "epub-gen": "^0.1.0",
-    "marked": "^3.0.8",
+    "marked": "^4.0.10",
     "remove-markdown": "^0.3.0",
     "rss-parser": "^3.12.0",
-    "simple-git": "^2.44.0",
+    "simple-git": "^2.48.0",
     "typo-js": "^1.2.0"
   },
   "build": {
