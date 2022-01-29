@@ -30,7 +30,6 @@ module.exports = async () => {
   addAPIMethods('default');
 
   if (inEditor) {
-    const simpleGit = require('simple-git');
     const Typo = require('typo-js');
 
     // Initialize variables
@@ -48,18 +47,14 @@ module.exports = async () => {
     }
 
     let git = null;
-    /*try {
-      git = simpleGit({
-        baseDir: (api.params.new ? api.projectPath : path.dirname(api.projectPath))
-      });
-    } catch(err) {
+    if (!fs.existsSync(api.projectPath)) {
       // The project has been deleted (it was probably opened from the "Recent Projects" page)
       setTimeout(() => {
         document.getElementById('projectDeletedError').classList.add('visible');
         api.readOnly = true;
       }, 100);
       return api;
-    }*/
+    }
 
     let editors = [];
     let clearing = false;
@@ -93,14 +88,12 @@ module.exports = async () => {
       project,
       events,
       editors,
-      dictionary,
-      git
+      dictionary
     });
     addAPIMethods('editorFiletree', {
       project,
       editors,
-      dictionary,
-      git
+      dictionary
     });
     addAPIMethods('editorSprints');
     addAPIMethods('editorGoals', {
@@ -108,8 +101,7 @@ module.exports = async () => {
     });
     addAPIMethods('editorGit', {
       project,
-      editors,
-      git
+      editors
     });
     addAPIMethods('editorExport', {
       project
