@@ -99,10 +99,20 @@ module.exports = (api, projectPath) => {
       api.emit('editorConstruct');
     }
 
-    previewCommit(commit) {
+    async previewCommit(commit) {
       this.previewingCommit = commit;
+      let result = null;
+      try {
+        result = await this.open(this.currentPath)
+      } catch {
+        const newFilePath = api.flatten((await api.getOldProject(commit)).index)
+          [0]
+          .path;
+
+        result = await this.open(newFilePath);
+      }
       if (!commit) api.populateFiletree();
-      return this.open(this.currentPath);
+      return result;
     }
     async open(filePath) {
       let result = '';
